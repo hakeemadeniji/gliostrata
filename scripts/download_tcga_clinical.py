@@ -126,7 +126,7 @@ ARM_NO_ADJUVANT = "NoAdjuvant"
 
 #: Deterministic order in which filter reasons are evaluated and reported.
 FILTER_REASONS = [
-    ("non_glioblastoma", "primary_diagnosis is not glioblastoma"),
+    ("contradictory_diagnosis", "primary_diagnosis names a non-glioblastoma histology"),
     ("no_usable_data", "no age, sex, survival or vital status"),
     ("nonpositive_survival", "overall_survival_months <= 0"),
 ]
@@ -161,12 +161,19 @@ def classify_arm(types_json: str):
     return ARM_NO_ADJUVANT
 
 
+#: primary_diagnosis values that record no histology rather than a different
+#: one. Every case in this download is enrolled in the TCGA-GBM project, so an
+#: absent diagnosis is a data-entry gap, not evidence of another disease.
+UNINFORMATIVE_DIAGNOSES = frozenset({"", "unknown", "not reported", "na", "n/a", "none"})
+
+
 def is_glioblastoma(value) -> bool:
-    """True only for genuine glioblastoma primary diagnoses.
+    """True only for an explicit glioblastoma primary diagnosis.
 
     Case-insensitive substring match on "glioblastoma", so variants such as
     "Glioblastoma, NOS" are kept, while NaN, "Unknown", "Not Reported" and
-    other histologies are rejected.
+    other histologies are rejected. This is the STRICT test; the cohort filter
+    uses `is_diagnosis_contradictory` instead -- see that function for why.
     """
     if value is None or value is pd.NA:
         return False
@@ -175,6 +182,31 @@ def is_glioblastoma(value) -> bool:
     if not isinstance(value, str):
         return False
     return "glioblastoma" in value.strip().lower()
+
+
+def is_diagnosis_contradictory(value) -> bool:
+    """True only when primary_diagnosis names a histology that is NOT glioblastoma.
+
+    A missing, blank, "Unknown" or "Not Reported" diagnosis is uninformative,
+    not contradictory: these cases were enrolled in TCGA-GBM, so the project
+    itself establishes the disease and the empty field is a curation gap. They
+    are retained. A field naming a different histology (e.g. "Adenocarcinoma,
+    NOS") genuinely conflicts with the cohort definition and is dropped.
+
+    This matters because 8 of the patients with an absent diagnosis have RNA-seq
+    data; excluding them would discard usable molecular samples on the strength
+    of a blank clinical field.
+    """
+    if value is None or value is pd.NA:
+        return False
+    if isinstance(value, float) and pd.isna(value):
+        return False
+    if not isinstance(value, str):
+        return False
+    text = value.strip().lower()
+    if text in UNINFORMATIVE_DIAGNOSES:
+        return False
+    return "glioblastoma" not in text
 
 
 def filter_cohort(cohort: pd.DataFrame, raw: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -199,12 +231,12 @@ def filter_cohort(cohort: pd.DataFrame, raw: pd.DataFrame) -> tuple[pd.DataFrame
         )
 
     diagnosis = raw["primary_diagnosis"].to_numpy()
-    keep_diag = pd.Series(
-        [is_glioblastoma(v) for v in diagnosis], index=cohort.index
+    contradictory = pd.Series(
+        [is_diagnosis_contradictory(v) for v in diagnosis], index=cohort.index
     )
 
     masks = {
-        "non_glioblastoma": ~keep_diag,
+        "contradictory_diagnosis": contradictory,
         "no_usable_data": (
             cohort["age"].isna()
             & cohort["sex"].isna()

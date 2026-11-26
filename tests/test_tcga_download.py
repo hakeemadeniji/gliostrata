@@ -142,9 +142,9 @@ def _filter_fixture():
                 submitter_id="DROP-diagnosis",
                 primary_diagnosis="Adenocarcinoma, NOS",
             ),
-            _raw_row(submitter_id="DROP-unknown", primary_diagnosis="Unknown"),
+            _raw_row(submitter_id="KEEP-unknown", primary_diagnosis="Unknown"),
             _raw_row(
-                submitter_id="DROP-notreported", primary_diagnosis="Not Reported"
+                submitter_id="KEEP-notreported", primary_diagnosis="Not Reported"
             ),
             _raw_row(
                 submitter_id="DROP-empty",
@@ -164,8 +164,16 @@ def _filter_fixture():
 def test_filter_cohort_keeps_only_valid_rows():
     cohort, raw = _filter_fixture()
     filtered, report = tcga.filter_cohort(cohort, raw)
-    assert list(filtered["patient_id"]) == ["KEEP-1", "KEEP-2"]
-    assert report["kept_rows"] == 2
+    # "Unknown"/"Not Reported" diagnoses are retained: TCGA-GBM enrollment
+    # establishes the disease, so a blank field is a curation gap, not a
+    # different histology. Only the named non-GBM histology is dropped.
+    assert list(filtered["patient_id"]) == [
+        "KEEP-1",
+        "KEEP-2",
+        "KEEP-unknown",
+        "KEEP-notreported",
+    ]
+    assert report["kept_rows"] == 4
 
 
 def test_filter_cohort_report_numbers_add_up():
@@ -173,14 +181,15 @@ def test_filter_cohort_report_numbers_add_up():
     filtered, report = tcga.filter_cohort(cohort, raw)
     assert report["input_rows"] == len(cohort) == 7
     attributed = sum(report[f"dropped_{k}"] for k, _ in tcga.FILTER_REASONS)
-    assert attributed == report["dropped_total"] == 5
+    assert attributed == report["dropped_total"] == 3
     assert report["kept_rows"] + report["dropped_total"] == report["input_rows"]
     assert report["kept_rows"] == len(filtered)
-    # The all-empty row also has a NaN (non-glioblastoma) diagnosis: overlap.
-    assert report["matched_non_glioblastoma"] == 4
-    assert report["dropped_non_glioblastoma"] == 4
+    # Only an explicitly different histology is contradictory; NaN/"Unknown"
+    # rows are retained because TCGA-GBM enrollment establishes the disease.
+    assert report["matched_contradictory_diagnosis"] == 1
+    assert report["dropped_contradictory_diagnosis"] == 1
     assert report["matched_no_usable_data"] == 1
-    assert report["dropped_no_usable_data"] == 0
+    assert report["dropped_no_usable_data"] == 1
     assert report["matched_nonpositive_survival"] == 1
     assert report["dropped_nonpositive_survival"] == 1
 
@@ -209,7 +218,7 @@ def test_filter_cohort_isolated_no_usable_data_row():
     filtered, report = tcga.filter_cohort(cohort, raw)
     assert list(filtered["patient_id"]) == ["KEEP"]
     assert report["dropped_no_usable_data"] == 1
-    assert report["dropped_non_glioblastoma"] == 0
+    assert report["dropped_contradictory_diagnosis"] == 0
 
 
 def test_filter_cohort_preserves_columns_and_order():
@@ -238,7 +247,7 @@ def test_print_filter_report_is_ascii(capsys):
     tcga.print_filter_report(report)
     out = capsys.readouterr().out
     assert out.isascii()
-    assert "Final cohort rows: 2" in out
+    assert "Final cohort rows: 4" in out
 
 
 def test_script_source_is_ascii_only():
@@ -271,3 +280,21 @@ def test_kps_uses_gdc_status_field_and_coerces_unknown():
     kps = tcga.build_cohort(raw)["kps"]
     assert kps.iloc[0] == 60
     assert pd.isna(kps.iloc[1])
+
+
+def test_uninformative_diagnosis_is_not_contradictory():
+    """A blank or 'Unknown' diagnosis must not exclude a TCGA-GBM case.
+
+    Regression: the original filter required an explicit 'glioblastoma'
+    string, which discarded 8 patients who have RNA-seq data purely because
+    their clinical diagnosis field was never filled in.
+    """
+    for keep in [None, float("nan"), "", "Unknown", "unknown", "Not Reported", "  "]:
+        assert tcga.is_diagnosis_contradictory(keep) is False, keep
+    for keep in ["Glioblastoma", "Glioblastoma, NOS", "GLIOBLASTOMA MULTIFORME"]:
+        assert tcga.is_diagnosis_contradictory(keep) is False, keep
+    for drop in ["Adenocarcinoma, NOS", "Oligodendroglioma", "Astrocytoma, NOS"]:
+        assert tcga.is_diagnosis_contradictory(drop) is True, drop
+    # The strict helper still exists and still means what it says.
+    assert tcga.is_glioblastoma("Glioblastoma, NOS") is True
+    assert tcga.is_glioblastoma("Unknown") is False
