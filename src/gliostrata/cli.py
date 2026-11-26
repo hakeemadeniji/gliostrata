@@ -287,3 +287,103 @@ def generate_protocol_cmd(in_path: str, fs_path: str, out_path: str) -> None:
 
 if __name__ == "__main__":
     cli()
+
+
+# ---------------------------------------------------------------------------
+# Appended below the `__main__` guard on purpose: this file is edited
+# concurrently by several agents, so this command is added as a pure append
+# with no change to anything above. Click registers it at import time
+# regardless of position, so the placement is cosmetic only.
+# ---------------------------------------------------------------------------
+
+
+@cli.command("freeze-partition")
+@click.option("--input", "in_path", required=True, type=click.Path(exists=True),
+              help="Cohort Parquet file to partition (must have a patient_id column).")
+@click.option("--manifest", "manifest_path", required=True, type=click.Path(),
+              help="Path to the partition manifest JSON (e.g. data/partitions/cgga_v1.json).")
+@click.option("--name", "partition_name", default=None,
+              help="Partition name recorded in the manifest. Defaults to the manifest stem.")
+@click.option("--seed", default=20251126, show_default=True, type=int,
+              help="Seed baked into the patient-id hash. Changing it is a "
+                   "pre-registration amendment, not a re-run.")
+@click.option("--test-fraction", default=0.30, show_default=True, type=float,
+              help="Target fraction of patients held out.")
+@click.option("--stratify-by", default=None,
+              help="Optional column to stratify on (e.g. subtype). Must be constant per patient.")
+@click.option("--verify", "verify_only", is_flag=True,
+              help="Do not write anything: check that the cohort still reproduces the "
+                   "frozen manifest and report precisely what drifted.")
+@click.option("--no-seal", is_flag=True,
+              help="Write an UNSEALED draft manifest that may be freely overwritten. "
+                   "Never use this for a partition any model will be trained against.")
+@click.option("--force", is_flag=True,
+              help="Overwrite a sealed manifest. Only legitimate as a documented "
+                   "pre-registration amendment with every model retrained from scratch.")
+@click.option("--notes", default="", help="Free-text provenance note stored in the manifest.")
+def freeze_partition_cmd(in_path: str, manifest_path: str, partition_name: str | None,
+                         seed: int, test_fraction: float, stratify_by: str | None,
+                         verify_only: bool, no_seal: bool, force: bool, notes: str) -> None:
+    """Freeze (or verify) a train/test partition by seeded hash of patient_id.
+
+    The split is a pure function of (seed, patient_id), so it is stable under
+    row reordering, cohort growth and library upgrades -- unlike a shuffle,
+    which silently re-assigns patients whenever upstream filtering changes the
+    row count. Once a model has trained on a partition, moving a patient from
+    train to test destroys that patient's value as an external test forever,
+    which is why a sealed manifest refuses to be overwritten.
+
+    Verify before every evaluation run:
+
+        gliostrata freeze-partition --input COHORT --manifest M.json --verify
+    """
+    from gliostrata.evaluation import (
+        PartitionSealedError,
+        freeze_partition,
+        read_manifest,
+        verify_partition,
+    )
+    from gliostrata.utils.io import read_parquet
+
+    cohort = read_parquet(in_path)
+
+    if verify_only:
+        report = verify_partition(read_manifest(manifest_path), cohort, cohort_source=in_path)
+        click.echo(report.describe())
+        if not report.ok:
+            raise click.ClickException(
+                f"Partition drift detected ({report.n_drifted} id(s) affected). "
+                f"Do not evaluate against this partition until the drift is explained."
+            )
+        return
+
+    name = partition_name or Path(manifest_path).stem
+    try:
+        result, manifest, written = freeze_partition(
+            cohort,
+            cohort_source=in_path,
+            manifest_path=manifest_path,
+            partition_name=name,
+            seed=seed,
+            test_fraction=test_fraction,
+            stratify_by=stratify_by,
+            seal=not no_seal,
+            force=force,
+            notes=notes,
+        )
+    except PartitionSealedError as exc:
+        raise click.ClickException(str(exc)) from None
+
+    click.echo(f"Partition '{name}' {'sealed' if not no_seal else 'written (UNSEALED draft)'} "
+               f"-> {written}")
+    click.echo(f"  patients      : {result.n_total} "
+               f"({result.n_train} train / {result.n_test} test, "
+               f"achieved test fraction {result.n_test / result.n_total:.4f})")
+    click.echo(f"  seed          : {manifest.seed}")
+    click.echo(f"  cohort sha256 : {manifest.cohort_sha256}")
+    click.echo(f"  test ids sha256: {manifest.test_ids_sha256}")
+    if manifest.stratum_balance:
+        click.echo("  stratum balance:")
+        for stratum, row in sorted(manifest.stratum_balance.items()):
+            click.echo(f"    {stratum:<20} n={row['n']:<6} test={row['n_test']:<6} "
+                       f"({row['test_fraction']:.3f})")
