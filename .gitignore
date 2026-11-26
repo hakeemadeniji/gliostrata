@@ -55,6 +55,7 @@ data/raw/**
 data/interim/**
 data/processed/**
 data/external/**
+data/manual/**
 data/results/**
 !data/raw/.gitkeep
 !data/interim/.gitkeep
@@ -83,3 +84,6 @@ snakemake_logs/
 
 # OS
 Thumbs.db
+
+# Office lock/temp files
+~$*
