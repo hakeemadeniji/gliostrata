@@ -1,0 +1,269 @@
+name: CI
+
+# No job in this workflow may reach the GDC or CGGA. The test suite was
+# verified to pass with all outbound sockets blocked (tests load scripts/ by
+# path and drive them with synthetic fixtures), and the three tests that read
+# the real TCGA cohort are guarded by
+# `@pytest.mark.skipif(not REAL_COHORT.exists())` — data/raw/** is gitignored,
+# so they skip in CI by construction.
+#
+# The workflow pipeline job runs with `--config source=synthetic`, which is the
+# only L0 entry point that does not touch the network.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The version this project is developed against. pyproject declares
+  # requires-python = ">=3.10"; the working environment is 3.14.
+  PYTHON_VERSION: "3.14"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install "ruff>=0.1"
+
+      - name: ruff check (blocking — real errors only)
+        # Deliberately narrow. The repo currently has ~96 findings under the
+        # project's own ruff config (90 in src+tests, 6 in scripts), dominated
+        # by N806 non-lowercase-variable-in-function — which is arguable in
+        # statistical code where `X`, `X_train` and `N` are the conventional
+        # names. Making the full rule set blocking today would land a red CI on
+        # commit 1 and teach everyone to ignore it.
+        #
+        # This set is the "the code is broken" floor and passes clean right now:
+        #   E9  syntax / IO errors      F63 invalid comparisons
+        #   F7  misplaced statements    F82 undefined names
+        # Widen it as the backlog is cleared; the advisory step below is the
+        # backlog. Locally: `make lint` (project config) / `make lint-strict`.
+        run: ruff check --select E9,F63,F7,F82 src tests scripts
+
+      - name: ruff check (advisory — full project config)
+        continue-on-error: true
+        run: ruff check --statistics src tests scripts
+
+  test:
+    name: Tests (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install package with dev extras
+        run: pip install -e ".[dev]"
+
+      - name: Run test suite
+        # No network needed. data/raw/** is not in git, so the real-cohort
+        # tests skip; everything else runs on synthetic fixtures.
+        run: python -m pytest -q
+
+  partition-drift:
+    name: Partition drift guardrail
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Verify the current partition manifest reproduces
+        env:
+          # The CURRENT partition. v1 (583 patients) is a superseded historical
+          # record of the pre-filter-revision cohort, kept unmodified and
+          # deliberately NOT re-frozen. It is still integrity-checked below,
+          # but only v2 is verified against the live cohort.
+          CURRENT_MANIFEST: data/partitions/tcga_gbm_clinical_v2.json
+        # A sealed train/test split is a pre-registration commitment: the split
+        # is a pure function of (seed, patient_id), so it must keep reproducing
+        # as the cohort is re-ingested. If a patient moves between train and
+        # test, every downstream evaluation is contaminated.
+        #
+        # Two levels of check:
+        #   1. ALWAYS — manifest integrity: the manifest is sealed, its id
+        #      digests match its id lists, and re-deriving each patient's split
+        #      from (seed, patient_id) reproduces the frozen assignment. This
+        #      needs only git contents, so it is a genuine CI gate.
+        #   2. WHEN AVAILABLE — `gliostrata freeze-partition --verify` against
+        #      the actual cohort parquet. data/raw/** is gitignored, so that
+        #      file is normally absent in CI and this step says so rather than
+        #      pretending to have checked it.
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          from pathlib import Path
+
+          from gliostrata.evaluation import assign_split, read_manifest, sha256_over_ids
+
+          current = Path(os.environ["CURRENT_MANIFEST"])
+          manifests = sorted(Path("data/partitions").glob("*.json"))
+          if not manifests:
+              sys.exit("No partition manifests found in data/partitions/.")
+          if current not in manifests:
+              sys.exit(f"CURRENT_MANIFEST {current} is not in data/partitions/.")
+
+          failures = []
+          for path in manifests:
+              m = read_manifest(path)
+              role = "CURRENT" if path == current else "superseded (historical record)"
+              print(f"\n=== {path}  [{role}] ===")
+              print(f"  partition    : {m.partition_name}")
+              print(f"  sealed       : {m.sealed}")
+              print(f"  seed         : {m.seed}")
+              print(f"  n_train/test : {m.n_train} / {m.n_test}")
+
+              if not m.sealed:
+                  failures.append(f"{path}: manifest is UNSEALED (draft)")
+
+              for label, ids, digest in (
+                  ("train_ids", m.train_ids, m.train_ids_sha256),
+                  ("test_ids", m.test_ids, m.test_ids_sha256),
+                  ("all_ids", list(m.train_ids) + list(m.test_ids), m.all_ids_sha256),
+              ):
+                  actual = sha256_over_ids(ids)
+                  if actual != digest:
+                      failures.append(
+                          f"{path}: {label} digest mismatch "
+                          f"(recorded {digest[:12]}..., recomputed {actual[:12]}...)"
+                      )
+
+              if m.stratify_by is None:
+                  drifted = [
+                      pid
+                      for expected, ids in (("train", m.train_ids), ("test", m.test_ids))
+                      for pid in ids
+                      if assign_split(
+                          pid, seed=m.seed, test_fraction=m.test_fraction
+                      ) != expected
+                  ]
+                  if drifted:
+                      failures.append(
+                          f"{path}: {len(drifted)} id(s) no longer hash to their "
+                          f"frozen split, e.g. {drifted[:5]}"
+                      )
+                  else:
+                      print(
+                          f"  re-derived   : all {m.n_train + m.n_test} ids reproduce "
+                          f"their frozen split from (seed, patient_id)"
+                      )
+              else:
+                  print(
+                      f"  re-derived   : SKIPPED (stratified by {m.stratify_by!r}; "
+                      f"needs the cohort table)"
+                  )
+
+              cohort = Path(m.cohort_source)
+              if path != current:
+                  print(
+                      "  cohort       : not checked -- superseded manifests are frozen "
+                      "history and are EXPECTED to drift from the current cohort"
+                  )
+              elif cohort.exists():
+                  print(f"  cohort       : present at {cohort} -> full --verify below")
+              else:
+                  print(
+                      f"  cohort       : NOT in this checkout ({cohort} is gitignored); "
+                      f"full --verify not run in CI"
+                  )
+
+          if failures:
+              print("\nPARTITION DRIFT:")
+              for f in failures:
+                  print(f"  - {f}")
+              sys.exit(1)
+          print("\nAll partition manifests verified.")
+          PY
+
+      - name: Full cohort verification of the current manifest
+        # Only the CURRENT manifest, and only when the cohort parquet happens to
+        # be in the checkout (it is gitignored, so normally it is not). Running
+        # this over every manifest would fail on the superseded v1 by design.
+        env:
+          CURRENT_MANIFEST: data/partitions/tcga_gbm_clinical_v2.json
+        run: |
+          cohort=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['cohort_source'])" "$CURRENT_MANIFEST")
+          if [ -f "$cohort" ]; then
+            echo "Verifying $CURRENT_MANIFEST against $cohort"
+            gliostrata freeze-partition --input "$cohort" --manifest "$CURRENT_MANIFEST" --verify
+          else
+            echo "Skipping: cohort $cohort is not present in this checkout (data/raw/** is gitignored)."
+          fi
+
+  workflow-dry-run:
+    name: Snakemake DAG + offline fixture pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install package with workflow extras
+        run: pip install -e ".[workflow]"
+
+      - name: Snakemake dry run (real-cohort DAG)
+        # Resolves the full L0->L7 DAG. A dry run executes nothing, so this
+        # cannot reach the GDC even though the DAG contains the ingest rules.
+        run: snakemake -n --cores 1 --snakefile workflow/Snakefile
+
+      - name: Run the pipeline on a small synthetic fixture (offline)
+        # source=synthetic replaces the two network ingest rules with
+        # `gliostrata synthetic-data`. Nothing here opens a socket.
+        run: |
+          snakemake --cores 2 --snakefile workflow/Snakefile \
+            --config source=synthetic cohort=fixture n_synthetic=12 \
+                     with_expression=false verify_partition=false \
+                     raw_root=.test/raw interim_root=.test/interim \
+                     processed_root=.test/processed results_root=.test/results
+
+      - name: Check the fixture pipeline produced its artifacts
+        run: |
+          test -f .test/interim/fixture_harmonized.parquet
+          test -f .test/processed/fixture_profiled.parquet
+          test -f .test/processed/fixture_feature_store.parquet
+          test -f .test/results/fixture/configs/ranked_configurations.parquet
+          test -f .test/results/fixture/pipeline_complete.txt
+          n=$(ls .test/results/fixture/protocols/protocol_*.json | wc -l)
+          echo "protocol documents: $n"
+          test "$n" -eq 12
+
+      - name: Validate the DVC pipeline definition
+        # `dvc stage list` / `dvc dag` parse dvc.yaml and resolve the stage
+        # graph without executing anything, needing a remote, or needing the
+        # data to exist. They do require a DVC repo, so initialise an ephemeral
+        # one if the checkout has no committed .dvc/ yet (see
+        # docs/reproducibility.md for why .dvc/ is not committed today).
+        run: |
+          if [ ! -d .dvc ]; then dvc init --no-scm -q; fi
+          dvc stage list --name-only
+          dvc dag --mermaid

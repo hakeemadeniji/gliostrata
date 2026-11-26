@@ -1,107 +1,105 @@
 """GlioStrata Snakemake workflow — main Snakefile.
 
-Runs the full L0→L7 pipeline on synthetic data (for scaffold testing) or on
-real data (once L0 ingestion is implemented).
+Orchestrates the real L0->L7 chain as the code actually implements it today.
+Every path is derived from `config`, so the same DAG runs against the full
+TCGA-GBM cohort or against a tiny synthetic fixture.
 
-Usage:
-    snakemake --snakefile workflow/Snakefile --cores 4
-    snakemake --snakefile workflow/Snakefile --cores 4 --directory <repo_root>
+    # what would run against the real cohort
+    snakemake -n --cores 1 --snakefile workflow/Snakefile
+
+    # offline fixture run (no network, no GDC) — this is what CI and
+    # `make pipeline` use
+    snakemake --cores 1 --snakefile workflow/Snakefile \
+        --config source=synthetic cohort=fixture n_synthetic=12 \
+                 with_expression=false verify_partition=false \
+                 raw_root=.test/raw interim_root=.test/interim \
+                 processed_root=.test/processed results_root=.test/results
+
+    # the real thing (NETWORK: GDC REST API, ~1.2 GB expression download)
+    snakemake --cores 4 --snakefile workflow/Snakefile
+
+Honesty notes — read these before reading the DAG as a scientific claim:
+  * L1 harmonize, L2 profile, L5 survival and L6 optimize are STUBS. Each rule
+    file states exactly what its layer does and does not do.
+  * L2 does not consume the L0 expression matrices, so those matrices are a
+    top-level target rather than an input edge. The DAG does not assert
+    dependencies the code does not have.
+  * Several real modules exist ALONGSIDE those stubs and are NOT wired into the
+    CLI pipeline, so they are absent from this DAG by design, not by oversight:
+        src/gliostrata/prediction/cox.py        — real Cox models; L5 still
+                                                  calls prediction/survival.py
+        src/gliostrata/profiling/verhaak.py     — real Verhaak classifier; L2
+                                                  still calls profiling/subtype.py
+        src/gliostrata/profiling/deconvolve.py  — deconvolution; L2 still calls
+                                                  profiling/{states,tme}.py
+        src/gliostrata/optimization/bayes_opt.py— real BO; L6 still calls
+                                                  optimization/bayesian.py
+        scripts/download_cgga.py                — CGGA ingest, no rule yet
+    Adding rules for them would imply they are in the pipeline. They are not.
+    Wiring them is a change to src/gliostrata/cli.py, not to this workflow.
+  * CIBERSORTx deconvolution is a MANUAL round trip through a web tool. The
+    export rule exists (rules/export.smk) but nothing consumes its output, so
+    it is outside `rule all`.
+  * Only the `ingest_tcga_*` rules touch the network. Running with
+    `source=synthetic` is guaranteed offline.
+
+See docs/reproducibility.md for what is genuinely reproducible today.
 """
-from pathlib import Path
 
-# Repository root — Snakemake runs from the repo root by default.
-RESULTS_DIR = "data/results"
+include: "rules/common.smk"
+include: "rules/ingest.smk"
+include: "rules/harmonize.smk"
+include: "rules/profile.smk"
+include: "rules/features.smk"
+include: "rules/partition.smk"
+include: "rules/optimize.smk"
+include: "rules/handoff.smk"
+include: "rules/export.smk"
+
 
 rule all:
+    """Full pipeline: L0 ingest -> L7 protocols, plus the partition guardrail."""
     input:
-        f"{RESULTS_DIR}/L0_cohort.parquet",
-        f"{RESULTS_DIR}/L1_harmonized.parquet",
-        f"{RESULTS_DIR}/L2_subtypes.parquet",
-        f"{RESULTS_DIR}/L3_feature_store.parquet",
-        f"{RESULTS_DIR}/L5_survival.parquet",
-        f"{RESULTS_DIR}/L6_ranked_configs.parquet",
+        # L0 — expression matrices are produced but not yet consumed by L2.
+        expression_targets(),
+        # L2 — profiled table is produced but not consumed by L3 (see features.smk).
+        PROFILED,
+        # L3/L6/L7 — the chain that is actually wired end to end.
+        FEATURE_STORE,
+        RANKED_CONFIGS,
+        PROTOCOL_DIR,
     output:
-        touch(f"{RESULTS_DIR}/pipeline_complete.txt")
-    shell:
-        "echo 'GlioStrata pipeline complete.'"
+        touch(PIPELINE_STAMP),
 
-# ── L0: Ingestion (synthetic for scaffold) ──────────────────────────────
+
 rule ingest:
-    output:
-        f"{RESULTS_DIR}/L0_cohort.parquet"
-    shell:
-        "gliostrata synthetic-data --n 30 --out {output}"
-
-# ── L1: Harmonization ───────────────────────────────────────────────────
-rule harmonize:
+    """L0 only — ingest the cohort (and expression matrices, if enabled)."""
     input:
-        f"{RESULTS_DIR}/L0_cohort.parquet"
-    output:
-        f"{RESULTS_DIR}/L1_harmonized.parquet"
-    shell:
-        "gliostrata harmonize --input {input} --out {output}"
+        cohort_parquet(),
+        expression_targets(),
 
-# ── L2: Profiling (subtype + states + TME) ──────────────────────────────
-rule profile:
-    input:
-        f"{RESULTS_DIR}/L1_harmonized.parquet"
-    output:
-        f"{RESULTS_DIR}/L2_subtypes.parquet",
-        f"{RESULTS_DIR}/L2_states.parquet",
-        f"{RESULTS_DIR}/L2_tme.parquet"
-    shell:
-        "python -c \""
-        "from gliostrata.utils.io import read_parquet, write_parquet;"
-        "from gliostrata.profiling.subtype import classify_subtypes;"
-        "from gliostrata.profiling.states import deconvolve_states;"
-        "from gliostrata.profiling.tme import deconvolve_tme;"
-        "df = read_parquet('{input}');"
-        "write_parquet(classify_subtypes(df), '{output[0]}');"
-        "write_parquet(deconvolve_states(df), '{output[1]}');"
-        "write_parquet(deconvolve_tme(df), '{output[2]}')\""
 
-# ── L3: Feature store ───────────────────────────────────────────────────
-rule feature_store:
+rule features:
+    """Everything up to and including the L3 feature store."""
     input:
-        cohort=f"{RESULTS_DIR}/L1_harmonized.parquet",
-        subtypes=f"{RESULTS_DIR}/L2_subtypes.parquet",
-        states=f"{RESULTS_DIR}/L2_states.parquet",
-        tme=f"{RESULTS_DIR}/L2_tme.parquet"
-    output:
-        f"{RESULTS_DIR}/L3_feature_store.parquet"
-    shell:
-        "gliostrata build-feature-store --input {input.cohort} --out {output}"
+        FEATURE_STORE,
 
-# ── L5: Survival prediction ─────────────────────────────────────────────
-rule predict_survival:
-    input:
-        f"{RESULTS_DIR}/L3_feature_store.parquet"
-    output:
-        f"{RESULTS_DIR}/L5_survival.parquet"
-    shell:
-        "python -c \""
-        "from gliostrata.utils.io import read_parquet, write_parquet;"
-        "from gliostrata.prediction.survival import predict_survival;"
-        "fs = read_parquet('{input}');"
-        "write_parquet(predict_survival(fs), '{output}')\""
 
-# ── L6: Bayesian optimization ───────────────────────────────────────────
-rule optimize:
+rule partition_check:
+    """Verify the frozen train/test partition still reproduces. Nothing else."""
     input:
-        features=f"{RESULTS_DIR}/L3_feature_store.parquet",
-        survival=f"{RESULTS_DIR}/L5_survival.parquet"
-    output:
-        f"{RESULTS_DIR}/L6_ranked_configs.parquet"
-    shell:
-        "gliostrata optimize --input {input.features} --out $(dirname {output}) --n-top 5"
+        PARTITION_STAMP,
 
-# ── L7: Protocol generation ─────────────────────────────────────────────
-rule handoff:
+
+rule cibersortx:
+    """Build the CIBERSORTx mixture file only (manual upload; see rules/export.smk)."""
     input:
-        configs=f"{RESULTS_DIR}/L6_ranked_configs.parquet",
-        features=f"{RESULTS_DIR}/L3_feature_store.parquet"
-    output:
-        directory(f"{RESULTS_DIR}/L7_protocols")
+        CIBERSORTX_MIXTURE,
+
+
+rule clean_results:
+    """Remove this cohort's derived results tree. Never touches data/raw or data/partitions."""
+    params:
+        results=RESULTS,
     shell:
-        "gliostrata generate-protocol "
-        "--input {input.configs} --feature-store {input.features} --out {output}"
+        "rm -rf {params.results}"
