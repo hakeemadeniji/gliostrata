@@ -1,0 +1,12 @@
+# Verhaak subtype classifier configuration.
+classifier_type: ensemble
+components:
+  - random_forest
+  - 1d_cnn
+subtypes:
+  - Classical
+  - Mesenchymal
+  - Proneural
+  - Neural
+signature_genes_source: verhaak_2010
+n_bootstrap: 1000

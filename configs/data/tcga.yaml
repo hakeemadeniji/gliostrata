@@ -1,0 +1,16 @@
+# TCGA-GBM ingestion configuration.
+source: tcga
+program: TCGA
+project: GBM
+data_categories:
+  - Transcriptome Profiling
+  - DNA Methylation
+  - Clinical
+  - Biospecimen
+file_formats:
+  - FPKM
+  - TXT
+  - CSV
+# Access: most TCGA-GBM is open. Controlled-access requires dbGaP (see .env).
+access_level: open
+n_samples_target: 600

@@ -1,0 +1,56 @@
+# GlioStrata master configuration.
+# Override per-layer configs in configs/<layer>/.
+project:
+  name: gliostrata
+  version: 0.1.0
+  seed: 42
+
+paths:
+  data_raw: data/raw
+  data_interim: data/interim
+  data_processed: data/processed
+  data_external: data/external
+  data_results: data/results
+  models: models
+
+# Cohort selection for training vs. frozen-test partitions
+# (committed to OSF before any model touches test data)
+cohorts:
+  train:
+    - tcga
+  test:
+    - cgga
+    - glass
+
+# Frozen test partition manifest (DVC-locked — do not modify after pre-registration)
+frozen_test:
+  osf_registration_id: TBD
+  commit_sha: TBD
+  partition_hash: TBD
+
+# Pre-registered success thresholds (committed to OSF before evaluation)
+thresholds:
+  t1_subtype_accuracy_cgga: 0.88
+  t1_state_deconv_r: 0.75
+  t2_survival_cindex_cgga: 0.65
+  t2_beat_baseline_by: 0.03
+  t2_brier_18m: 0.25
+  t3_tumor_growth_rmse_pct: 15.0
+  t3_nsc_migration_r: 0.65
+  t4_optimizer_beats_random_pct: 25.0
+  t4_personalization_variance: 3
+  t5_rmst_gain_months: 3.0
+  t5_success_fraction: 0.50
+  t5_harm_fraction_max: 0.10
+
+layers:
+  data:
+    config: configs/data/tcga.yaml
+  profiling:
+    config: configs/profiling/subtype.yaml
+  simulation:
+    config: configs/simulation/tumor.yaml
+  prediction:
+    config: configs/prediction/survival.yaml
+  optimization:
+    config: configs/optimization/bayesian.yaml

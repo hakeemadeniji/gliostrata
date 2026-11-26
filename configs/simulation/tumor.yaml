@@ -1,0 +1,9 @@
+# PhysiCell tumor growth simulation configuration.
+simulator: physiell
+dt_minutes: 10
+simulation_hours: 720  # 30 days
+tumor_cell_cycle_hours: 24
+apoptosis_rate_per_hour: 0.001
+n_seed_cells: 5000
+calibration_target: published_pdx_growth_curves
+n_pdx_series: 10

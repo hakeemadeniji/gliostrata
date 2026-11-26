@@ -1,0 +1,35 @@
+# DVC pipeline definition for GlioStrata.
+# Each stage corresponds to one layer (L0-L7) of the architecture.
+# Run with: dvc repro
+
+stages:
+  ingest:
+    cmd: gliostrata ingest --source tcga --out data/raw/tcga
+    deps:
+      - configs/data/tcga.yaml
+    outs:
+      - data/raw/tcga/
+
+  harmonize:
+    cmd: gliostrata harmonize --input data/raw/tcga --out data/interim/tcga_harmonized.parquet
+    deps:
+      - data/raw/tcga/
+      - src/gliostrata/data/harmonize.py
+    outs:
+      - data/interim/tcga_harmonized.parquet
+
+  profile:
+    cmd: gliostrata profile --input data/interim/tcga_harmonized.parquet --out data/processed/profiles.parquet
+    deps:
+      - data/interim/tcga_harmonized.parquet
+      - src/gliostrata/profiling/
+    outs:
+      - data/processed/profiles.parquet
+
+  optimize:
+    cmd: gliostrata optimize --input data/processed/profiles.parquet --out data/results/configs/
+    deps:
+      - data/processed/profiles.parquet
+      - src/gliostrata/optimization/
+    outs:
+      - data/results/configs/

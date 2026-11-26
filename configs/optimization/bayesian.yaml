@@ -1,0 +1,6 @@
+# Bayesian configuration optimizer (BoTorch) configuration.
+acquisition_function: expected_improvement
+n_initial_random: 20
+n_optimization_iterations: 50
+n_top_configs_returned: 5
+# Configuration space — see src/gliostrata/optimization/config_space.py for full definition

@@ -1,0 +1,10 @@
+# Neftel single-cell state deconvolution configuration.
+method: CIBERSORTx
+signature_matrix: neftel_2019
+states:
+  - NPC_like
+  - OPC_like
+  - AC_like
+  - MES_like
+secondary_method: MuSiC2
+reconciliation: mean

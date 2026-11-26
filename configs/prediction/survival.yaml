@@ -1,0 +1,13 @@
+# DeepSurv survival model configuration.
+model: deepsurv
+architecture:
+  hidden_layers: [64, 32]
+  activation: relu
+  dropout: 0.2
+training:
+  optimizer: adam
+  learning_rate: 0.001
+  batch_size: 64
+  epochs: 200
+  early_stopping_patience: 20
+horizon_months: 36

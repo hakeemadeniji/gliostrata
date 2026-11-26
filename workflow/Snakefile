@@ -1,0 +1,107 @@
+"""GlioStrata Snakemake workflow — main Snakefile.
+
+Runs the full L0→L7 pipeline on synthetic data (for scaffold testing) or on
+real data (once L0 ingestion is implemented).
+
+Usage:
+    snakemake --snakefile workflow/Snakefile --cores 4
+    snakemake --snakefile workflow/Snakefile --cores 4 --directory <repo_root>
+"""
+from pathlib import Path
+
+# Repository root — Snakemake runs from the repo root by default.
+RESULTS_DIR = "data/results"
+
+rule all:
+    input:
+        f"{RESULTS_DIR}/L0_cohort.parquet",
+        f"{RESULTS_DIR}/L1_harmonized.parquet",
+        f"{RESULTS_DIR}/L2_subtypes.parquet",
+        f"{RESULTS_DIR}/L3_feature_store.parquet",
+        f"{RESULTS_DIR}/L5_survival.parquet",
+        f"{RESULTS_DIR}/L6_ranked_configs.parquet",
+    output:
+        touch(f"{RESULTS_DIR}/pipeline_complete.txt")
+    shell:
+        "echo 'GlioStrata pipeline complete.'"
+
+# ── L0: Ingestion (synthetic for scaffold) ──────────────────────────────
+rule ingest:
+    output:
+        f"{RESULTS_DIR}/L0_cohort.parquet"
+    shell:
+        "gliostrata synthetic-data --n 30 --out {output}"
+
+# ── L1: Harmonization ───────────────────────────────────────────────────
+rule harmonize:
+    input:
+        f"{RESULTS_DIR}/L0_cohort.parquet"
+    output:
+        f"{RESULTS_DIR}/L1_harmonized.parquet"
+    shell:
+        "gliostrata harmonize --input {input} --out {output}"
+
+# ── L2: Profiling (subtype + states + TME) ──────────────────────────────
+rule profile:
+    input:
+        f"{RESULTS_DIR}/L1_harmonized.parquet"
+    output:
+        f"{RESULTS_DIR}/L2_subtypes.parquet",
+        f"{RESULTS_DIR}/L2_states.parquet",
+        f"{RESULTS_DIR}/L2_tme.parquet"
+    shell:
+        "python -c \""
+        "from gliostrata.utils.io import read_parquet, write_parquet;"
+        "from gliostrata.profiling.subtype import classify_subtypes;"
+        "from gliostrata.profiling.states import deconvolve_states;"
+        "from gliostrata.profiling.tme import deconvolve_tme;"
+        "df = read_parquet('{input}');"
+        "write_parquet(classify_subtypes(df), '{output[0]}');"
+        "write_parquet(deconvolve_states(df), '{output[1]}');"
+        "write_parquet(deconvolve_tme(df), '{output[2]}')\""
+
+# ── L3: Feature store ───────────────────────────────────────────────────
+rule feature_store:
+    input:
+        cohort=f"{RESULTS_DIR}/L1_harmonized.parquet",
+        subtypes=f"{RESULTS_DIR}/L2_subtypes.parquet",
+        states=f"{RESULTS_DIR}/L2_states.parquet",
+        tme=f"{RESULTS_DIR}/L2_tme.parquet"
+    output:
+        f"{RESULTS_DIR}/L3_feature_store.parquet"
+    shell:
+        "gliostrata build-feature-store --input {input.cohort} --out {output}"
+
+# ── L5: Survival prediction ─────────────────────────────────────────────
+rule predict_survival:
+    input:
+        f"{RESULTS_DIR}/L3_feature_store.parquet"
+    output:
+        f"{RESULTS_DIR}/L5_survival.parquet"
+    shell:
+        "python -c \""
+        "from gliostrata.utils.io import read_parquet, write_parquet;"
+        "from gliostrata.prediction.survival import predict_survival;"
+        "fs = read_parquet('{input}');"
+        "write_parquet(predict_survival(fs), '{output}')\""
+
+# ── L6: Bayesian optimization ───────────────────────────────────────────
+rule optimize:
+    input:
+        features=f"{RESULTS_DIR}/L3_feature_store.parquet",
+        survival=f"{RESULTS_DIR}/L5_survival.parquet"
+    output:
+        f"{RESULTS_DIR}/L6_ranked_configs.parquet"
+    shell:
+        "gliostrata optimize --input {input.features} --out $(dirname {output}) --n-top 5"
+
+# ── L7: Protocol generation ─────────────────────────────────────────────
+rule handoff:
+    input:
+        configs=f"{RESULTS_DIR}/L6_ranked_configs.parquet",
+        features=f"{RESULTS_DIR}/L3_feature_store.parquet"
+    output:
+        directory(f"{RESULTS_DIR}/L7_protocols")
+    shell:
+        "gliostrata generate-protocol "
+        "--input {input.configs} --feature-store {input.features} --out {output}"

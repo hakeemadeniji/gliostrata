@@ -1,0 +1,9 @@
+# NSC migration simulation configuration.
+chemoattractants:
+  - SDF1
+  - VEGF
+  - uPA
+  - MCP1
+migration_model: chemotaxis
+max_velocity_um_per_hour: 50
+validation_source: published_hbf3_luciferase_imaging

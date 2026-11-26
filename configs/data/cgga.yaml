@@ -1,0 +1,9 @@
+# CGGA (Chinese Glioma Genome Atlas) ingestion configuration.
+source: cgga
+base_url: http://www.cgga.org.cn
+cohorts:
+  - mRNAseq_693
+  - mRNAseq_325
+  - methyl_689
+access_level: open
+registration_required: true

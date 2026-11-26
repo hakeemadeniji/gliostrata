@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checkers
+.mypy_cache/
+.ruff_cache/
+
+# Data (large files — versioned via DVC, not git)
+data/raw/**
+data/interim/**
+data/processed/**
+data/external/**
+data/results/**
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+!data/results/.gitkeep
+
+# Models (large files — versioned via DVC)
+models/**
+!models/.gitkeep
+
+# DVC
+/.dvc/cache
+/.dvc/tmp
+
+# Snakemake
+.snakemake/
+snakemake_logs/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Env
+.env
+.env.local
+
+# OS
+Thumbs.db

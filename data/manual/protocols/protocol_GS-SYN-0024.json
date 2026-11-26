@@ -1,0 +1,187 @@
+{
+  "patient_id": "GS-SYN-0024",
+  "document_version": "0.2.0",
+  "recommended_config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "combo",
+    "dose_cells": 48489643,
+    "n_injection_sites": 3,
+    "injection_coordinates_placeholder": "Map to patient-specific PDO geometry",
+    "schedule": "fractionated_x3",
+    "rank_in_optimizer": 1
+  },
+  "patient_summary": {
+    "sex": "F",
+    "age": 62,
+    "kps": 85,
+    "extent_of_resection": "biopsy",
+    "mgmt_methylated": true,
+    "idh_mutated": false,
+    "subtype": "Neural",
+    "subtype_prob_Classical": 0.09636046838741738,
+    "subtype_prob_Mesenchymal": 0.11735844138835541,
+    "subtype_prob_Proneural": 0.019108624429445626,
+    "subtype_prob_Neural": 0.7671724657947816,
+    "state_npc": 0.2491427484112417,
+    "state_opc": 0.36133913329652617,
+    "state_ac": 0.20884140156760328,
+    "state_mes": 0.18067671672462873,
+    "tme_immune": 0.0719272529776921,
+    "tme_stromal": 0.20291445476581732,
+    "tme_endothelial": 0.024132633361151914
+  },
+  "cell_line_provenance": {
+    "line_name": "iPSC-derived NSC (patient-matched iPSC line)",
+    "cell_type_category": "iPSC-NSC",
+    "source_reference": "placeholder: originating publication, ATCC/repository catalog number, or executed MTA required",
+    "passage_range": "placeholder: acceptable passage window for this line required",
+    "mycoplasma_certified": "placeholder: mycoplasma test certificate (date and result) required before use",
+    "differentiation_protocol_reference": "placeholder: dual-SMAD-inhibition NSC induction protocol reference required"
+  },
+  "payload_specification": {
+    "construct_name": "Delta-24-RGDOX + CD-UPRT co-delivery",
+    "category": "combo",
+    "sequence_accession": "placeholder: GenBank/Addgene accession or full annotated construct map required",
+    "titer_vp_per_ml": "placeholder: measured viral particle titer (vp/mL) required",
+    "replication_competence_confirmed": "placeholder: replication-competence assay result required (expected for CRAd payloads)",
+    "biosafety_approval_reference": "placeholder: institutional biosafety committee approval number required"
+  },
+  "dose_specification": {
+    "total_cells": 48489643,
+    "n_injection_sites": 3,
+    "cells_per_site": 16163214,
+    "volume_per_site_ul": "placeholder: injection volume per site (uL) required - constrained by PDO diameter",
+    "concentration_cells_per_ml": "placeholder: working suspension concentration (cells/mL) required - derive from volume_per_site_ul",
+    "vehicle_buffer": "placeholder: vehicle/buffer formulation required (e.g. serum-free medium or HBSS)"
+  },
+  "schedule_detail": {
+    "schedule": "fractionated_x3",
+    "temporal_anchor": "Day 0 post-PDO-establishment",
+    "injection_day": 0,
+    "injection_days": [
+      0,
+      7,
+      14
+    ],
+    "follow_up_timepoints_days": [
+      7,
+      14,
+      21,
+      28
+    ],
+    "sampling_schedule": "Conditioned medium sampled at each follow-up timepoint; PDOs harvested for endpoint assays at day 28 (or at earlier stopping-criteria trigger)."
+  },
+  "pdo_panel_specification": {
+    "n_pdos_per_patient": 10,
+    "selection_criteria": "10 PDOs per patient spanning the Verhaak subtypes, each established from the patient's resection tissue and passing establishment QC.",
+    "culture_medium": "placeholder: PDO culture medium formulation and supplier catalog numbers required",
+    "passage_range": "placeholder: acceptable PDO passage window at treatment required",
+    "quality_controls": [
+      "placeholder: establishment success and viability threshold required",
+      "placeholder: histology/marker confirmation of GBM identity required",
+      "placeholder: mycoplasma and sterility clearance required"
+    ]
+  },
+  "endpoints": {
+    "primary_endpoint": "RMST difference Arm A vs Arm B, days",
+    "secondary_endpoints": [
+      "Tumor kill fraction at day 28 (Arm B vs Arm A)",
+      "Tumor kill fraction at day 28 (Arm B vs Arm C)",
+      "PDO viability trajectory across follow-up timepoints",
+      "Payload persistence / viral replication across follow-up timepoints",
+      "Off-target cytotoxicity in non-tumor co-culture"
+    ],
+    "measurement_methods": [
+      "CellTiter-Glo 3D ATP viability assay",
+      "Live/dead fluorescent stain (calcein-AM / ethidium homodimer) with confocal readout",
+      "qPCR for viral genome copy number"
+    ],
+    "timepoints": [
+      7,
+      14,
+      21,
+      28
+    ]
+  },
+  "assay_plan": {
+    "tumor_kill_assay": "CellTiter-Glo 3D at each follow-up timepoint, normalized to the matched vehicle-only PDO from the same panel.",
+    "viability_assay": "Live/dead fluorescent stain (calcein-AM / ethidium homodimer) with confocal z-stack quantification of the dead-cell fraction.",
+    "imaging_plan": "Brightfield PDO diameter tracking at every timepoint; confocal immunofluorescence at day 28 endpoint harvest.",
+    "qpcr_for_viral_replication": "qPCR for viral genome copies per ng total DNA at each follow-up timepoint, run against a standard curve of the input construct."
+  },
+  "statistical_analysis_plan": {
+    "primary_analysis": "Two-sided paired t-test, Arm A vs Arm B, paired within the patient's PDO panel (alpha=0.05; 80% power at n>=10 PDOs per power analysis).",
+    "multiple_comparison_correction": "Benjamini-Hochberg",
+    "interim_analysis_rule": "One interim look after 50% of PDOs reach the day-28 endpoint; O'Brien-Fleming alpha spending so the final analysis retains nominal alpha.",
+    "stopping_criteria": "Stop for futility if the interim Arm A vs Arm B effect estimate is <= 0; stop an individual PDO for unexpected total loss of viability in the vehicle control."
+  },
+  "regulatory_context": {
+    "irb_reference": "placeholder: pending - IRB protocol number required",
+    "iacuc_reference": "placeholder: pending - IACUC protocol number required only if the study extends to in vivo work",
+    "ind_status": "placeholder: TBD - pre-IND; no IND filed for this preclinical PDO study",
+    "fda_gene_therapy_notes": "Design aligned with FDA guidance \"Considerations for the Design of Early-Phase Clinical Trials of Cellular and Gene Therapy Products\" and the FDA guidance on cell-based oncology product design. Preclinical PDO stage: no FDA submission required, but potency and identity assays are specified now to support a future IND."
+  },
+  "randomization_and_blinding": {
+    "randomization_scheme": "block randomization within patient PDO panel",
+    "blinding": "assay-level blinding for tumor kill measurement; analyst blinded to arm",
+    "allocation_concealment": "placeholder: randomization code custodian (not an assay operator) required"
+  },
+  "predicted_outcomes": {
+    "predicted_survival_with_config_months": 30.735668934297998,
+    "predicted_tumor_kill_fraction": 0.575676159025096,
+    "survival_gain_vs_stupp_months": 13.013888923277904,
+    "baseline_stupp_survival_months": 17.721780011020094
+  },
+  "controls": [
+    {
+      "arm": "A",
+      "description": "Standard Stupp-equivalent in vitro (TMZ + radiation on PDO)"
+    },
+    {
+      "arm": "B",
+      "description": "Framework-recommended stem-cell-delivered configuration"
+    },
+    {
+      "arm": "C",
+      "description": "Fixed-payload NSC delivery (City of Hope-style active control)"
+    }
+  ],
+  "biosafety": {
+    "bsl_level": "placeholder: institutional biosafety committee risk assessment required - co-delivery of a replication-competent adenovirus and an integrating lentiviral vector may require BSL-2+ or enhanced containment; baseline BSL-2 applies to each vector individually but the combination is institution-dependent",
+    "viral_vector_class": "Co-delivery: replication-competent adenovirus (Delta-24 backbone) plus integrating lentiviral vector",
+    "payload_category": "combo",
+    "containment_notes": "Follow institutional biosafety committee protocols."
+  },
+  "ethical_notes": "Pre-registered three-arm PDO experiment. Sample size: >= 10 PDOs spanning Verhaak subtypes (power analysis: 80% power to detect Arm A->B difference at alpha=0.05 two-sided paired t-test).",
+  "completeness_checklist": {
+    "cell_line_source": "placeholder",
+    "payload_sequence": "placeholder",
+    "dose": "placeholder",
+    "schedule": true,
+    "pdo_panel": "placeholder",
+    "injection_coordinates": "placeholder",
+    "controls": true,
+    "endpoints": true,
+    "assay_plan": true,
+    "statistical_analysis_plan": true,
+    "power_analysis": true,
+    "randomization_and_blinding": true,
+    "regulatory_context": "placeholder",
+    "predicted_outcomes": true,
+    "patient_summary": true,
+    "biosafety_level": "placeholder",
+    "ethical_notes": true,
+    "data_sharing_agreement": "placeholder: executed data sharing agreement with the collaborating wet lab required",
+    "unresolved_items": [
+      "biosafety_level",
+      "cell_line_source",
+      "data_sharing_agreement",
+      "dose",
+      "injection_coordinates",
+      "payload_sequence",
+      "pdo_panel",
+      "regulatory_context"
+    ],
+    "all_complete": false
+  }
+}
