@@ -459,12 +459,16 @@ def test_cv_on_noise_features_is_near_chance():
 
 
 # ---------------------------------------------------------------------------
-# 9. Smoke test on the real 583-patient TCGA-GBM cohort
+# 9. Smoke test on the real TCGA-GBM cohort
 # ---------------------------------------------------------------------------
 @pytest.mark.skipif(not REAL_COHORT.exists(), reason="real TCGA cohort not downloaded")
 def test_smoke_real_tcga_gbm_cohort():
     cohort = pd.read_parquet(REAL_COHORT)
-    assert len(cohort) == 583
+    # Canary on the ingested cohort size. If this trips, the L0 filter changed:
+    # confirm the change was intended, refit, and update the number here rather
+    # than loosening the assertion -- a silent cohort change invalidates every
+    # downstream metric and every frozen partition.
+    assert len(cohort) == 594
 
     model, cv, report = fit_clinical_baseline(cohort, n_boot=200, seed=42)
 
