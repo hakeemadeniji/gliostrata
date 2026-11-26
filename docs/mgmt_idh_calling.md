@@ -207,8 +207,7 @@ explicit row with a reason rather than an absent row.
    sample is recurrent is not callable for IDH.
 6. **IDH-mutant cases stay in the primary cohort.** Decided: see the
    pre-specified sensitivity analysis in section 6.3.
-7. **Neither table is joined to the cohort.** They are standalone; the join is
-   a separate, reviewed step.
+7. **Both tables are joined to the cohort in scripts/join_molecular_calls.py; see section 6.3 for the sensitivity analysis that uses the join.
 8. **Coverage differs between the two markers.** IDH and MGMT are testable on
    different subsets of patients (section 6); a model using both sees only
    their intersection.
@@ -312,7 +311,8 @@ and only 12 gain neither. Among those 206:
 | IDH wildtype | 135 | 55 |
 | IDH mutant | 10 | 6 |
 
-**Pre-specified sensitivity analysis (decision recorded; not yet run).**
+**Pre-specified sensitivity analysis (decision recorded before the IDH calls
+existed; now executed).**
 All 23 IDH-mutant patients stay in the primary cohort and the frozen
 594-patient partition stands. Under WHO 2021 those cases would be
 reclassified as astrocytoma, IDH-mutant (section 2.4), so the primary
@@ -327,8 +327,87 @@ primary analysis, not a change to it**:
 - the exclusion is applied at analysis time from `idh_calls.parquet`.
   Nothing is removed from any ingested table.
 
-This cannot be run yet: the call tables are not joined to the cohort
-(section 5, item 7).
+The join now exists (`scripts/join_molecular_calls.py`), and the analysis
+has been run.
+
+**Result: the primary analysis is robust to the exclusion by the
+pre-specified criterion.** The C-index moved by 0.0079, which does not
+exceed the 0.01 threshold, and no subtype share moved by more than 1.10
+percentage points.
+
+**Cox C-index.** The committed clinical-only baseline (age, sex, KPS and
+treatment arm; 5-fold stratified cross-validation; pooled out-of-fold
+Harrell C-index) was fitted twice with identical settings. Only the
+patients differ between the two fits.
+
+| Cohort | Patients | Modelled | Deaths | C-index | 95% CI |
+| --- | --- | --- | --- | --- | --- |
+| full (the primary cohort) | 594 | 592 | 491 | 0.6735 | [0.6478, 0.6994] |
+| without the 23 IDH-mutant patients | 571 | 569 | 481 | 0.6656 | [0.6370, 0.6913] |
+
+- Delta (without minus full) is **-0.0079**. The absolute change, 0.0079,
+  is below the 0.01 threshold: **not flagged**. Its direction is a small
+  decrease.
+- The two patients with no `vital_status` are dropped by the design matrix
+  in both fits, exactly as in the primary fit.
+- The intervals are percentile bootstraps (1000 resamples, seed 42) of the
+  pooled out-of-fold risk scores, computed as in the primary fit. The model
+  is not refitted inside a resample, and the two bootstraps are not paired.
+  Each point estimate lies inside the other cohort's interval. No paired
+  test of the difference was pre-specified, and none is reported.
+- Per-fold C-indices are 0.649, 0.630, 0.693, 0.707 and 0.676 for the full
+  cohort and 0.742, 0.594, 0.663, 0.663 and 0.669 without the IDH-mutant
+  patients. The spread across folds is several times the size of the delta.
+
+**Verhaak subtype distribution.** The committed signature classifier
+(`classify_verhaak`, default settings) was run on all 284 expression
+samples and again on the 268 left after excluding the 16 IDH-mutant
+samples.
+
+| Subtype | Full n | Full % | Without IDH n | Without IDH % | Change (pp) |
+| --- | --- | --- | --- | --- | --- |
+| Classical | 88 | 30.99 | 86 | 32.09 | +1.10 |
+| Mesenchymal | 82 | 28.87 | 77 | 28.73 | -0.14 |
+| Proneural | 67 | 23.59 | 61 | 22.76 | -0.83 |
+| Neural | 47 | 16.55 | 44 | 16.42 | -0.13 |
+
+The largest per-subtype change is **1.10 pp** (Classical). Two things sit
+behind those small net changes; both are in
+`data/results/tcga_gbm/idh_sensitivity_subtype.json`.
+
+1. **The excluded cases are not subtype-typical.** By their full-cohort
+   labels, 14 of the 16 are Proneural, 1 is Mesenchymal and 1 is Neural:
+   87.5% Proneural, against 23.59% in the full set. If every retained
+   sample kept its full-cohort label, Proneural would fall from 23.59% to
+   19.78%, a change of -3.81 pp.
+2. **A label depends on which samples are in the matrix.** The classifier
+   compares signatures after standardising each one across samples, so its
+   labels are a within-cohort ranking (`_softmax_over_cohort_z`). In the
+   reduced run, 8 of the 268 retained samples get a different label from the
+   one they got in the full run. All eight are called Proneural in the
+   reduced run and were not in the full run (two Classical, four
+   Mesenchymal, two Neural); that breakdown follows from the per-subtype
+   counts.
+
+The two movements partly cancel, which is why Proneural shows a net change
+of only -0.83 pp. The aggregate distribution is stable; the labels of
+individual samples near a subtype boundary are less so.
+
+One expression sample, TCGA-28-2510, is outside the clinical cohort and so
+has no row in the joined table. It is kept, because it is IDH wildtype in
+`idh_calls.parquet`, and it is listed in the JSON.
+
+**In one sentence.** Excluding the 23 IDH-mutant patients leaves the
+primary results standing: the Cox C-index falls by 0.0079, under the
+pre-specified limit of 0.01, and the subtype shares move by at most 1.10
+percentage points.
+
+**Reproducing.** Run `python scripts/join_molecular_calls.py`, then
+`python scripts/idh_sensitivity_cox.py` and
+`python scripts/idh_sensitivity_subtype.py`. The two result files are
+git-ignored, as are the call tables under `data/raw/` they derive from: a
+clean checkout reproduces them only after the two download scripts have
+been run.
 
 ---
 
