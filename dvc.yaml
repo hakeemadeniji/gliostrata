@@ -1,35 +1,157 @@
 # DVC pipeline definition for GlioStrata.
-# Each stage corresponds to one layer (L0-L7) of the architecture.
-# Run with: dvc repro
+#
+# This file describes the pipeline AS THE CODE ACTUALLY IMPLEMENTS IT TODAY.
+# Snakemake (workflow/Snakefile) is the execution orchestrator; DVC's job here
+# is data/model versioning and content-addressed provenance. The two
+# definitions must agree -- tests/test_workflow.py enforces that every path
+# named below is one the CLI or scripts/ really produces.
+#
+# STATUS: DVC is declared in the optional `workflow` extra and is NOT installed
+# in the current environment, so `.dvc/` has deliberately NOT been initialised
+# and no remote is configured. See docs/reproducibility.md ("DVC") for the exact
+# init commands and the storage implications before you run them.
+#
+#     pip install -e ".[workflow]"
+#     dvc init && dvc repro
+#
+# What is NOT a DVC stage, on purpose:
+#   * `gliostrata freeze-partition` -- frozen partition manifests live in
+#     data/partitions/ and are version-controlled in GIT, not DVC. Making them
+#     a DVC out would move them out of git and defeat the whole point: a sealed
+#     split must be readable in a diff and must not be regenerable by a
+#     `dvc repro`. The verification gate runs in CI and in Snakemake instead
+#     (see .github/workflows/ci.yml and workflow/rules/partition.smk).
+#   * `data/raw/tcga_gbm/expression/_cache/` -- 1.2 GB of per-sample STAR TSVs.
+#     Pure download scratch, reconstructible from the GDC. Excluded in
+#     .dvcignore; never add it as an out.
+#   * `scripts/export_cibersortx.py` -- regenerates a 39 MB text file from
+#     tpm.parquet in seconds, for manual upload to a web tool. Tracking it
+#     would store 39 MB per re-run to save a few seconds of compute. It has a
+#     Snakemake rule (workflow/rules/export.smk) and no DVC stage.
+#   * `scripts/download_cgga.py`, `src/gliostrata/prediction/cox.py`,
+#     `src/gliostrata/profiling/verhaak.py`,
+#     `src/gliostrata/profiling/deconvolve.py` and
+#     `src/gliostrata/optimization/bayes_opt.py` -- real modules built alongside
+#     the stubs but NOT wired into the CLI pipeline. They are absent from this
+#     file because adding stages for them would assert they are in the
+#     pipeline. Wiring them is a change to src/gliostrata/cli.py.
 
 stages:
-  ingest:
-    cmd: gliostrata ingest --source tcga --out data/raw/tcga
+  # --- L0a: TCGA-GBM clinical ingest (NETWORK: GDC REST API) ---
+  # No data deps: the upstream input is the live GDC API, which DVC cannot
+  # hash. Re-run deliberately with `dvc repro -f ingest_tcga_clinical`.
+  ingest_tcga_clinical:
+    cmd: python scripts/download_tcga_clinical.py --out data/raw/tcga_gbm --project TCGA-GBM
     deps:
-      - configs/data/tcga.yaml
+      - scripts/download_tcga_clinical.py
     outs:
-      - data/raw/tcga/
+      - data/raw/tcga_gbm/clinical_raw.parquet
+      - data/raw/tcga_gbm/clinical_cohort.parquet
 
-  harmonize:
-    cmd: gliostrata harmonize --input data/raw/tcga --out data/interim/tcga_harmonized.parquet
+  # --- L0b: TCGA-GBM bulk RNA-seq ingest (NETWORK, ~1.2 GB downloaded) ---
+  # Produces the expression matrices. NOTE: no downstream stage consumes them
+  # yet -- L2 profiling does not read an expression matrix (see `profile`).
+  ingest_tcga_expression:
+    cmd: python scripts/download_tcga_expression.py --out data/raw/tcga_gbm/expression
+      --project TCGA-GBM --clinical data/raw/tcga_gbm/clinical_cohort.parquet
     deps:
-      - data/raw/tcga/
+      - scripts/download_tcga_expression.py
+      - data/raw/tcga_gbm/clinical_cohort.parquet
+    outs:
+      - data/raw/tcga_gbm/expression/file_manifest.parquet
+      - data/raw/tcga_gbm/expression/gene_annotation.parquet
+      - data/raw/tcga_gbm/expression/counts.parquet
+      - data/raw/tcga_gbm/expression/tpm.parquet
+      - data/raw/tcga_gbm/expression/sample_metadata.parquet
+
+  # --- L0c: TCGA-GBM IDH mutation calling (NETWORK: GDC REST API) ---
+  # Downloads and calls only; nothing is joined to the cohort. The
+  # *_report.json beside the outputs and the _cache/ download scratch are
+  # deliberately not outs (the cache is excluded in .dvcignore).
+  ingest_tcga_mutations:
+    cmd: python scripts/download_tcga_mutations.py --out data/raw/tcga_gbm/mutations
+    deps:
+      - scripts/download_tcga_mutations.py
+      - data/raw/tcga_gbm/clinical_cohort.parquet
+    outs:
+      - data/raw/tcga_gbm/mutations/file_manifest.parquet
+      - data/raw/tcga_gbm/mutations/idh_calls.parquet
+
+  # --- L0d: TCGA-GBM MGMT methylation calling (NETWORK: GDC REST API) ---
+  # ~2.3 GB downloaded. Same pattern as L0c. NOT MGMT-STP27 -- see
+  # docs/mgmt_idh_calling.md before using the binary call.
+  ingest_tcga_methylation:
+    cmd: python scripts/download_tcga_methylation.py --out data/raw/tcga_gbm/methylation
+    deps:
+      - scripts/download_tcga_methylation.py
+      - data/raw/tcga_gbm/clinical_cohort.parquet
+    outs:
+      - data/raw/tcga_gbm/methylation/file_manifest.parquet
+      - data/raw/tcga_gbm/methylation/mgmt_calls.parquet
+
+  # --- L1: harmonization (STUB layer -- schema normalisation + basic QC) ---
+  harmonize:
+    cmd: gliostrata harmonize --input data/raw/tcga_gbm/clinical_cohort.parquet
+      --out data/interim/tcga_gbm_harmonized.parquet
+    deps:
+      - data/raw/tcga_gbm/clinical_cohort.parquet
       - src/gliostrata/data/harmonize.py
     outs:
-      - data/interim/tcga_harmonized.parquet
+      - data/interim/tcga_gbm_harmonized.parquet
 
+  # --- L2: profiling (STUB layer -- does NOT read the expression matrices) ---
+  # The subtype calls and state/TME fractions here are derived from the
+  # clinical table, not measured. The `expression/*.parquet` files are
+  # deliberately absent from deps: declaring them would assert a dependency
+  # the code does not have.
   profile:
-    cmd: gliostrata profile --input data/interim/tcga_harmonized.parquet --out data/processed/profiles.parquet
+    cmd: gliostrata profile --input data/interim/tcga_gbm_harmonized.parquet
+      --out data/processed/tcga_gbm_profiled.parquet
     deps:
-      - data/interim/tcga_harmonized.parquet
-      - src/gliostrata/profiling/
+      - data/interim/tcga_gbm_harmonized.parquet
+      - src/gliostrata/profiling
     outs:
-      - data/processed/profiles.parquet
+      - data/processed/tcga_gbm_profiled.parquet
 
-  optimize:
-    cmd: gliostrata optimize --input data/processed/profiles.parquet --out data/results/configs/
+  # --- L3: unified feature store ---
+  # Takes the HARMONIZED table, not the profiled one: the CLI re-runs the three
+  # L2 functions internally. Hence the profiling dep alongside the store code.
+  build_feature_store:
+    cmd: gliostrata build-feature-store --input data/interim/tcga_gbm_harmonized.parquet
+      --out data/processed/tcga_gbm_feature_store.parquet
     deps:
-      - data/processed/profiles.parquet
-      - src/gliostrata/optimization/
+      - data/interim/tcga_gbm_harmonized.parquet
+      - src/gliostrata/features/store.py
+      - src/gliostrata/profiling
     outs:
-      - data/results/configs/
+      - data/processed/tcga_gbm_feature_store.parquet
+
+  # --- L5 + L6: survival prediction and configuration optimization ---
+  # L5 has no materialised artifact: `gliostrata optimize` calls
+  # predict_survival internally and never writes the predictions out. Both
+  # layers are STUBS (ranked enumeration, not a Bayesian loop over a validated
+  # response surface).
+  optimize:
+    cmd: gliostrata optimize --input data/processed/tcga_gbm_feature_store.parquet
+      --out data/results/tcga_gbm/configs --n-top 5 --seed 42
+    deps:
+      - data/processed/tcga_gbm_feature_store.parquet
+      - src/gliostrata/optimization
+      - src/gliostrata/prediction/survival.py
+    outs:
+      - data/results/tcga_gbm/configs/ranked_configurations.parquet
+
+  # --- L7: wet-lab protocol handoff (STUB layer) ---
+  # Structurally complete JSON documents templated from stubbed L2/L5/L6
+  # output. Not bench-executable.
+  generate_protocol:
+    cmd: gliostrata generate-protocol
+      --input data/results/tcga_gbm/configs/ranked_configurations.parquet
+      --feature-store data/processed/tcga_gbm_feature_store.parquet
+      --out data/results/tcga_gbm/protocols
+    deps:
+      - data/results/tcga_gbm/configs/ranked_configurations.parquet
+      - data/processed/tcga_gbm_feature_store.parquet
+      - src/gliostrata/handoff
+    outs:
+      - data/results/tcga_gbm/protocols
