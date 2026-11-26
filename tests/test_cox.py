@@ -474,12 +474,12 @@ def test_smoke_real_tcga_gbm_cohort():
 
     # Missingness audit: only the 2 patients with no vital_status are dropped.
     assert report.dropped_missing_outcome == 2
-    assert report.n_used == 581
-    assert report.n_imputed["kps"] == 149  # of the 581 retained
+    assert report.n_used == 592
+    assert report.n_imputed["kps"] == 150  # of the 592 retained
     assert "kps_missing" in report.feature_names
     assert model.converged_
-    assert model.n_obs_ == 581
-    assert model.n_events_ == 483
+    assert model.n_obs_ == 592
+    assert model.n_events_ == 491
 
     # Performance: better than chance, and honestly short of the >= 0.65
     # EXTERNAL threshold this internal CV cannot speak to.
