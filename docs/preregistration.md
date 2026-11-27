@@ -134,8 +134,42 @@ resolutions are pre-registered rather than chosen after the data is seen.
    distribution and no valid CI. *Registered resolution:* the comparator must be re-run on
    the identical frozen partition, and the metric is the paired bootstrap distribution of
    the difference. If the comparator cannot be re-run (no released code or weights), this
-   threshold is reported as **not evaluable**, never as a pass. **TO BE COMPLETED BY AUTHOR:
-   the specific 2024 baseline model, publication and code/weights source.**
+   threshold is reported as **not evaluable**, never as a pass. *Comparator (registered
+   2026-11-27, before the deposit and before the search below was run):* the comparator
+   is chosen by a rule and one search, not named in advance. (a) *Eligibility.* A model
+   is eligible only if all of E1 to E5 hold. E1: peer-reviewed, first published online
+   or in print between 2024-01-01 and 2024-12-31. E2: it predicts overall survival and
+   applies to adult WHO grade 4 glioblastoma, IDH-wild-type included. E3: it can be
+   re-run without refitting, from a complete published formula (every term, its
+   coefficient and the expression scale it expects) or from released code with fitted
+   weights. E4: every input is available for `cgga_external_v1` from files already
+   obtained: CGGA RNA-seq and the CGGA clinical fields (age, sex, IDH, MGMT, 1p/19q,
+   radiotherapy, chemotherapy); not KPS, extent of resection, methylation arrays,
+   imaging or histology. E5: no patient of CGGA mRNAseq_325 or mRNAseq_693 was used for
+   its training, gene or feature selection, coefficient fitting or cut-off choice; use
+   for validation only is allowed and is disclosed. E6 (choice among eligible models):
+   the highest C-index the paper reports on an external cohort other than CGGA; ties go
+   to the earlier publication; if no eligible model reports one, the largest external
+   validation n. (b) *Search.* One PubMed search, run once after this item is committed:
+   `glioblastoma[tiab] AND (prognos*[tiab] OR survival[tiab]) AND (signature[tiab] OR model[tiab] OR nomogram[tiab] OR "risk score"[tiab]) AND 2024[dp]`. Every record is screened on title and abstract for E1, E2 and
+   E4, and every record that passes is screened on its full text for E3 and E5. The log
+   (query, date run, hit count, every record with its first failing criterion or
+   "eligible") is committed and attached to the deposit. (c) *Our side of the
+   comparison:* the transferable model (variant 2 of section 2.3: age, sex, treatment
+   arm), fitted on TCGA exactly as committed in `scripts/validate_cox_cgga.py`. It is the
+   stand-in that decided the C-index and Brier rows, because the committed model needs
+   KPS, which CGGA does not record. (d) *Partition and procedure:* `cgga_external_v1`,
+   complete cases on the union of both models' inputs; Harrell's C-index for each; a
+   paired percentile bootstrap over patients of the difference (variant 2 minus the
+   comparator), 1000 resamples, seed 42; the lower bound of the 95% interval decides.
+   The comparator is applied as published: its own transformation, coefficients and
+   identifiers, nothing re-estimated on CGGA. (e) *Outcomes.* If no model is eligible,
+   this threshold is NOT EVALUABLE, the log is the stated reason, and CGGA is not read
+   for it. If one is eligible, it is named here by a further amendment before the
+   deposit, OSF stopping rule 9 and section 5 gain exactly this one read, and the read
+   runs after the deposit under its own rule in `configs/scoring_rules.yaml`. The
+   candidates, the reasoning and the alternatives considered are in
+   `docs/t2_comparator_shortlist.md`.
 3. **T3 tumour-growth RMSE "≤ 15% of final volume" — whose final volume, and over which
    curves?** *Registered resolution:* RMSE is computed over the full time course per PDX
    growth curve, normalised by that curve's own observed final volume, then averaged across
@@ -216,7 +250,29 @@ resolutions are pre-registered rather than chosen after the data is seen.
    external data beyond the sample being scored. This is a project choice, not
    the normalisation of Verhaak et al. (2010), who standardised each gene across
    patients within each platform. The rule was fixed, and entered in section 8,
-   before the microarray expression matrix was downloaded. (e) *Margin, stated so the choice of
+   before the microarray expression matrix was downloaded. *The classifier (registered
+   2026-11-27, before the deposit and before the matrix was downloaded):* single-sample
+   nearest centroid, `gliostrata.profiling.centroid.classify_single_sample`. Genes: the
+   831 genes of the Verhaak et al. (2010) ClaNC 840-gene signature that were resolved
+   when the centroids were built. Centroids: the frozen set `verhaak840_tcga_all`
+   (`configs/subtype_centroids/verhaak840_tcga_all.json`, SHA-256
+   `c2b65d8ff0be2708bc8086e909f04a16a299823109186d674837c4d46f159bf7`): for each of the four
+   classes, the mean of the per-sample z-scored log2(TPM + 1) profiles of the 246 TCGA
+   RNA-seq patients carrying a published four-class label (Classical 64, Mesenchymal 82,
+   Proneural 48, Neural 52; labels from the Brennan et al. 2013 table, which mixes
+   Verhaak 2010 clustering labels with single-sample GSEA calls). Similarity: the
+   Pearson correlation between the sample's z-scored vector and each centroid, over the
+   genes present; the call is the highest, and an exact tie goes to the earlier class
+   in the order Classical, Mesenchymal, Proneural, Neural. Nothing is tuned; no other
+   candidate is evaluated; the three-class variant and the set estimated on the v2
+   training split (`verhaak840_tcga_v2train`) are not used for T1. *Microarray input:*
+   genes are matched by exact symbol to the set's symbols, with no alias resolution;
+   rows sharing a symbol are averaged; values enter on the log2 scale, as distributed if
+   the source's documentation says they are log2 values, otherwise as log2(x + 1), and
+   that scale is decided from the documentation, and recorded, before any value is read.
+   The number of genes used is reported. The code applies log2(TPM + 1) to RNA-seq; the
+   microarray input rules are implemented in the T1 script, which is committed before
+   the read. (e) *Margin, stated so the choice of
    scoring set can be checked:* on 108 patients the criterion tolerates up to 6
    errors (102 of 108 gives 0.8830; 101 of 108 gives 0.8710). An observed accuracy
    near 0.95 needs roughly 71 to 100 patients to clear (68 of 71 gives 0.8814; 95 of
@@ -627,13 +683,23 @@ generated data, exercised by the test suite and a dry-run CLI command. Those run
 that the plumbing executes and produce no result about glioblastoma. One registered row
 has been evaluated on the Neftel 2019 atlas before this deposit: T1's state-deconvolution
 row, on 100 simulated mixtures (section 2.4; PASS, 0.9521, 95% CI 0.9430 to 0.9589).
-Four analyses on real TCGA-GBM data have also been run; none is an external result, and no number in this
-pre-registration is derived from them apart from those in section 2.3: descriptive
+Analyses on real TCGA-GBM data have also been run; none is an external result, and no number in this
+pre-registration is derived from them apart from those in section 2.3 and the centroid-set
+counts in section 2.2 item 9(d): descriptive
 statistics of the clinical cohort (cohort size, age and survival distributions, censoring
 rate); the IDH sensitivity analyses (`scripts/idh_sensitivity_cox.py`,
 `scripts/idh_sensitivity_subtype.py`); a concordance check of the deconvolution module's
-marker panels on the expression matrix; and the T2 fit itself, whose internal C-index is
-cross-validated on TCGA. The
+marker panels on the expression matrix; the T2 fit itself, whose internal C-index is
+cross-validated on TCGA; and, in stage 3b (2026-11-27), four more: the estimation of two
+frozen subtype centroid sets from TCGA RNA-seq and published labels
+(`verhaak840_tcga_v2train` on the 170 labelled v2 training patients; `verhaak840_tcga_all`
+on all 246 labelled patients); single-sample subtype calls for the 283 profiled patients,
+with a descriptive agreement check against the published labels of the 76 labelled v2-test
+patients (56 of 76, 0.737; most of those labels come from another classifier, so this is
+not a validation); a measurement of how far cohort-relative subtype and state scores move
+when the scoring set changes; and the build of the feature store over all 594 patients,
+whose state and TME scores are cohort-relative over the 283 profiled patients, 82 v2-test
+patients among them. The
 partition demonstration quoted in §4.1 used patient identifiers and split assignments only
 — no outcome variable was examined in connection with any split.
 
@@ -644,8 +710,10 @@ on every complete-case TCGA patient, and variant 1 on the 592 with an observed o
 (KPS imputed, see section 2.3), and reports a 5-fold cross-validated internal C-index for
 each, so
 the 169 patients in the test split of `tcga_gbm_clinical_v2` were in the fit set. The
-sealed external partition `cgga_external_v1` does not exist yet; it is to be created
-before T4 and T5 (section 2.2, item 7). This pre-registration is being written before any
+subtype centroid set reserved for T1 was estimated on all 246 labelled TCGA patients, the
+v2 test split included (section 2.2 item 9(d)). The sealed external partition
+`cgga_external_v1` was created on 2026-11-27, after the T2 evaluation and before any T4
+or T5 computation (section 2.2 item 7; section 4.5). This pre-registration is being written before any
 confirmatory evaluation other than T2 and T1's state-deconvolution row (section 2.4).
 
 **Prior expectations.** The thresholds in §2 are taken from published external benchmarks,
@@ -722,6 +790,9 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.4 (added) | Recorded the outcome of T1's state-deconvolution row: PASS, mean per-state Pearson r 0.9521 (95% CI 0.9430 to 0.9589) against 0.75, on the 100 registered mixtures. The mixture-generation specification (`docs/t1_deconvolution_spec.md`) was committed before the run (`f5b9fe6`) and fixes only what section 2.2 items 1 and 10 left open. No threshold, no decisive bound, no metric and no decision rule changed. | Records a result rather than a plan, in the form of section 2.3. | **Yes.** Written after the row was run, on 2026-11-27, before the deposit, and disclosed as such. The row reads the Neftel 2019 atlas, not a cohort; no CGGA or TCGA data was read for it. |
 | 2026-11-27 | 5 (data in hand; data not yet obtained; analyses already run; the last sentence of "Models fitted") | Section 5 said no single-cell data had been ingested, that the single-cell reference atlases had not been obtained, and that the registration was written before any confirmatory evaluation other than T2. It now records that the Neftel 2019 atlas was obtained on 2026-11-27 for T1's deconvolution row, and that this row was evaluated before the deposit (section 2.4). | The section exists so that what is in hand at deposit is stated; it had become out of date. | **Yes.** Written after T1's deconvolution row was run (section 2.4). No CGGA data was read. |
 | 2026-11-27 | 4.5 (`cgga_external_v1` row); 5 (data not yet obtained) | Sealed the external partition as section 2.2 item 7 registers: an all-test manifest over the 218 CGGA patients eligible by its rule (an RNA-seq profile, a survival outcome, a usable identifier), after the T2 evaluation and before any T4 or T5 computation. The row now gives n, split, seed and seal date, and the SHA-256 of the manifest and of the eligibility table. No threshold, decisive bound, decision rule or eligibility rule changed; the count equals the one registered in advance from identifiers (218). | Item 7 orders the seal after T2 and before T4 and T5; the registration must name the sealed partition. | **Yes.** CGGA had been read twice for T2 before this entry. The seal itself read identifiers, the batch label, the presence of a survival time and vital status, and the column names of the expression matrix: an availability access, recorded in the access ledger (entry 11). No value was inspected. |
+| 2026-11-27 | 2.2 item 2 (completed) | Replaced "TO BE COMPLETED BY AUTHOR: the specific 2024 baseline model" with a rule for choosing the comparator: eligibility criteria E1 to E6, one PubMed search with a fixed query, the log to be committed and attached, our side of the comparison (the transferable model, variant 2), the partition (`cgga_external_v1`) and the paired bootstrap. If no model is eligible the threshold is NOT EVALUABLE and CGGA is not read for it; if one is, it is named by a further amendment before the deposit, with exactly one added read. No threshold, decisive bound or decision rule changed. | The protocol names no baseline. A comparator picked by hand cannot show that a stronger one was not passed over, and many 2024 signatures were fitted on the CGGA batches the partition is made of (`docs/t2_comparator_shortlist.md`). Fixed before the search is run. | **Yes.** CGGA had been read twice for T2 before this entry. No comparator has been run, and the registered search had not been run when this entry was committed. Four candidates had been read in a preliminary, unregistered search (`docs/t2_comparator_shortlist.md` section 4). |
+| 2026-11-27 | 2.2 item 9(d) (classifier named) | Named the classifier that item 9(d) called "the RNA-seq-trained classifier": single-sample nearest centroid (Pearson) over the 831 resolved genes of the Verhaak 840-gene signature, against the frozen centroid set `verhaak840_tcga_all` (246 labelled TCGA patients, SHA-256 recorded), with a fixed tie order, no tuning and no other candidate; and the microarray input rules (exact symbol match, duplicate symbols averaged, log2 scale decided from the source's documentation before any value is read). The harmonisation rule itself is unchanged. | Decided in stage 3b (project record decision D6) on principle: a sample's call must not depend on the other samples scored. A classifier chosen after the deposit would be a post-hoc choice. | **No.** The CGGA microarray expression matrix has not been downloaded. The centroids were estimated on TCGA only; their agreement with TCGA labels was examined descriptively (section 5). CGGA had been read twice for T2 before this entry. |
+| 2026-11-27 | 5 ("Models fitted"; "Analyses already run") | "Models fitted" still said `cgga_external_v1` did not exist; it now gives the seal date, and that the T1 centroid set was estimated on all labelled TCGA patients, the v2 test split included. "Analyses already run" listed four TCGA analyses; it now also lists the four of stage 3b: the two centroid sets, the single-sample subtype calls with their descriptive agreement check (56 of 76 v2-test patients), the scoring-set dependence measurement, and the feature-store build. | The section exists so that what was done before the deposit is stated; both passages had become out of date. Found while preparing `docs/deposit_checklist.md`. | **No.** No data was read. CGGA had been read twice for T2, and once for the seal's availability check, before this entry. |
 
 ---
 

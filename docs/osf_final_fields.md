@@ -88,7 +88,9 @@ checksum.
 Cross-platform harmonisation for T1 (fixed before the microarray matrix is downloaded).
 Each sample's expression vector is z-scored across genes (for that sample alone, mean 0 and
 variance 1 over its genes), and the RNA-seq-trained classifier is applied to the z-scored
-vector. There is no shared reference and no cross-platform batch correction, and nothing in
+vector. The classifier is single-sample nearest centroid (Pearson correlation) over the
+Verhaak 840-gene signature, against centroids frozen from 246 labelled TCGA RNA-seq
+patients and identified by SHA-256; nothing is tuned and no other candidate is evaluated. There is no shared reference and no cross-platform batch correction, and nothing in
 the rule depends on the external data beyond the sample being scored. This is a project
 choice, not the normalisation of Verhaak et al. (2010), who standardised each gene across
 patients within each platform.
@@ -252,9 +254,11 @@ STOPPING RULES
 7. Ties. If more than 20 of the 50 T4 patients are tied, the p-value is still
    reported but the regret criterion is INCONCLUSIVE whatever its value, and patients
    are not dropped and re-run to remove the tie.
-8. Comparator unavailable. T2's improvement-over-baseline criterion is NOT EVALUABLE
-   if the comparator cannot be re-run on the identical frozen partition. It is never
-   scored against a number quoted from a paper.
+8. Comparator. T2's improvement-over-baseline comparator is chosen by a registered
+   eligibility rule and one literature search, both fixed before the search was run.
+   If no model is eligible, or the comparator cannot be re-run on the identical frozen
+   partition, the criterion is NOT EVALUABLE. It is never scored against a number
+   quoted from a paper.
 9. External reads. CGGA has been read twice, both for T2 (its C-index row, then its
    Brier row). The only further registered reads of CGGA are T1, T4 and T5. Any other
    analysis of CGGA requires a new pre-registration.
@@ -288,5 +292,8 @@ STOPPING RULES
 - Revised on 2026-11-27 after cgga_external_v1 was sealed: "Data collection
   procedures" and "Sample size" say it is sealed. Upload `data/partitions/cgga_external_v1.json`
   with the two development manifests.
-- Still open: the comparator model in section 2.2 item 2 of the pre-registration is
-  "TO BE COMPLETED BY AUTHOR"; rule 8 governs what happens if it cannot be run.
+- Revised on 2026-11-27: the T1 classifier is named under "Cross-platform harmonisation
+  for T1", and rule 8 now says the T2 comparator is chosen by a registered rule and one
+  search (pre-registration section 2.2 item 2). If the search finds an eligible model,
+  rule 9 must gain one read before the deposit; if it finds none, rule 9 is unchanged.
+  Attach the search log.

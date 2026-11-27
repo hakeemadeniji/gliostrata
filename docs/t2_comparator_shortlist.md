@@ -1,8 +1,9 @@
 # T2 comparator: shortlist and the decision it needs
 
-Status: **prepared 2026-11-27 for the project lead. Nothing here is registered.** It fills
-no "TO BE COMPLETED BY AUTHOR" field. Pre-registration section 2.2 item 2 stays open until
-the lead decides, and the decision is then entered there as a dated amendment (section 8).
+Status: **prepared 2026-11-27 for the project lead; path C chosen the same day and
+registered** in pre-registration section 2.2 item 2, as a dated amendment (section 8),
+before the search was run. The registered text, not this document, is authoritative: it
+differs from section 5 below only in wording.
 
 No CGGA file was opened for this document, and no model was run. The candidates were
 judged on what their papers say.
