@@ -412,3 +412,40 @@ def freeze_partition_cmd(ctx: click.Context, in_path: str, manifest_path: str,
         for stratum, row in sorted(manifest.stratum_balance.items()):
             click.echo(f"    {stratum:<20} n={row['n']:<6} test={row['n_test']:<6} "
                        f"({row['test_fraction']:.3f})")
+
+
+# ---------------------------------------------------------------------------
+# Access ledger. Appended, like freeze-partition above, as a pure append.
+# ---------------------------------------------------------------------------
+
+
+@cli.command("access-ledger")
+@click.option("--ledger", "ledger_path", default=None, type=click.Path(exists=True),
+              help="Ledger file to print. Defaults to data/access_ledger.jsonl.")
+def access_ledger_cmd(ledger_path: str | None) -> None:
+    """Print every recorded access to the held-out cohort.
+
+    The ledger (data/access_ledger.jsonl) is append-only and version-controlled.
+    Every access is in it: schema looks, dry runs, checksum-only accesses and
+    value reads. Run this before any evaluation on the external cohort.
+
+    A read that inspects values is refused by gliostrata.evaluation.read_guard
+    until the registration is deposited and, where one applies, the partition
+    is sealed. Verify a partition with:
+
+        gliostrata freeze-partition --input COHORT --manifest M.json --verify
+    """
+    from gliostrata.evaluation.read_guard import (
+        LEDGER_PATH,
+        format_ledger,
+        is_deposited,
+        load_ledger,
+        registration_state,
+    )
+
+    click.echo(format_ledger(load_ledger(ledger_path or LEDGER_PATH)))
+    state = registration_state()
+    if is_deposited(state):
+        click.echo(f"Registration: deposited, DOI {state['osf_registration_doi']}.")
+    else:
+        click.echo("Registration: NOT deposited. A read that inspects values is refused.")

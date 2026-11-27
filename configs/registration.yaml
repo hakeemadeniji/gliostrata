@@ -1,0 +1,14 @@
+# Machine-readable registration state, read by gliostrata.evaluation.read_guard.
+#
+# The pre-registration (docs/preregistration.md) is DRAFTED and NOT DEPOSITED.
+# Until the OSF deposit is made, osf_registration_doi stays null, and the read
+# guard refuses every access to the held-out cohort that inspects values.
+#
+# At deposit, fill in all three fields and the pre-registration header in the
+# same commit. Never enter a placeholder DOI: only a DOI-shaped value opens the
+# registration gate. tests/test_read_guard.py checks that this file and the
+# pre-registration header agree.
+
+osf_registration_doi: null      # e.g. "10.17605/OSF.IO/<id>" once deposited
+deposited_at: null              # ISO-8601 date of the deposit
+registered_commit: null         # full git commit SHA registered with the deposit

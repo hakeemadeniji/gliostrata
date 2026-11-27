@@ -3,9 +3,10 @@ name: CI
 # No job in this workflow may reach the GDC or CGGA. The test suite was
 # verified to pass with all outbound sockets blocked (tests load scripts/ by
 # path and drive them with synthetic fixtures). The tests that read the real
-# TCGA or CGGA data are guarded by `skipif` / `skip` conditions on files under
+# TCGA data are guarded by `skipif` / `skip` conditions on files under
 # data/raw/ and data/processed/ — both are gitignored, so they skip in CI by
-# construction.
+# construction. No test reads CGGA: every CGGA-shaped cohort in the suite is
+# synthetic.
 #
 # The workflow pipeline job runs with `--config source=synthetic`, which is the
 # only L0 entry point that does not touch the network.
@@ -94,13 +95,15 @@ jobs:
       - name: Install package
         run: pip install -e .
 
-      - name: Verify the current partition manifest reproduces
+      - name: Verify every active partition manifest reproduces
         env:
-          # The CURRENT partition. v1 (583 patients) is a superseded historical
-          # record of the pre-filter-revision cohort, kept unmodified and
-          # deliberately NOT re-frozen. It is still integrity-checked below,
-          # but only v2 is verified against the live cohort.
-          CURRENT_MANIFEST: data/partitions/tcga_gbm_clinical_v2.json
+          # Every manifest that is NOT superseded, space-separated. A new sealed
+          # manifest (the external partition, once it is created) is added here
+          # in the same commit that adds it; a manifest not listed here is
+          # integrity-checked and labelled superseded. v1 (583 patients) is a
+          # superseded historical record of the pre-filter-revision cohort,
+          # kept unmodified and deliberately NOT re-frozen.
+          ACTIVE_MANIFESTS: data/partitions/tcga_gbm_clinical_v2.json
         # A sealed train/test split is a pre-registration commitment: the split
         # is a pure function of (seed, patient_id), so it must keep reproducing
         # as the cohort is re-ingested. If a patient moves between train and
@@ -123,17 +126,18 @@ jobs:
 
           from gliostrata.evaluation import assign_split, read_manifest, sha256_over_ids
 
-          current = Path(os.environ["CURRENT_MANIFEST"])
+          active = [Path(p) for p in os.environ["ACTIVE_MANIFESTS"].split()]
           manifests = sorted(Path("data/partitions").glob("*.json"))
           if not manifests:
               sys.exit("No partition manifests found in data/partitions/.")
-          if current not in manifests:
-              sys.exit(f"CURRENT_MANIFEST {current} is not in data/partitions/.")
+          for path in active:
+              if not path.is_file():
+                  sys.exit(f"ACTIVE_MANIFESTS lists {path}, which does not exist.")
 
           failures = []
           for path in manifests:
               m = read_manifest(path)
-              role = "CURRENT" if path == current else "superseded (historical record)"
+              role = "ACTIVE" if path in active else "superseded (historical record)"
               print(f"\n=== {path}  [{role}] ===")
               print(f"  partition    : {m.partition_name}")
               print(f"  sealed       : {m.sealed}")
@@ -181,7 +185,7 @@ jobs:
                   )
 
               cohort = Path(m.cohort_source)
-              if path != current:
+              if path not in active:
                   print(
                       "  cohort       : not checked -- superseded manifests are frozen "
                       "history and are EXPECTED to drift from the current cohort"
@@ -202,20 +206,22 @@ jobs:
           print("\nAll partition manifests verified.")
           PY
 
-      - name: Full cohort verification of the current manifest
-        # Only the CURRENT manifest, and only when the cohort parquet happens to
-        # be in the checkout (it is gitignored, so normally it is not). Running
+      - name: Full cohort verification of the active manifests
+        # Only ACTIVE manifests, and only when the cohort parquet happens to be
+        # in the checkout (it is gitignored, so normally it is not). Running
         # this over every manifest would fail on the superseded v1 by design.
         env:
-          CURRENT_MANIFEST: data/partitions/tcga_gbm_clinical_v2.json
+          ACTIVE_MANIFESTS: data/partitions/tcga_gbm_clinical_v2.json
         run: |
-          cohort=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['cohort_source'])" "$CURRENT_MANIFEST")
-          if [ -f "$cohort" ]; then
-            echo "Verifying $CURRENT_MANIFEST against $cohort"
-            gliostrata freeze-partition --input "$cohort" --manifest "$CURRENT_MANIFEST" --verify
-          else
-            echo "Skipping: cohort $cohort is not present in this checkout (data/raw/** is gitignored)."
-          fi
+          for manifest in $ACTIVE_MANIFESTS; do
+            cohort=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['cohort_source'])" "$manifest")
+            if [ -f "$cohort" ]; then
+              echo "Verifying $manifest against $cohort"
+              gliostrata freeze-partition --input "$cohort" --manifest "$manifest" --verify
+            else
+              echo "Skipping: cohort $cohort is not present in this checkout (data/raw/** is gitignored)."
+            fi
+          done
 
   workflow-dry-run:
     name: Snakemake DAG + offline fixture pipeline
