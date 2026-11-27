@@ -1,5 +1,7 @@
 # GlioStrata project record
 
+> **Commit hashes.** The commits on `master` were rewritten on 2026-11-27 to the project email before the first push. Hashes in this record are the old ones; resolve them with [commit_map.md](commit_map.md). Trees, dates and messages are unchanged.
+
 **As of 2026-11-26.** This folder is a complete, self-contained record of what the
 GlioStrata project is, what it has done, what it has found, and what remains. It is
 written for two readers: the project lead, and a researcher who has not seen the
