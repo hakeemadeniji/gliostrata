@@ -42,6 +42,11 @@ COMMITTED = [
     "data/provenance/neftel2019_sources.json",
     "data/access_ledger.jsonl",
     "docs/project_record/commit_map.md",
+    "docs/osf_study_design_fields.md",
+    "docs/osf_supplements/measured_variables.md",
+    "docs/osf_supplements/indices.md",
+    "docs/osf_supplements/statistical_models.md",
+    "docs/dry_runs/t2_improvement_row_dry_run.json",
 ]
 #: Git-ignored results the registration cites, with their recorded SHA-256.
 RESULTS = {
@@ -80,8 +85,22 @@ def main(argv=None) -> None:
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dst)
         lines.append(f"{digest}  {rel}{'  (git-ignored result; checksum as recorded)' if expected else ''}")
+    # The three field PDFs, rendered from the committed supplements.
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("render_osf_pdfs",
+                                                  Path(__file__).with_name("render_osf_pdfs.py"))
+    render = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(render)
+    pdf_dir = args.out / "osf_field_uploads"
+    pdf_dir.mkdir(parents=True, exist_ok=True)
+    lines.append("")
+    for src, name in render.DOCS.items():
+        render.render(Path(src), pdf_dir / name)
+        lines.append(f"{_sha(pdf_dir / name)}  osf_field_uploads/{name}  (rendered from {src})")
     (args.out / "MANIFEST.txt").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
-    print(f"{len(COMMITTED) + len(RESULTS)} files -> {args.out} (commit {commit[:12]})")
+    print(f"{len(COMMITTED) + len(RESULTS)} files and {len(render.DOCS)} PDFs -> {args.out} "
+          f"(commit {commit[:12]})")
 
 
 if __name__ == "__main__":

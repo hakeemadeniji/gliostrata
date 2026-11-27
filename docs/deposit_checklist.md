@@ -55,21 +55,17 @@ Pre-registration sections are cited as "§". "OSF rule n" is a stopping rule in
 
 ## 5. The OSF form (you)
 
-1. Re-paste the four Sampling fields from `docs/osf_final_fields.md`, after step 2.3. The
-   copy on the form predates the latest corrections.
-2. Check that the other OSF sections (hypotheses, design, analysis plan) match the
-   pre-registration at the registered commit. `docs/osf_final_fields.md` covers Sampling
-   only.
-3. Upload the attachments:
-   - `docs/preregistration.md` (the registered commit's copy)
-   - `src/gliostrata/evaluation/thresholds.py`
-   - `data/partitions/tcga_gbm_clinical_v1.json`, `tcga_gbm_clinical_v2.json` and
-     `cgga_external_v1.json` (the last one subject to 3.2)
-   - `docs/cgga_validation.md`
-   - `docs/t1_deconvolution_spec.md`
-   - the result files of 2.4
-   - from path C: the comparator search log
-4. Deposit. Note the DOI and the date.
+1. Paste the four Sampling fields from `docs/osf_final_fields.md`.
+2. Paste the design, variables and analysis fields from `docs/osf_study_design_fields.md`.
+3. Upload the bundle built by `scripts/osf_bundle.py`:
+   - the three PDFs in `osf_field_uploads/` go into the Measured variables, Indices and
+     Statistical models upload fields;
+   - every other file goes under Data collection procedures, as listed in
+     `MANIFEST.txt`.
+4. On the code fields, give the repository URL and the full SHA of `prereg-deposit`, which
+   is in `MANIFEST.txt`.
+5. Confirm the last line of pre-registration section 5, then deposit. Note the DOI and the
+   date.
 
 ## 6. Recording the deposit, in one commit (I can do this once you send the DOI)
 
