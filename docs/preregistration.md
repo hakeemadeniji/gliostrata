@@ -9,10 +9,8 @@
 > **TO BE COMPLETED BY AUTHOR: OSF registration DOI** (insert once the registration is
 > created; do not fabricate a placeholder DOI).
 > **TO BE COMPLETED BY AUTHOR: date of OSF deposit (ISO-8601).**
-> **TO BE COMPLETED BY AUTHOR: author name(s), ORCID(s) and affiliation(s).**
-> **TO BE COMPLETED BY AUTHOR: thesis committee / supervisor name(s).**
-> **TO BE COMPLETED BY AUTHOR: planned start date of the confirmatory (frozen-test)
-> analysis phase.**
+> Both are entered after the deposit, in one commit, together with `configs/registration.yaml`.
+> Every other header field below is complete.
 
 | Field | Value |
 | --- | --- |
@@ -20,12 +18,14 @@
 | Registration type | Pre-registration of a confirmatory computational analysis (secondary analysis of existing public data) |
 | OSF registration DOI | TO BE COMPLETED BY AUTHOR: OSF DOI |
 | Date of registration | TO BE COMPLETED BY AUTHOR: ISO-8601 date |
-| Authors | TO BE COMPLETED BY AUTHOR: names, ORCIDs, affiliations |
-| Code repository | `https://github.com/` TO BE COMPLETED BY AUTHOR: repository URL |
-| Code commit registered | TO BE COMPLETED BY AUTHOR: git commit SHA of the deposited analysis code |
+| Authors | Hakeem Adeniji (sole author). MS Health Informatics student, Boston University; MS Psychology, Arizona State University; independent researcher. ORCID: not provided |
+| Thesis committee / supervisor | Not yet appointed. Named by a dated amendment (section 8) when appointed |
+| Planned start of the confirmatory phase | Immediately after the deposit. The first registered read (T2's improvement row, section 2.2 item 2 (j)) runs once the DOI is recorded in `configs/registration.yaml` |
+| Code repository | `https://github.com/hakeemadeniji/gliostrata` (made public at the deposit) |
+| Code commit registered | The commit tagged `prereg-deposit` in the repository. Its full SHA is entered on the OSF form and recorded in `configs/registration.yaml` (`registered_commit`) after the deposit; a document cannot contain its own commit's hash |
 | Threshold table checksum | `96bbcd49dcda20f8a0bc9c8b71427aaa24cf754dc6d8d7b4f7d6a2df3d2874ab` (SHA-256 over `gliostrata.evaluation.thresholds`) |
-| IRB status | Exempt — secondary analysis of existing, de-identified, public data (TCGA, CGGA, GLASS, CPTAC, published single-cell atlases) |
-| Funding / conflicts | TO BE COMPLETED BY AUTHOR: funding sources and conflict-of-interest statement |
+| IRB status | Exempt — secondary analysis of existing, de-identified, public data (TCGA, CGGA, CPTAC, published single-cell atlases) |
+| Funding / conflicts | None. No external funding; no conflicts of interest |
 
 ---
 
@@ -737,7 +737,12 @@ row: the Neftel 2019 atlas, as the Smart-seq2 expression matrix of GEO GSE131928
 GSM3828672; 7,930 cells from 28 tumours) and the per-cell annotation of the Curated
 Cancer Cell Atlas release of the same data (`data/provenance/neftel2019_sources.json`).
 The second cohort is CGGA: 305 unique patients in 333 rows, characterised at schema level
-and then read twice for T2 (section 2.3).
+and then read twice for T2 (section 2.3). Since then it has been accessed only without
+reading values, and every access is recorded in `data/access_ledger.jsonl`:
+- the seal's availability check (entry 11);
+- the download of CGGA's RSEM FPKM release for T2's comparator, which is in hand and has
+  been opened for gene names and sample ids only (entries 13 and 16);
+- the gene names of the counts matrix (entry 17).
 
 **Data not yet obtained.** CGGA has been downloaded and read twice for the T2 evaluation
 (C-index row, then Brier row); no reads beyond the registered T1, T4 and T5, and the one
@@ -771,7 +776,10 @@ patients (56 of 76, 0.737; most of those labels come from another classifier, so
 not a validation); a measurement of how far cohort-relative subtype and state scores move
 when the scoring set changes; and the build of the feature store over all 594 patients,
 whose state and TME scores are cohort-relative over the 283 profiled patients, 82 v2-test
-patients among them. The
+patients among them. One more TCGA analysis followed, for option B of T2's comparator
+(section 2.2 item 2 (j)): 23 published gene sets, each refitted and scored by 5-fold
+cross-validation on the 200 v2-training patients with RNA-seq, then the chosen set
+refitted on 282 patients. The
 partition demonstration quoted in §4.1 used patient identifiers and split assignments only
 — no outcome variable was examined in connection with any split.
 
@@ -871,6 +879,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.2 item 2 (j) (option B's choice recorded) | Ran option B's registered choice before the deposit and recorded the result. 33 candidate gene sets were fixed and committed before any fit. R2 removed 10, read from CGGA gene names only (ledger entry 17). 23 were cross-validated on the v2 training split, and the best was the primary comparator's own 7 genes (C-index 0.615). The refitted model is frozen with its checksum. No threshold, bound or rule changed. | Item 2 (h) requires the chosen gene set to be named before the deposit. | **Yes.** As for the previous entry, plus the gene-name availability access of ledger entry 17. No CGGA expression value, clinical field or outcome has been read for this row. |
 | 2026-11-27 | 4.5 (no text changed; storage of the three manifests) | The SHA-256 values in section 4.5 are of the manifests as written, with CRLF line endings. Git had stored them with LF line endings, so a checkout outside Windows produced different bytes and failed to reproduce the registered checksums, although the content was identical. The manifests are now marked byte-exact in `.gitattributes` and stored as written. No partition, id, seed or checksum changed. | A registered checksum must reproduce on any platform. Found while preparing the deposit (`docs/deposit_checklist.md` item 2.5); approved by the project lead. | **Yes**, as for the entries above. No data was read for this entry. |
 | 2026-11-27 | 2.3 (decisions on T2's open items); 3.3 (GLASS removed); 3.4, 3.5 (as applied to T2); 4.5 (`glass_external_v1` row) | Wrote down five decisions that follow from registered text: the evaluation unit is the patient; T2 is FAIL on its C-index and Brier rows, and section 7's fallback applies; the two pre-seal reads are the reads of record, and T2 is not re-run; the KPS model is NOT EVALUABLE on CGGA; calibration and decision-curve analyses are not run for T2. GLASS is removed from section 3.3: no registered verdict needs it, because T2 is not re-run. No threshold, decisive bound, decision rule or partition changed. | These items were open in `docs/cgga_validation.md` sections 11 and 12.5 and `docs/deposit_checklist.md` items 1.3 to 1.5; a registration must not leave them implicit. | **Yes.** Written after CGGA had been read for T2. No data was read for this entry. |
+| 2026-11-27 | Header; 5 (data in hand; analyses already run) | Completed the header: the author and affiliations, a committee not yet appointed, no funding and no conflicts, the start of the confirmatory phase immediately after the deposit, the repository URL, and the registered commit as the tag `prereg-deposit`. Only the DOI and the deposit date remain, and they exist only after the deposit. GLASS was removed from the IRB data list. Section 5 now lists the CGGA accesses that read no values (ledger entries 11, 13, 16, 17) and the TCGA cross-validation of option B. No threshold, bound or rule changed. | The deposit needs a complete header, and section 5 must be true at the moment of deposit. | **Yes**, as for the entries above. No data was read for this entry. |
 
 ---
 

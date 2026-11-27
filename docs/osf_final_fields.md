@@ -4,9 +4,10 @@ Paste-ready text for the four fields of the OSF "Sampling" section. It matches
 `docs/preregistration.md` as of the commit that adds this file. Where the two
 differ, the pre-registration is authoritative and this file is wrong.
 
-No placeholders remain in the four fields. The items still marked "TO BE
-COMPLETED BY AUTHOR" are all in the pre-registration's header (deposit DOI,
-date, authors, repository URL, registered commit) and must be filled at deposit.
+No placeholders remain in the four fields. The pre-registration's header is complete
+except the OSF DOI and the deposit date, which exist only after the deposit. On the OSF
+form, give the repository `https://github.com/hakeemadeniji/gliostrata` and the full SHA
+of the commit tagged `prereg-deposit` (listed in the bundle's MANIFEST.txt).
 
 ## Data collection procedures
 

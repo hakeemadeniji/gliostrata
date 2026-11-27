@@ -41,20 +41,17 @@ Pre-registration sections are cited as "§". "OSF rule n" is a stopping rule in
 | 3.3 | **Done 2026-11-27: all five CI jobs green on GitHub** (the floor job's first run found a click 8.1 incompatibility, fixed). **Let CI run once on GitHub.** None of the jobs has run there. `test-floor` (Python 3.10) tests a claim that has never been tested, and may fail. Registering a commit whose CI fails would be awkward to explain. | Should |
 | 3.4 | **Choose the registered commit.** This is the commit that holds the final pre-registration text, after sections 1 and 2, and the code. A document cannot contain its own commit SHA, so the SHA goes on the OSF form and into the post-deposit commit (step 6.1). Tagging it, for example `prereg-deposit`, makes it easy to cite. | **Blocks** |
 
-## 4. Pre-registration header (you)
+## 4. Pre-registration header
 
-The header (lines 9 to 28) lists these fields as TO BE COMPLETED BY AUTHOR:
-
-| Field | When |
-| --- | --- |
-| Authors, ORCIDs, affiliations | Before the registered commit |
-| Thesis committee or supervisor | Before the registered commit |
-| Funding and conflict-of-interest statement | Before the registered commit |
-| Planned start date of the confirmatory analysis phase | Before the registered commit |
-| Code repository URL | Before the registered commit (after 3.1) |
-| Confirm §5 is still accurate (the last "TO BE COMPLETED" line of §5) | At the moment of deposit |
-| Registered commit SHA | After the commit exists; goes on the OSF form and into step 6.1 |
-| OSF DOI; date of deposit | After the deposit (step 6.1) |
+**Done 2026-11-27**, except the two fields that exist only after the deposit:
+- **Author:** Hakeem Adeniji. ORCID not provided.
+- **Committee:** not yet appointed; named by amendment later.
+- **Funding and conflicts:** none.
+- **Confirmatory start:** immediately after the deposit.
+- **Repository URL:** filled in.
+- **Registered commit:** the `prereg-deposit` tag.
+- **Still open:** the OSF DOI and the deposit date (step 6.1). At the moment of deposit,
+  the author also confirms the last line of section 5.
 
 ## 5. The OSF form (you)
 

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deposit readiness (2026-11-27)
+- Pre-registration header complete except the OSF DOI and the deposit date; the registered
+  commit is the tag `prereg-deposit`. Repository: https://github.com/hakeemadeniji/gliostrata
+  (private until the deposit). Author email rewritten before the first push
+  (`docs/project_record/commit_map.md`).
+- CI green on GitHub, the click 8.1 floor included. The sealed manifests are stored
+  byte-exact. T2's open items are decided in pre-registration 2.3; GLASS is not used.
+  `scripts/osf_bundle.py` assembles the OSF attachments.
+
 ### Added — T2 comparator (2026-11-27)
 - The registered comparator search (`docs/t2_comparator_search/`) was run once (549 records,
   dual screening, full-text review). It found one model eligible as first registered:
