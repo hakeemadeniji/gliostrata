@@ -14,6 +14,7 @@ repository before.
 | `03_work_log.md` | Every task run, in order, with its evidence and outcome. |
 | `04_commit_history.md` | All 27 commits on `master`, with the files each one changed, and the uncommitted work. |
 | `05_future_plan.md` | The tests not yet run and what each needs, the steps before the OSF deposit, the implementation strategy per layer, open decisions and known gaps. |
+| `06_evidence_reports.md` | One report per stage: changed files, commands and results, test counts, artifact checksums, external reads, unresolved issues, and whether the next gate is satisfied. |
 
 ## How to read it
 
@@ -46,10 +47,10 @@ repository before.
 7. T1, T3, T4 and T5 have **not been run**. T3's input data have not been obtained.
 8. The supporting analyses are solid: the IDH sensitivity analysis passed its
    pre-specified criterion, and the molecular calling and subtyping ran on real data.
-9. The test suite is 985 tests: 984 pass and 1 is skipped. It passes with all network
+9. The test suite is 1016 tests: 1015 pass and 1 is skipped. It passes with all network
    sockets blocked.
-10. The pre-registration is **drafted but not deposited** on the OSF, and the work since
-    the last commit is **not yet committed**.
+10. The pre-registration is **drafted but not deposited** on the OSF. The work that was
+    uncommitted when this was written is committed (section 4, last table).
 
 ## Three things a reader should know before citing anything here
 
@@ -57,7 +58,8 @@ repository before.
   made, T1 to T5 are exploratory analyses, whatever the repository says.
 - **CGGA has been read twice, both times for T2, and both times before the external
   partition was sealed.** The pre-registration allows one read per registered analysis,
-  and both reads are disclosed in its amendment log.
+  and both reads are disclosed in its amendment log. Every access is listed in
+   `data/access_ledger.jsonl`.
 - **Several layers of the pipeline produce synthetic output.** A "subtype" or "cell-state
   fraction" written by `gliostrata profile` today is derived from the clinical table, not
   measured from expression. `01_project_overview.md` marks every layer.

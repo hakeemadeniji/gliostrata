@@ -52,6 +52,9 @@ and `utils/` are under `src/gliostrata/`.
 
 ## Uncommitted work (at the time of writing)
 
+Committed on 2026-11-26 in commits 28 to 30 (last section of this file). The rest of
+this section is kept as the description of what those commits contain.
+
 Everything in Phases G and H of the work log is in the working tree, not in a commit.
 
 **Measured on 2026-11-26 with `git status` and `git diff --shortstat`.**
@@ -88,3 +91,17 @@ ruff settings), `optimization/bayesian.py` (dead line removed) and
   sees T2's C-index result only.
 - The registered commit hash for the OSF deposit should be taken after these changes are
   committed.
+
+## Commits made after this record was written (2026-11-26)
+
+| # | Hash | Commit message | Files |
+| --- | --- | --- | --- |
+| 28 | `0c20999` | Add the T2 Brier row and the audit corrections to code, tests and packaging | 26: the 22 code, test and packaging files of Phases G and H, plus `scripts/validate_brier_cgga.py` and `tests/test_validate_brier_cgga.py` |
+| 29 | `10cfd93` | Record the T2 Brier outcome and bring the documentation back in line with the code | The 11 documentation and CI files |
+| 30 | `8f79b33` | Add the project record: overview, findings, work log, commit history and future plan | The six files of this record, as written |
+
+The three commits contain the working tree exactly as the audit left it: every diff
+was read before committing, and nothing in it was changed. Commit 28 was checked on
+its own in a throwaway worktree (`test_workflow.py` and `test_cli.py`: 78 passed,
+1 skipped), so the history can be bisected. Later commits are listed in
+`06_evidence_reports.md`.

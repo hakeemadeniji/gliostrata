@@ -110,6 +110,7 @@ succeeded.
 | `src/`, `scripts/`, `tests/`, `configs/` | **git** | Code. |
 | `workflow/`, `dvc.yaml`, `Makefile`, `.github/` | **git** | Pipeline definition. |
 | `data/partitions/*.json` | **git** | Sealed train/test splits. Kilobytes, must be diff-reviewable, must never be regenerated. See §4. |
+| `data/access_ledger.jsonl`, `configs/registration.yaml` | **git** | Every access to the held-out cohort, and the machine-readable registration state. Must be reviewable in a diff. |
 | `data/raw/**` (`clinical_*.parquet`, `expression/*.parquet`) | **DVC candidate — not yet tracked** | Reconstructible from the GDC, but only against *today's* GDC. See §3. |
 | `data/raw/**/_cache/` (1.2 GB of STAR TSVs) | **neither** | Pure download scratch. Excluded in both `.gitignore` and `.dvcignore`. Never track it. |
 | `data/interim/**`, `data/processed/**`, `data/results/**` | **neither (DVC candidate)** | Derived. Cheap to recompute from `data/raw/`. |
@@ -286,8 +287,9 @@ re-freeze it.
 Verified, not assumed. The suite was re-run with `socket.socket.connect`,
 `connect_ex`, `create_connection` and `getaddrinfo` all patched to raise. The
 results were **identical** to the normal run — no test attempted a connection.
-Re-verified 2026-11-26 on the full suite (965 tests: 964 passed, 1 skipped)
-with zero blocked connection attempts.
+Re-verified 2026-11-26 on the full suite (1016 tests: 1015 passed, 1 skipped; the
+Python-level socket entry points replaced before pytest started) with zero blocked
+connection attempts.
 Specifically:
 
 - `tests/test_tcga_download.py` and `tests/test_tcga_expression.py` load
@@ -306,8 +308,8 @@ Specifically:
 
 ### Why the blocking lint set is narrow
 
-The repo currently has ~148 ruff findings under its own config (144 in
-`src`+`tests`, 4 in `scripts`), dominated by the `N803`/`N806` naming rules
+The repo currently has 171 ruff findings under its own config (164 in
+`src`+`tests`, 7 in `scripts`, measured 2026-11-26), dominated by the `N803`/`N806` naming rules
 (argument and variable names) — which is arguable in statistical code
 where `X`, `X_train` and `N` are the conventional names. Making the full set
 blocking today would land a red CI on the first commit and train everyone to
@@ -376,7 +378,7 @@ writes the predictions out.
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite: 985 tests, 984 passing and 1 skipped, with all outbound sockets blocked.
+2. The test suite: 1016 tests, 1015 passing and 1 skipped, with all outbound sockets blocked.
 3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
    methylation calls (real GDC API code with cohort filtering, barcode parsing and
    a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does

@@ -34,12 +34,12 @@ different stages, stated per layer:
 | L5 — Outcome prediction | `gliostrata.prediction.cox` | **Fitted Cox-PH model**, not wired into the pipeline. Neither its external C-index nor its Brier score on CGGA met the registered T2 thresholds (`docs/cgga_validation.md`). `gliostrata.prediction.survival`, which the CLI uses, is a stub. |
 | L6 — Optimizer | `gliostrata.optimization.config_space`, `bayesian` | **Working** (ranked enumeration). `optimization.bayes_opt` adds a Gaussian-process optimizer; the BoTorch backend is TODO. |
 | L7 — Wet-lab handoff | `gliostrata.handoff.protocol` | **Working** (JSON protocol generator) |
-| — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification |
+| — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification, access ledger and read guard |
 
-The test suite has 985 tests in 25 modules: 984 pass and 1 is skipped (it needs Snakemake, an
-optional dependency). Tests that need the real TCGA or CGGA data skip when it is
-absent. Heavy optional dependencies
-Snakemake) are NOT required.
+The test suite has 1016 tests in 26 modules: 1015 pass and 1 is skipped (it needs Snakemake, an
+optional dependency). It passes with all outbound sockets blocked. Tests that need the real
+TCGA data skip when it is absent, and no test reads CGGA. Heavy optional dependencies
+(scanpy, lifelines, botorch, PhysiCell) are NOT required.
 
 ---
 
@@ -106,6 +106,7 @@ pytest
 | `gliostrata optimize --input <path> --out <dir> [--n-top 5] [--seed 42]` | L6 — therapeutic configuration optimization (ranked enumeration). |
 | `gliostrata generate-protocol --input <configs.parquet> --feature-store <fs.parquet> --out <dir>` | L7 — wet-lab handoff protocol generation. |
 | `gliostrata freeze-partition --input <cohort.parquet> --manifest <path.json> [--verify]` | Seal a train/test partition, or verify a sealed one still reproduces. Run `--verify` before every evaluation. |
+| `gliostrata access-ledger` | Print every recorded access to the held-out cohort, and whether the registration is deposited. |
 
 ### End-to-end example (synthetic data)
 
@@ -169,6 +170,7 @@ gliostrata/
 │   │   └── bayes_opt.py           ← Gaussian-process Bayesian optimization
 │   ├── evaluation/                ← pre-registration machinery
 │   │   ├── thresholds.py          ← pre-registered thresholds T1-T5 (checksum-frozen)
+│   │   ├── read_guard.py          ← access ledger and read guard for the held-out cohort
 │   │   └── partitions.py          ← deterministic, sealable partitions
 │   ├── handoff/protocol.py        ← L7: wet-lab protocol document generator
 │   └── utils/                     ← io.py, stats.py
@@ -183,10 +185,11 @@ gliostrata/
 │   ├── cgga_external_eligibility.py  ← patients eligible for the sealed external partition
 │   ├── generate_synthetic_data.py
 │   └── run_full_pipeline.py
-├── tests/                         ← 25 test modules, 985 tests
-├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds)
+├── tests/                         ← 26 test modules, 1016 tests
+├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds; registration.yaml the registration state)
 ├── workflow/                      ← Snakemake workflow (Snakefile + rules/)
 ├── data/partitions/               ← sealed partition manifests (in git)
+├── data/access_ledger.jsonl        ← every access to the held-out cohort (in git, append-only)
 ├── docs/
 │   ├── preregistration.md         ← the OSF pre-registration (not yet deposited)
 │   ├── osf_final_fields.md        ← paste-ready OSF registration text
@@ -316,6 +319,11 @@ Rules that keep the registration meaningful:
   separately named partition.
 - CGGA is the external validation cohort. Do not read it for model or feature
   selection (`scripts/download_cgga.py` says the same).
+- Every access to CGGA is listed in `data/access_ledger.jsonl` (print it with
+  `gliostrata access-ledger`). A script that would inspect values calls
+  `gliostrata.evaluation.read_guard.record_access` first. The guard refuses the read
+  until `configs/registration.yaml` carries the OSF DOI, the partition is sealed (or
+  the scoring set is fixed by registered rule), and the analysis has not been read.
 - Results so far: T2's C-index and Brier criteria are **not met** on CGGA
   (`docs/cgga_validation.md`). The IDH sensitivity analysis is in
   `docs/mgmt_idh_calling.md` §6.3.

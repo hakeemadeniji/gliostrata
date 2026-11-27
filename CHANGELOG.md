@@ -29,6 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a second read of CGGA and not met (0.2617, 95% CI 0.2391 to 0.2829, against 0.25).
 - `docs/project_record/`: a full project record (overview, findings, work log, commit
   history and future plan). Every number in it was cross-checked against its source.
+- Read discipline for the held-out cohort: an append-only access ledger
+  (`data/access_ledger.jsonl`, with every access to CGGA to date back-filled and
+  sourced), a read guard (`evaluation/read_guard.py`) that refuses a value read
+  until the registration is deposited and, where one applies, the partition is
+  sealed and the analysis not already read, and `gliostrata access-ledger` to
+  print the ledger.
+- `configs/registration.yaml`: the machine-readable registration state. The OSF
+  DOI is `null` until the deposit; a test keeps this file and the
+  pre-registration header in agreement.
 
 - L6: Gaussian-process / expected-improvement optimizer
   (`optimization/bayes_opt.py`).
@@ -47,6 +56,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of the roadmap.
 - README, `docs/roadmap.md`, `docs/reproducibility.md` and
   `docs/mgmt_idh_calling.md` brought back in line with the code.
+- CI partition guardrail: a manifest is active because `ACTIVE_MANIFESTS` lists
+  it, not because it is the one manifest that is not v1. A new sealed manifest
+  is added to that list in the commit that adds it, so the external partition
+  will not be mislabelled "superseded".
 
 ### Fixed
 - `test_argmax_matches_input_subtype` computed an argmax and asserted nothing

@@ -357,7 +357,10 @@ the point estimate and the lower bound are both >= 0.65.
 
 ## 9. Record of every access to CGGA
 
-So that every read can be audited rather than taken on trust:
+So that every read can be audited rather than taken on trust. The same record is
+kept in machine-readable form in `data/access_ledger.jsonl` (print it with
+`gliostrata access-ledger`). That ledger, not this table, is the one to update
+for any further access:
 
 | When | What was read | What was computed |
 | --- | --- | --- |
@@ -368,6 +371,7 @@ So that every read can be audited rather than taken on trust:
 | `python scripts/validate_cox_cgga.py` | The cohort file | The three variants, once |
 | `validate_brier_cgga.py --dry-run`, same day, after its tests passed | The cohort file | Availability and evaluable counts only; no fit, no metric |
 | `python scripts/validate_brier_cgga.py`, same day | The cohort file | T2's Brier row: the three variants, once (section 12) |
+| 2026-11-26, baseline review | File bytes of `clinical_cohort`, `clinical_raw`, `counts` and `gene_annotation` | SHA-256 checksums only; nothing deserialised, no value inspected |
 
 Never done: a feature plotted against survival, a univariate hazard ratio, a second
 configuration, a re-run after seeing a number, or any edit to either script after its
@@ -377,6 +381,10 @@ script was not edited between the two reads.
 The counts above are information about CGGA. They were confined to what was needed to fix
 the encoding and the evaluable set, in line with what the ingest itself allows
 (`docs/cgga_ingestion.md`), and none relates a feature to an outcome.
+
+The test suite makes no access to CGGA: every real-data guard in `tests/` points at
+`data/raw/tcga_gbm/` or `data/processed/tcga_gbm/`, and every CGGA-shaped cohort in the
+suite is synthetic (checked against every guard on 2026-11-26).
 
 One disclosure. The dry run folds the unseen-category exclusion into its evaluable total
 without printing it separately, so the 20-patient exclusion in variant 3 was first seen in

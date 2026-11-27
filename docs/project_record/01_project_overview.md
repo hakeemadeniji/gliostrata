@@ -130,7 +130,7 @@ Source: manifests under `data/partitions/`; `docs/reproducibility.md` section 4.
 | Property | Value |
 | --- | --- |
 | Package | `gliostrata` 0.1.0, MIT licence, Python >= 3.10 (developed on 3.14.3) |
-| Test suite | **985 tests in 25 modules: 984 pass, 1 skipped, 0 failed**, with all outbound sockets blocked |
+| Test suite | **1016 tests in 26 modules: 1015 pass, 1 skipped, 0 failed**, with all outbound sockets blocked |
 | The one skip | A Snakemake-dependent workflow test; Snakemake is an optional dependency and was not installed |
 | Real-data tests | Skip when the TCGA or CGGA files are absent; they ran here because the data are present |
 | Blocking lint (`E9,F63,F7,F82`) | Clean across `src`, `tests`, `scripts` |
@@ -152,6 +152,8 @@ added (20 and 3 findings). They follow the naming convention of their sibling fi
 | Author details, DOI, registered commit | **Placeholders.** To be completed at deposit |
 | Comparator model for T2's improvement row | **Placeholder.** "TO BE COMPLETED BY AUTHOR" |
 | Amendments logged | Five dated entries, all 2026-11-26. Four are marked as written after CGGA was read; one (the T1 harmonisation rule) is marked "No" |
+| Machine-readable registration state | `configs/registration.yaml`. The OSF DOI is `null` until the deposit; the read guard reads it |
+| Access ledger | `data/access_ledger.jsonl`. 7 entries; 2 are value reads, both T2 and both before deposit |
 
 Until the deposit is made the project has no pre-registration in the formal sense, and
 T1 to T5 are exploratory. Source: `docs/preregistration.md` header and section 8.

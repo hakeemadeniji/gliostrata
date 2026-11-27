@@ -16,8 +16,8 @@ The order below is a recommendation; the reasons are given so it can be judged.
 
 | Step | Action | Why it comes here |
 | --- | --- | --- |
-| 1 | Review and commit the working tree. Suggested split: code and packaging; documentation; this record. | The registration records a commit hash, so the registered code must be fixed first. |
-| 2 | Fix the partition-drift CI job before any new manifest is committed. | The job treats every manifest other than the development one as "superseded". It would mislabel the external partition when `cgga_external_v1.json` is added. |
+| 1 | **Done, 2026-11-26.** Review and commit the working tree, in the suggested split: code and packaging (`0c20999`); documentation (`10cfd93`); this record (`8f79b33`). | The registration records a commit hash, so the registered code must be fixed first. |
+| 2 | **Done, 2026-11-26.** The partition-drift CI job now lists its active manifests in `ACTIVE_MANIFESTS` (`ci.yml`). Add the external manifest there, in both steps, in the same commit that adds it. | The job treats every manifest other than the development one as "superseded". It would mislabel the external partition when `cgga_external_v1.json` is added. |
 | 3 | Decide the two open T2 items: the comparator model, and whether calibration slope, intercept and decision-curve analysis are run. See section 5.4. | Both change what the registration must say. |
 | 4 | Write the eligibility table, then seal the external partition (commands below). | T4 and T5 cannot start without it. The pre-registration places the seal after the T2 evaluation and before any T4 or T5 computation. |
 | 5 | Commit the manifest and update the `cgga_external_v1` row in pre-registration section 4.5. | The registration must name the sealed partition. |
@@ -44,11 +44,46 @@ commit its checksum.
 `data/results/tcga_gbm/idh_sensitivity_*.json`) are git-ignored, yet the pre-registration
 cites their paths. Upload them to the OSF as results, or commit their checksums.
 
+### 5.1.1 Three things found on 2026-11-26 that bear on T1
+
+All three were found by reading the registered text against the code and the files on
+disk. None changes a number that has been measured.
+
+1. **No classifier matches the registered T1 rule.** Section 2.2 item 9(d) registers
+   "the RNA-seq-trained classifier", applied to each sample alone. The only subtype code
+   in the repository, `profiling/verhaak.py`, describes itself as "signature-based
+   unsupervised scoring, NOT the supervised RF + 1D-CNN ensemble the protocol
+   specifies", because the project holds no subtype labels to train on. And
+   `classify_verhaak` standardises each signature's scores across the samples it is
+   given before taking the argmax, so a sample's label depends on the rest of its batch.
+   Applied to the 108 labelled patients as one batch, it would break the registered
+   property that "nothing in the rule depends on the external data beyond the sample
+   being scored". T1 needs one of two decisions before it can run. Both change the
+   registered text, so both are for the lead:
+   - obtain Verhaak reference labels for the TCGA RNA-seq samples, and predeclare up to
+     three supervised candidates and one tuning round, chosen by cross-validation on
+     TCGA only; or
+   - amend item 9(d) before the deposit to name a per-sample deterministic rule that
+     needs no labels.
+2. **Most of the T1 scoring set lies outside the registered external partition.** The
+   scoring set is the 108 labelled patients of the microarray batch. The registered
+   eligibility for `cgga_external_v1` (item 7) requires an RNA-seq profile, and only 28
+   of the 108 have one, so about 80 T1 patients would be scored outside any sealed
+   partition. The OSF text already says T1's scoring set is "fixed by the registered
+   rules instead", so the procedure is consistent as written. But the `cgga_external_v1`
+   row of section 4.5 calls that partition the "Primary external test for T1, T2, T4 and
+   T5", which is not accurate for T1, and should be corrected before the deposit.
+3. **The microarray expression matrix is not on disk.** `data/raw/cgga/_cache/` holds
+   the clinical archive of `mRNA_array_301` and nothing else from that batch. The other
+   CGGA files came from the portal's open download endpoint, without registration
+   (`docs/cgga_ingestion.md` section 1). Whether the microarray expression file is on
+   the same endpoint, and its exact name and checksum, has not been checked.
+
 ## 5.2 The tests not yet run: what each needs
 
 | Test | Registered rule | Scoring set | What is missing today |
 | --- | --- | --- | --- |
-| T1 subtype accuracy | Exact binomial lower bound >= 0.88, two-sided | 108 CGGA microarray patients with a reference label; below 30 labelled patients it is NOT EVALUABLE | The microarray expression matrix has not been downloaded. The harmonisation rule is fixed. |
+| T1 subtype accuracy | Exact binomial lower bound >= 0.88, two-sided | 108 CGGA microarray patients with a reference label; below 30 labelled patients it is NOT EVALUABLE | The microarray expression matrix has not been downloaded, and no classifier matches the registered rule (section 5.1.1). The harmonisation rule is fixed. |
 | T1 deconvolution | Mean of four per-state Pearson r >= 0.75, CI lower | 100 simulated pseudo-bulk mixtures from the Neftel 2019 atlas | The mixtures have not been simulated. |
 | T2 improvement over baseline | Paired difference in C-index >= 0.03, CI lower | Identical frozen partition for both models | **No comparator model is named.** If none can be re-run, the row is NOT EVALUABLE. |
 | T3 tumour growth | RMSE <= 15% of final volume, CI upper | At least 10 PDX control-arm curves spanning four subtypes | **No qualifying dataset.** Data due 2027-01-15; calibration by 2027-03-01; otherwise NOT EVALUABLE. |
@@ -125,10 +160,19 @@ None of these has been made. Each changes something a document currently says.
 Found in the audit or while writing this record. Listed so that nobody has to rediscover
 them.
 
-- **CI manifest labelling.** The partition-drift job hard-codes which manifest is current
-  and calls every other one "superseded". Fix before committing the external manifest.
+- **CI manifest labelling. Fixed on 2026-11-26.** The partition-drift job used to
+  hard-code which manifest was current and label every other one "superseded". It now
+  takes its active manifests from `ACTIVE_MANIFESTS` in `ci.yml`.
+- **No machine-readable registration state, no single access ledger. Fixed on
+  2026-11-26.** `configs/registration.yaml` (OSF DOI `null` until the deposit) and
+  `data/access_ledger.jsonl` (every access to CGGA, back-filled with its source).
+  `evaluation/read_guard.py` refuses a value read until the registration is deposited,
+  the partition is sealed or the scoring set fixed by rule, and the analysis has not
+  been read. It is a discipline, not a sandbox: a script has to call it. The two T2
+  scripts predate it and do not.
 - **Eligibility table not committed.** `data/processed/**` is git-ignored.
 - **Result files not committed.** `data/results/**` is git-ignored.
+  Their SHA-256 checksums as of 2026-11-26 are recorded in `06_evidence_reports.md`.
 - **Unused declared dependencies.** `python-dotenv`, `tqdm` and `joblib` are declared but
   not imported.
 - **A deferred consolidation.** `prediction/cox.py` carries its own bootstrap routine with

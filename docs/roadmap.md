@@ -27,7 +27,7 @@ Status as of 2026-11-26. Three statuses are used:
 | L6 | `optimization/bayesian.py` | Working | Ranked enumeration |
 | L6 | `optimization/bayes_opt.py` | Implemented, not wired | Gaussian-process surrogate + expected improvement; BoTorch backend TODO |
 | L7 | `handoff/protocol.py` | Working | JSON protocol documents; not bench-executable |
-| — | `evaluation/{thresholds,partitions}.py` | Working | Pre-registered threshold registry, frozen partitions |
+| — | `evaluation/{thresholds,partitions,read_guard}.py` | Working | Pre-registered threshold registry, frozen partitions, access ledger and read guard |
 
 ## Recommended implementation order
 
@@ -49,13 +49,13 @@ Status as of 2026-11-26. Three statuses are used:
 
 ## What the tests cover
 
-985 tests in 25 modules: 984 pass and 1 is skipped without the optional dependencies. They
+1016 tests in 26 modules: 1015 pass and 1 is skipped without the optional dependencies. They
 pass without network access and without heavy dependencies (scanpy, lifelines,
-botorch and PhysiCell are not required). Tests that read the real TCGA or CGGA
-data skip when it is absent; one workflow test skips when Snakemake is not
+botorch and PhysiCell are not required). Tests that read the real TCGA
+data skip when it is absent; no test reads CGGA; one workflow test skips when Snakemake is not
 installed.
 
-- `test_cli.py` — CLI, including `freeze-partition`
+- `test_cli.py` — CLI, including `freeze-partition` and `access-ledger`
 - `test_data.py`, `test_profiling.py`, `test_features.py`, `test_simulation.py`,
   `test_optimization.py` — the synthetic L0→L7 path, including the end-to-end pipeline test
 - `test_evaluation.py` — threshold registry (checksum), partition freeze / verify / drift
@@ -68,5 +68,5 @@ installed.
 - `test_cgga.py`, `test_cgga_eligibility.py` — CGGA ingest and external-partition eligibility
 - `test_join_molecular_calls.py`, `test_idh_sensitivity_cox.py`,
   `test_idh_sensitivity_subtype.py` — molecular joins and the sensitivity analysis
-- `test_export_cibersortx.py`, `test_bayes_opt.py`, `test_stats.py` — export script,
-  GP optimizer, statistics helpers
+- `test_export_cibersortx.py`, `test_bayes_opt.py`, `test_stats.py`, `test_read_guard.py` —
+  export script, GP optimizer, statistics helpers, and the access ledger with its read gates

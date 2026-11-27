@@ -83,7 +83,7 @@ final run.
 | 19:26 | Eligibility listing for the external partition, with a dry run | `scripts/cgga_external_eligibility.py`, 8 tests. A dry run counted 218 eligible patients from identifiers only; the table itself has not been written | `384bdf1` |
 | 19:26 | Final paste-ready text for the four OSF Sampling fields | `docs/osf_final_fields.md` | `a092a16` |
 
-## Phase G. Full project audit and correction (after 19:26; **uncommitted**)
+## Phase G. Full project audit and correction (after 19:26; committed in `0c20999` and `10cfd93`)
 
 A whole-project audit was run in five passes, and everything clearly broken was fixed.
 
@@ -114,7 +114,7 @@ A whole-project audit was run in five passes, and everything clearly broken was 
   pre-registration; the T1 accuracy bounds recomputed as two-sided exact intervals, which
   superseded the one-sided figures in the decision memo.
 
-## Phase H. T2 Brier row and this record (2026-11-26; **uncommitted**)
+## Phase H. T2 Brier row and this record (2026-11-26; committed in `0c20999`, `10cfd93` and `8f79b33`)
 
 | Task | Order of work | Outcome |
 | --- | --- | --- |
@@ -127,6 +127,23 @@ A whole-project audit was run in five passes, and everything clearly broken was 
 script unpacked a four-value result into two names. The synthetic-data tests failed on it,
 it was fixed, and only then was the script run on CGGA.
 
+## Phase I. Secure baseline and read discipline (2026-11-26; after the record was written)
+
+A new session reviewed and committed the work above, then built the read discipline.
+Commands and results are in `06_evidence_reports.md`, stages 1 and 2.
+
+| Task | Method | Outcome | Commit |
+| --- | --- | --- | --- |
+| Review the uncommitted work | Every diff read; secret scan of the diff and the untracked files | Nothing to change: no credential, no patient-level file, no cache, and no change to any threshold, bound, rule or manifest | |
+| Verify before committing | Full suite; blocking lint; partition v2; registry checksum | 984 passed, 1 skipped; lint clean; v2 verified (594, 425 / 169); checksum unchanged | |
+| Commit the working tree | Three commits, in the split the future plan suggested | Code, tests and packaging; documentation; this record | `0c20999`, `10cfd93`, `8f79b33` |
+| Check commit 28 on its own | Throwaway worktree; `test_workflow.py` and `test_cli.py` | 78 passed, 1 skipped; worktree removed | |
+| Checksum the CGGA files | PowerShell `Get-FileHash`; file bytes only | **CGGA access: checksum only.** Four files hashed; nothing deserialised | |
+| Read discipline | Access ledger; read guard; registration state; CLI command; 31 tests | 7 ledger entries, 2 of them value reads. A value read is refused until the registration is deposited and the partition sealed | `324a09b` |
+| CI partition guardrail | `ACTIVE_MANIFESTS` replaces "every manifest but one is superseded" | Run locally in three scenarios; a listed manifest that does not exist stops the job | `324a09b` |
+| Full suite with sockets blocked | Python-level socket entry points replaced before pytest | 1015 passed, 1 skipped; 0 blocked connection attempts | |
+| Documentation | Stale numbers corrected (lint count, test counts); a broken README sentence repaired; T1 findings recorded (section 5.1.1 of the future plan) | Committed after `324a09b` | |
+
 ## Reads of the external cohort, in total
 
 | # | When | What was read | What was computed |
@@ -137,3 +154,7 @@ it was fixed, and only then was the script run on CGGA.
 
 Dry runs before each read printed availability counts only. The CGGA expression values
 have never been read by a model: eligibility was counted from column names.
+
+`data/access_ledger.jsonl` is now the record of every access, including the three in
+this table. Its one later entry, from Phase I, is the checksum-only access. The full
+test suite reads no CGGA file.
