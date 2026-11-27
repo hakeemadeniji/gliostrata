@@ -311,14 +311,20 @@ Found in stage 3b (2026-11-27), not fixed:
   per-cell annotation; `data/provenance/neftel2019_sources.json`) and T1's deconvolution
   row has been run once, before the deposit (`06_evidence_reports.md`, section "T1,
   state-deconvolution row").
-- **The pre-registration and the OSF text now understate the data in hand.**
-  Pre-registration section 5 says the single-cell reference atlases have not been
-  obtained, and `docs/osf_final_fields.md` lists the deconvolution ground truth as still
-  to be obtained. Both need correcting before the deposit, which must also disclose that
-  T1's deconvolution row was run, and passed, before it. Whether to record the result in
-  the pre-registration, as section 2.3 does for T2, is for the project lead. Not edited.
-- **The licences of the atlas inputs are not stated** by GEO or by 3CA (UNVERIFIED);
-  both are cited.
+- **Corrected 2026-11-27: the pre-registration and the OSF text now state the atlas and
+  the result.** Section 5 records the Neftel 2019 atlas as obtained and T1's deconvolution
+  row as evaluated before the deposit; a new section 2.4 records the result in the form of
+  section 2.3; both changes are dated amendments marked as written after the run.
+  `docs/osf_final_fields.md` gives the atlas its own paragraph, the result under "Sample
+  size", and discloses the run as pilot-phase item (c); `docs/t1_deconvolution_spec.md`
+  joins the attachments.
+- **The atlas inputs carry no stated licence.** NCBI places no restriction on use or
+  distribution of GEO data (submitters may claim rights); 3CA states no terms and
+  publishes datasets with the original authors' permission. Recommended, not yet done:
+  keep both files out of any release (download and verify by checksum instead), cite
+  Neftel et al. 2019 and Gavish et al. 2023, and ask 3CA (3CA@weizmann.ac.il) to confirm
+  reuse and whether the Neftel malignant flags and state scores are the original
+  authors' annotations.
 - **`scripts/prepare_subtype_reference.py` needs `openpyxl` and `pyreadr`**, which are in
   neither `pyproject.toml` nor the lock file, to rebuild the published-label table and the gene map from the
   downloads. The committed centroid sets and gene map do not need it.

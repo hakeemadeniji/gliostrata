@@ -1004,14 +1004,18 @@ download), the Human Cell Atlas index (file listing).
 
 **Open issues.**
 
-1. Pre-registration section 5 ("the single-cell reference atlases ... have not been
-   obtained") and `docs/osf_final_fields.md` ("DATA STILL TO BE OBTAINED: Deconvolution
-   ground truth") are now out of date, and the deposit must disclose that this row was
-   run before it. Not edited: a change to the pre-registration waits for the project
-   lead.
-2. Whether to record this result in the pre-registration, as section 2.3 does for T2,
-   is the project lead's decision.
-3. The licences of the GEO series and the 3CA release are not stated by either source.
+1. Closed the same day, at the project lead's request: pre-registration section 5 and
+   `docs/osf_final_fields.md` now record the atlas as obtained and this row as evaluated
+   before the deposit, and the result is recorded in a new pre-registration section 2.4,
+   in the form of section 2.3. Two dated amendments (section 8), both marked as written
+   after the row was run.
+2. (Merged into item 1.)
+3. Neither source states a licence. NCBI's policies say NCBI places no restriction on use
+   or distribution of the data, while submitters may claim rights; 3CA states no terms and
+   publishes datasets with the original authors' permission. Both files are used for
+   analysis only and are not redistributed (`data/provenance/neftel2019_sources.json`,
+   "terms"). A written confirmation from 3CA has been recommended to the project lead and
+   not yet sought.
 4. The store's state and TME scores remain cohort-relative over the 283 profiled
    patients. The secondary above shows the cohort-independent option also recovers
    simulated proportions (0.854); no decision has been taken.

@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before the deposit, so exploratory until it; optimistic by design (malignant cells
   only; the atlas states and the estimator's markers share the Neftel meta-modules).
   Declared secondary (`fraction_method="proportional"`): 0.8541 (0.8358 to 0.8750).
+- Pre-registration: a new section 2.4 records the result (in the form of section 2.3), and
+  section 5 records the atlas as obtained and the row as evaluated before the deposit;
+  two dated amendments. `docs/osf_final_fields.md` updated to match, with the
+  specification added to the attachments. The provenance record gains the verified
+  terms of both sources.
 
 ### Added — pre-registration and the real data layers
 - Pre-registration machinery: checksum-frozen threshold registry

@@ -127,4 +127,5 @@ below and in `06_evidence_reports.md`.
 | 43 | `16b6c09` | Correct the T1 scoring sets in pre-registration sections 3.3 and 4.5 | `docs/preregistration.md` (sections 3.3, 4.5, 8), `CHANGELOG.md`, this record |
 | 44 | `5dadf9b` | Align the T1 scoring rule's wording with pre-registration item 9(d) | `configs/scoring_rules.yaml`, `CHANGELOG.md`, this record |
 | 45 | `f5b9fe6` | Fix the T1 deconvolution mixture specification before any run | `docs/t1_deconvolution_spec.md`, `scripts/t1_deconvolution_mixtures.py`, `tests/test_t1_deconvolution.py`, `data/provenance/neftel2019_sources.json` |
-| 46 | the commit after `f5b9fe6` | Record T1's state-deconvolution row, run before deposit | this record, `CHANGELOG.md`, `docs/reproducibility.md` |
+| 46 | `3bf0094` | Record T1's state-deconvolution row, run before deposit | this record, `CHANGELOG.md`, `docs/reproducibility.md` |
+| 47 | the commit after `3bf0094` | Record T1's deconvolution result in the pre-registration and bring section 5 and the OSF text up to date | `docs/preregistration.md` (sections 2.4, 5, 8), `docs/osf_final_fields.md`, `data/provenance/neftel2019_sources.json`, `CHANGELOG.md`, this record |

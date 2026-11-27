@@ -197,7 +197,8 @@ in `06_evidence_reports.md`, stage 3b.
 | Obtain the atlas | GEO GSM3828672 (Smart-seq2 matrix); the 3CA per-cell annotation, because GEO has no malignant flag or state and the Broad portal refused an anonymous download | Both checksummed; provenance recorded | `f5b9fe6` |
 | Specify before running | `docs/t1_deconvolution_spec.md`; script and 13 tests; independent pre-run review (2 must-fix, 3 should-fix, all applied) | Committed before the run | `f5b9fe6` |
 | Run once | `python scripts/t1_deconvolution_mixtures.py`, 11:40:07Z to 11:40:45Z, exit 0 | Mean per-state r 0.9521 (CI 0.9430 to 0.9589): PASS, run before deposit. Secondary (proportional) 0.8541 | |
-| Record | This record, the changelog, reproducibility | Pre-registration section 5 and the OSF text noted as out of date, not edited | The commit after `f5b9fe6` |
+| Record | This record, the changelog, reproducibility | Pre-registration section 5 and the OSF text noted as out of date, not edited | `3bf0094` |
+| Bring the registration up to date (at the project lead's request) | Pre-registration section 2.4 (the result) and section 5; two dated amendments; the OSF fields; the sources' terms checked (NCBI policies, 3CA methods and contact pages, Europe PMC) | No threshold, bound, metric or rule changed; licence recommendation made to the lead | The commit after `3bf0094` |
 
 ## Reads of the external cohort, in total
 

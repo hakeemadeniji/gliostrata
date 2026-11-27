@@ -14,7 +14,7 @@
     "annotation": {
       "path": "data/external/neftel2019_3ca/Meta-data_Neftel2019_Brain.tar.gz",
       "url": "https://www.dropbox.com/scl/fi/7zz1jyhah1a5teuvipmjc/Meta-data_Neftel2019_Brain.tar.gz?rlkey=jglw4f8t0l4wm2zj9y28ftp4m&dl=1",
-      "source": "Curated Cancer Cell Atlas (3CA), Tirosh lab, Weizmann Institute: https://www.weizmann.ac.il/sites/3CA/brain, entry 'Neftel et al. 2019', 'Download Meta-data'. 3CA is described in Gavish A, et al. Nature 618:598-606 (2023), doi:10.1038/s41586-023-06130-4.",
+      "source": "Curated Cancer Cell Atlas (3CA), Tirosh lab, Weizmann Institute: https://www.weizmann.ac.il/sites/3CA/brain, entry 'Neftel et al. 2019', 'Download Meta-data'. 3CA is described in Gavish A, et al. Hallmarks of transcriptional intratumour heterogeneity across a thousand tumours. Nature 618:598-606 (2023), doi:10.1038/s41586-023-06130-4 (volume and pages confirmed in Europe PMC, 2026-11-27).",
       "bytes": 888416,
       "sha256": "df01ad311ddf152e08c7ebb3c2c6c9fcf22b119f5a4a9744aa0e81a37c7a7b80",
       "members": {
@@ -26,8 +26,11 @@
     }
   },
   "terms": {
-    "geo": "No data licence is attached to the series. NCBI places no restriction on the use or distribution of GEO data; submitters may claim rights. The NCBI disclaimer page could not be read on 2026-11-27 (captcha), so its wording is UNVERIFIED.",
-    "3ca": "The 3CA brain page states no licence and no terms on 2026-11-27. UNVERIFIED. Cite Neftel et al. 2019 and Gavish et al. 2023."
+    "checked": "2026-11-27",
+    "geo": "No licence is attached to the series. NCBI's policies page (https://www.ncbi.nlm.nih.gov/home/about/policies/, 'Molecular Data Usage'), read 2026-11-27: \"NCBI itself places no restrictions on the use or distribution of the data contained therein.\" The same page says submitters or countries of origin may claim patent, copyright or other intellectual property rights in submitted data, and that NCBI does not accept data whose submitter requested restrictions on reuse or redistribution. GEO's own disclaimer and FAQ pages returned a captcha and were not read.",
+    "3ca": "The 3CA site states no licence and no terms of use (home, methods and contact pages read 2026-11-27). Its methods page says datasets are published there only where the original authors gave permission, and that where the authors did not provide cell annotations 3CA inferred them itself; enquiries go to 3CA@weizmann.ac.il. Whether the Neftel 2019 malignant flags and meta-module scores are the original authors' or 3CA's own is not stated for this dataset (the Tirosh lab is an author group of Neftel 2019).",
+    "neftel_2019_data_statement": "Per the PMC copy (PMC6703186), the data are available through the Broad Institute Single Cell Portal and GEO GSE131928. Not read verbatim; UNVERIFIED wording.",
+    "use_in_this_project": "Both files are used for analysis only and are not redistributed: they are git-ignored under data/external/ and the repository commits only their URLs, sizes and SHA-256 (this file). Cite Neftel et al. 2019 and Gavish et al. 2023 (3CA)."
   },
   "not_downloaded": "The 3CA expression archive Data_Neftel2019_Brain.tar.gz (467,866,008 bytes), the GEO 10x matrix, and the GEO RAW tar. Not needed: the GEO Smart-seq2 matrix is the expression input."
 }

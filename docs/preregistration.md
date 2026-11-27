@@ -356,6 +356,62 @@ registered here. Any such analysis would need its own pre-registration, its own 
 hypothesis, and its own decision about whether the remaining CGGA reads are worth
 spending. It is not executed here and its results are not anticipated by this document.
 
+### 2.4 Outcome of T1's state-deconvolution row, recorded before deposit (2026-11-27)
+
+> This subsection is a record of a result, not part of the registered specification. It
+> changes no threshold, no decisive bound and no decision rule. The row was run before
+> this registration was deposited, so the result was known at the deposit and the row is
+> disclosed as run before deposit (section 8). It reads no cohort.
+
+**T1 (state deconvolution Pearson r >= 0.75): evaluated 2026-11-27, PASS, run before
+deposit.** Under the decision rules in section 6 the row is reported as PASS: the lower
+bound of the 95% interval of the registered metric clears the threshold. This is one of
+the eleven pre-registered thresholds in section 2. T1's subtype-accuracy row has not been
+evaluated; T1 as a whole is not reported as met.
+
+**What was measured.** The registered truth (section 2.2 item 10): 100 pseudo-bulk
+mixtures simulated from the Neftel 2019 atlas (GEO GSE131928) with imposed Dirichlet
+mixing weights. Everything the registration left open was fixed in
+`docs/t1_deconvolution_spec.md` and committed (`f5b9fe6`) before the run, with the script
+`scripts/t1_deconvolution_mixtures.py` and its tests: 6,568 malignant Smart-seq2 cells
+(26 tumours) whose per-cell malignant flag and six meta-module scores come from the
+Curated Cancer Cell Atlas release of the same data, each assigned its highest state
+(NPC, OPC, AC, MES, with the two NPC and the two MES sub-modules merged by maximum);
+flat Dirichlet weights; 500 cells per mixture, drawn by state; seed 131928. The
+estimator is the project's own marker-enrichment scorer
+(`gliostrata.profiling.deconvolve.deconvolve_states_expression`, defaults), applied once
+to the 100 mixtures; it is not CIBERSORTx. The metric is the mean of the four per-state
+Pearson r between estimate and imposed weight (item 1); the interval is a percentile
+bootstrap over mixtures, 1000 resamples, seed 42, with the estimates held fixed. The
+verdict was computed by the registry (`T1_state_deconvolution_pearson_r`).
+
+| Metric | Value | 95% CI |
+| --- | --- | --- |
+| Mean of the four per-state r (decides) | **0.9521** | **0.9430 to 0.9589** |
+| NPC-like | 0.9647 | 0.9472 to 0.9768 |
+| OPC-like | 0.9528 | 0.9290 to 0.9682 |
+| AC-like | 0.9204 | 0.8885 to 0.9447 |
+| MES-like | 0.9705 | 0.9574 to 0.9797 |
+| Pooled r over all 400 pairs (descriptive only) | 0.9506 | |
+
+No interval was clipped and no bootstrap resample was dropped. One secondary analysis
+was declared in the specification before the run and is descriptive only: the same
+estimator with its cohort-independent normalisation (`fraction_method="proportional"`)
+gives 0.8541 (95% CI 0.8358 to 0.8750).
+
+**How to read it.** As item 10 registers, this tests recovery of known proportions and is
+optimistic. Specifically: the mixtures contain malignant cells only, with no immune,
+stromal or normal-brain cells; the truth is computed from the same cells; and the atlas
+states and the estimator's marker panels are both drawn from the Neftel meta-modules, so
+part of the agreement is built in. The result says the estimator recovers simulated state
+proportions under these conditions. It does not say how well it estimates state
+composition in a TCGA or CGGA tumour.
+
+**What was not done.** One run, from the committed specification, with no re-run, no
+change of seed, cell count or estimator after the result, and no CIBERSORTx run. Full
+account: `docs/project_record/06_evidence_reports.md`, section "T1, state-deconvolution
+row"; result file `data/results/t1/neftel_mixture_deconvolution.json`.
+
 ---
 
 ## 3. Analysis plan
@@ -548,23 +604,29 @@ survival in months, vital status and treatment arm; 284 bulk RNA-seq samples (ST
 counts and TPM); and MGMT promoter methylation and IDH mutation calls from the GDC, held
 in a separate joined table for 368 patients (IDH), 415 (MGMT) and 314 (both). In the
 clinical file itself the columns for extent of resection, MGMT, IDH, Verhaak subtype and
-the Neftel and TME fractions are **entirely null**. No proteomic, single-cell or imaging
-data has been ingested. The second cohort is CGGA: 305 unique patients in 333 rows,
-characterised at schema level and then read twice for T2 (section 2.3).
+the Neftel and TME fractions are **entirely null**. No proteomic or imaging data has been
+ingested. One single-cell dataset is in hand, obtained 2026-11-27 for T1's deconvolution
+row: the Neftel 2019 atlas, as the Smart-seq2 expression matrix of GEO GSE131928 (sample
+GSM3828672; 7,930 cells from 28 tumours) and the per-cell annotation of the Curated
+Cancer Cell Atlas release of the same data (`data/provenance/neftel2019_sources.json`).
+The second cohort is CGGA: 305 unique patients in 333 rows, characterised at schema level
+and then read twice for T2 (section 2.3).
 
 **Data not yet obtained.** CGGA has been downloaded and read twice for the T2 evaluation
 (C-index row, then Brier row); no reads beyond the registered T1, T4 and T5 will occur
 without a new pre-registration. GLASS has **not** been
-downloaded. CPTAC-GBM, the single-cell reference atlases, TCIA imaging, and the PDX growth
-curves and in vivo NSC tracking data required for T3 have **not** been obtained. Neither has the CGGA microarray expression
-matrix. No
+downloaded. CPTAC-GBM, any single-cell reference atlas other than the Neftel 2019 atlas,
+TCIA imaging, and the PDX growth curves and in vivo NSC tracking data required for T3
+have **not** been obtained. Neither has the CGGA microarray expression matrix. No
 external test partition exists yet; the two external manifests in §4.5 are placeholders.
 
 **Analyses already run.** The repository contains a working but *synthetic-data* pipeline:
 the L4 simulation layer and the L6 optimiser's objective are stubs that operate on
 generated data, exercised by the test suite and a dry-run CLI command. Those runs establish
-that the plumbing executes and produce no result about glioblastoma. Four analyses on real
-TCGA-GBM data have also been run; none is an external result, and no number in this
+that the plumbing executes and produce no result about glioblastoma. One registered row
+has been evaluated on the Neftel 2019 atlas before this deposit: T1's state-deconvolution
+row, on 100 simulated mixtures (section 2.4; PASS, 0.9521, 95% CI 0.9430 to 0.9589).
+Four analyses on real TCGA-GBM data have also been run; none is an external result, and no number in this
 pre-registration is derived from them apart from those in section 2.3: descriptive
 statistics of the clinical cohort (cohort size, age and survival distributions, censoring
 rate); the IDH sensitivity analyses (`scripts/idh_sensitivity_cox.py`,
@@ -583,7 +645,7 @@ each, so
 the 169 patients in the test split of `tcga_gbm_clinical_v2` were in the fit set. The
 sealed external partition `cgga_external_v1` does not exist yet; it is to be created
 before T4 and T5 (section 2.2, item 7). This pre-registration is being written before any
-confirmatory evaluation other than T2.
+confirmatory evaluation other than T2 and T1's state-deconvolution row (section 2.4).
 
 **Prior expectations.** The thresholds in §2 are taken from published external benchmarks,
 not from any GlioStrata result. The protocol's own risk register judges a first-pass
@@ -656,6 +718,8 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.3 (table row 1, the "Where the gap sits" paragraph, section 5 "Models fitted"; wording only) | Stated what variant 1's TCGA fit does with missing data, which the row had shown as a bare 594: 594 passed, 592 modelled; KPS set to the median, 80, for 150, with an indicator (HR 1.57); treatment arm missing for 22 (level, HR 1.20). Scoped "not imputed" to CGGA and to variants 2 and 3. Reframed the two internal contrasts as descriptive: neither carries an interval, and the first bundles three differences (the KPS value, the prognostic missing-KPS indicator, and fit sets of 592 against 570). No threshold, no decisive bound and no decision rule changed. | The independent review of commit `b83f9f7` found the imputation disclosed in one place and contradicted in another, and an attribution drawn from two differences that were never bootstrapped. | **No.** No data was read. CGGA had been read twice for T2 before this entry. |
 | 2026-11-27 | 2.3 (variant 1 internal C-index; note) | The code that computes variant 1's internal C-index imputed KPS with the median of all modelled patients before cross-validation, not the training-fold median its documentation stated. Corrected, and rerun on TCGA only: 0.673544 before and after (95% CI 0.6478 to 0.6994), because every training fold's median KPS is 80; the IDH sensitivity analysis is likewise unchanged (0.665650). The 0.6735 in the table is unchanged. No external number depends on the path: variant 1 is not evaluated on CGGA, and variants 2 and 3 impute nothing. | The review found that the code and its documentation disagreed. | **No.** TCGA only; no CGGA file was read. |
 | 2026-11-27 | 3.3 (first sentence), 4.5 (`cgga_external_v1` role; a note below the table) | Section 4.5 named `cgga_external_v1` the primary external test for T1, T2, T4 and T5, and section 3.3 said final T1 numbers are reported on the frozen external test partitions. Both now say what section 2.2 items 9 and 10 already register: T1's subtype accuracy is scored on the labelled CGGA microarray patients (108 at ingest), fixed by rule and frozen as their own manifest, and T1's deconvolution on 100 mixtures simulated from the Neftel 2019 atlas. `cgga_external_v1` is the primary external test for T2, T4 and T5. No threshold, no decisive bound, no decision rule, no scoring set and no partition changed. | The two sections contradicted items 9 and 10: 80 of the 108 labelled patients have no RNA-seq profile and so fall outside the partition's eligibility (item 7), and the deconvolution row reads no cohort. Found in the stage 3b reconciliation (`docs/project_record/06_evidence_reports.md`, stage 3b, Part A item 2). | **No.** No T1 test data has been read: the CGGA microarray expression matrix has not been downloaded, the Neftel atlas is not on disk, and no T1 computation has been run. CGGA had been read twice for T2 before this entry; the change leaves T2's account as it was. |
+| 2026-11-27 | 2.4 (added) | Recorded the outcome of T1's state-deconvolution row: PASS, mean per-state Pearson r 0.9521 (95% CI 0.9430 to 0.9589) against 0.75, on the 100 registered mixtures. The mixture-generation specification (`docs/t1_deconvolution_spec.md`) was committed before the run (`f5b9fe6`) and fixes only what section 2.2 items 1 and 10 left open. No threshold, no decisive bound, no metric and no decision rule changed. | Records a result rather than a plan, in the form of section 2.3. | **Yes.** Written after the row was run, on 2026-11-27, before the deposit, and disclosed as such. The row reads the Neftel 2019 atlas, not a cohort; no CGGA or TCGA data was read for it. |
+| 2026-11-27 | 5 (data in hand; data not yet obtained; analyses already run; the last sentence of "Models fitted") | Section 5 said no single-cell data had been ingested, that the single-cell reference atlases had not been obtained, and that the registration was written before any confirmatory evaluation other than T2. It now records that the Neftel 2019 atlas was obtained on 2026-11-27 for T1's deconvolution row, and that this row was evaluated before the deposit (section 2.4). | The section exists so that what is in hand at deposit is stated; it had become out of date. | **Yes.** Written after T1's deconvolution row was run (section 2.4). No CGGA data was read. |
 
 ---
 

@@ -51,9 +51,6 @@ DATA STILL TO BE OBTAINED
 - Microarray expression for the 108 CGGA patients who carry a reference Verhaak subtype
   label (batch mRNA_array_301). Only their clinical rows are held so far. The file will be
   stored unopened; the harmonisation rule is fixed in advance (below).
-- Deconvolution ground truth: 100 pseudo-bulk mixtures simulated from the Neftel 2019
-  single-cell atlas (GEO GSE131928; 28 glioblastoma tumours) with imposed Dirichlet random
-  mixing weights.
 - T3 inputs, not yet obtained. PDX growth curves: the candidates are the Mayo Clinic Brain
   Tumor PDX National Resource (not re-checked) and the Alcaniz 2023 panel
   (doi:10.3389/fonc.2023.1129627). A read-only check of the latter found 26 subcutaneous
@@ -66,6 +63,17 @@ DATA STILL TO BE OBTAINED
   request and that the imaging could not resolve local cell migration. Neither source is
   recorded as obtained. A source qualifies as a PDX curve set only if it has longitudinal
   volumes, a control arm, and a subtype call or RNA-seq per model.
+
+SINGLE-CELL REFERENCE: NEFTEL 2019 ATLAS (OBTAINED 2026-11-27; T1 DECONVOLUTION ONLY)
+Source. The Smart-seq2 expression matrix of GEO GSE131928 (sample GSM3828672; 7,930 cells,
+28 IDH-wild-type glioblastomas), and the per-cell malignant flag and six Neftel
+meta-module scores from the Curated Cancer Cell Atlas (Tirosh lab) release of the same
+data, which GEO does not carry. Both files are identified by size and SHA-256.
+Use. 6,568 malignant cells with all six scores (26 tumours), each assigned its highest
+state (NPC, OPC, AC, MES). They are the cells from which T1's 100 pseudo-bulk mixtures
+were simulated, with imposed flat-Dirichlet weights. The mixture-generation rules were
+written down and committed before the mixtures were made. The atlas is not a cohort and
+holds no outcome; no patient is analysed.
 
 PREPARATION COMMON TO BOTH COHORTS
 Fields are mapped to one schema with documented rules: survival converted to months with
@@ -106,14 +114,17 @@ T2 (survival prediction; ALREADY EVALUATED)
   split. External (CGGA): 305 unique patients; 283 evaluable for the three-feature model
   and 241 for the five-feature model that also needs IDH and MGMT calls.
 
-T1 (subtyping and deconvolution; NOT RUN). Two criteria with different units.
+T1 (subtyping NOT RUN; deconvolution RUN BEFORE THE DEPOSIT). Two criteria with different
+units.
   Subtype accuracy: the 108 CGGA microarray patients with a reference Verhaak label (one
     row per patient). Cross-platform. Guard rails fixed in advance: the interval is exact
     binomial; if fewer than 30 labelled patients are available the criterion is NOT
     EVALUABLE. The 28 of these patients who also have RNA-seq are reported descriptively
     only and are not part of the criterion.
-  State deconvolution: 100 simulated pseudo-bulk mixtures. The unit is the mixture, not a
-    patient; the bootstrap resamples mixtures.
+  State deconvolution: 100 simulated pseudo-bulk mixtures of 500 malignant cells each,
+    from the Neftel 2019 atlas. The unit is the mixture, not a patient; the bootstrap
+    resamples mixtures. Evaluated on 2026-11-27, before the deposit: mean per-state
+    Pearson r 0.9521 (95% CI 0.9430 to 0.9589) against 0.75.
 
 T3 (simulation fidelity; NOT RUN). Two criteria, each on its own unit.
   Tumour growth: PDX growth curves. One curve = one PDX model, control arm, mean volume per
@@ -195,8 +206,11 @@ recorded in this registration. Two things happened before the deposit and are
 disclosed: (a) T2 was evaluated on CGGA in two reads (external C-index 0.5385; Brier
 score at 18 months 0.2617), without a sealed external partition, because none existed
 yet; (b) before the first read, CGGA had been characterised at schema level only (row
-counts, missingness, value ranges), with no feature related to any outcome. That
-result changed no threshold. The rules that were still open were fixed before the
+counts, missingness, value ranges), with no feature related to any outcome; (c) T1's
+state-deconvolution criterion was evaluated on 100 mixtures simulated from the Neftel
+2019 atlas (mean per-state r 0.9521, 95% CI 0.9430 to 0.9589, against 0.75), from rules
+committed before the mixtures were made. It reads no cohort. These results changed no
+threshold. The rules that were still open were fixed before the
 deposit and are logged in the pre-registration's amendment log, which marks what was
 written after the T2 read.
 
@@ -208,9 +222,10 @@ cohort partition, that partition is sealed and the verification step reproduces 
 from (seed, patient_id). This is required for T4 and T5; T1's scoring set and T3's
 datasets are fixed by the registered rules instead.
 Order for the external cohort (CGGA): seal the external partition first, then run T4
-and T5. T1 is scored on the CGGA microarray batch, on the 108 labelled patients fixed
-in advance; its harmonisation rule is fixed and was fixed before the matrix is
-downloaded. T3 is calibrated only after its datasets and their counts are entered in
+and T5. T1's subtype criterion is scored on the CGGA microarray batch, on the 108
+labelled patients fixed in advance; its harmonisation rule is fixed and was fixed before
+the matrix is downloaded. T1's deconvolution criterion has already been evaluated (pilot
+phase, item c) and is not re-run. T3 is calibrated only after its datasets and their counts are entered in
 the pre-registration. T2 is reported as already conducted and is not re-run.
 
 STOPPING RULES
@@ -246,7 +261,8 @@ STOPPING RULES
 
 - Attachments for "Data collection procedures - File upload": `docs/preregistration.md`
   (re-upload: it has changed since the first upload), `src/gliostrata/evaluation/thresholds.py`,
-  both development partition manifests, and `docs/cgga_validation.md`.
+  both development partition manifests, `docs/cgga_validation.md`, and
+  `docs/t1_deconvolution_spec.md`.
 - The two-sided bounds above differ from the decision memo's figures, which were
   one-sided. The pre-registration carries the two-sided bounds.
 - The harmonisation rule is the memo's rule. The sentence attributing it to Verhaak et al.
@@ -259,5 +275,11 @@ STOPPING RULES
   on all eligible TCGA patients, held-out test split included. Both are corrected above.
 - T2's Brier-score row was evaluated on 2026-11-26 (a second read of CGGA) and is not
   met: 0.2617, 95% CI 0.2391 to 0.2829, against 0.25. Rule 9 lists it among the reads made.
+- Revised on 2026-11-27 after T1's deconvolution criterion was evaluated before the
+  deposit: the Neftel 2019 atlas moved from "data still to be obtained" to its own
+  paragraph in "Data collection procedures"; "Sample size" gives the result; "Starting
+  and stopping rules" discloses it as pilot-phase item (c). Upload
+  `docs/t1_deconvolution_spec.md` with the other attachments. The pre-registration
+  records the result in section 2.4.
 - Still open: the comparator model in section 2.2 item 2 of the pre-registration is
   "TO BE COMPLETED BY AUTHOR"; rule 8 governs what happens if it cannot be run.
