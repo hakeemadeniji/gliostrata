@@ -1,0 +1,12 @@
+{
+ "what": "Whether CGGA's terms allow republishing its patient identifiers (deposit checklist item 3.2). The committed manifest data/partitions/cgga_external_v1.json lists 218 CGGA sample ids and no clinical or expression value.",
+ "checked": "2026-11-27",
+ "sources_read": {
+  "https://www.cgga.org.cn/download.jsp": "No terms of use or licence stated. Files are downloadable without registration. Each dataset carries a citation request ('If you use this part of the data ..., please consider to cite').",
+  "https://www.cgga.org.cn/index.jsp, /about.jsp": "No terms of use found.",
+  "Zhao Z, et al. Chinese Glioma Genome Atlas (CGGA): A Comprehensive Resource with Functional Genomic Data from Chinese Glioma Patients. Genomics Proteomics Bioinformatics 2021;19(1):1-12. doi:10.1016/j.gpb.2020.10.005 (PMC8498921; CC BY 4.0)": "States 'we have decided to make CGGA publicly available for worldwide researchers'; IRB approval of Beijing Tiantan Hospital; written informed consent from all patients; 'All data referred to in this article can be found online at http://www.cgga.org.cn'."
+ },
+ "finding": "No prohibition on republishing identifiers was found. The ids are CGGA's own pseudonymous sample codes, already published in CGGA's public clinical files. The manifest holds ids only.",
+ "residual": "CGGA states no explicit licence. If a journal or committee asks for written permission, ask CGGA (contact page of cgga.org.cn).",
+ "obligation": "Cite Zhao et al. 2021 (above) wherever CGGA data or the manifest are used."
+}

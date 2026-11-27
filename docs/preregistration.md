@@ -451,6 +451,23 @@ model that can be evaluated, and its improvement-over-baseline row remains uneva
 Full account: `docs/cgga_validation.md` section 12; result file
 `data/results/cgga/brier18_external.json`.
 
+**Decisions on T2's open items (2026-11-27, before the deposit).** Each follows from text
+already registered, and none changes a threshold, bound or rule.
+(1) *Evaluation unit:* the patient, one row per patient (305, not 333 rows), as the
+"Sample size" section states for every test.
+(2) *Status:* the C-index and Brier rows are FAIL for the model that can be evaluated.
+Section 7's fallback applies: the contribution is re-framed as benchmark establishment.
+(3) *The two reads:* they are the reads of record for those two rows. T2 is not re-run on
+`cgga_external_v1`, and the deviation (no sealed partition at the time) stays disclosed
+above.
+(4) *KPS:* the committed four-feature model is NOT EVALUABLE on CGGA, which records no
+performance status. No other cohort is registered for it.
+(5) *Calibration slope and intercept, calibration plots and decision-curve analysis
+(sections 3.4 and 3.5):* not done for T2's evaluation, as decided in
+`docs/cgga_validation.md` section 12.5. They decide no registered row, and each would be a
+further read of CGGA.
+The improvement row is the one T2 read still to come (section 2.2 item 2 (j)).
+
 **Anticipated but not pre-registered.** The T2 result leaves open questions: whether the
 cross-cohort shift of about 0.113 reflects population, treatment era, cohort composition
 or measurement differences; whether a model whose primary features are molecular would
@@ -546,7 +563,7 @@ corrected separately; exploratory results never change a confirmatory verdict.
 ### 3.3 External validation
 
 Final numbers for T2 are reported on the **frozen external test partitions** of CGGA
-(primary external cohort) and GLASS (longitudinal external cohort), never on
+(primary external cohort), never on
 TCGA-derived data. Final numbers for T1 are reported on the scoring sets that section 2.2
 items 9 and 10 register, not on those partitions: for subtype accuracy, the CGGA
 microarray patients that carry a reference Verhaak label, fixed by rule and frozen as
@@ -566,11 +583,17 @@ Hosmer–Lemeshow style goodness-of-fit test adapted for censored survival data.
 that discriminates but is miscalibrated is reported as such, because a miscalibrated model
 cannot support the RMST-gain claims in T5.
 
+*As applied to T2 (2026-11-27):* T2 was evaluated before the deposit, and the analyses of
+this section were decided not to be run on CGGA for this thesis (section 2.3, "Decisions on
+T2's open items", item 5). They apply to any survival model evaluated under a future
+registration.
+
 ### 3.5 Decision-curve analysis
 
 Net benefit is reported across the clinically plausible range of threshold probabilities
 for the survival model, against both treat-all and treat-none strategies, so that the
 result is expressed as clinical utility rather than only as a discrimination statistic.
+*As applied to T2 (2026-11-27):* not run on CGGA for this thesis, as for section 3.4.
 
 ### 3.6 Sensitivity analyses (pre-specified, labelled exploratory)
 
@@ -682,7 +705,7 @@ every patient id. It is produced by the same hash rule as any other partition.
 | `tcga_gbm_clinical_v1` | TCGA-GBM clinical-only | 583 | 419 train / 164 test | 20251126 | **Development.** Internal held-out set for model-selection discipline. **Not** a pre-registered external test. Superseded by `tcga_gbm_clinical_v2`; retained unmodified as the historical record. | Yes (2026-11-26) |
 | `tcga_gbm_clinical_v2` | TCGA-GBM clinical | 594 | 425 train / 169 test | 20251126 | **Development.** Supersedes v1 after the cohort was re-ingested (section 5). Unstratified. | Yes (2026-11-26) |
 | `cgga_external_v1` | CGGA | 218 | 0 train / 218 test (all-test) | 20251126 (changes no assignment when every patient is held out) | **Primary external test for T2, T4 and T5.** It is not the scoring set of either T1 row (see the note below the table). | **Yes (2026-11-27).** Sealed after the T2 evaluation and before any T4 or T5 computation, as item 7 registers, over the 218 patients eligible by its rule (133 in mRNAseq_693, 85 in mRNAseq_325). Manifest `data/partitions/cgga_external_v1.json`, SHA-256 `040ba322d77f1f2cc205993d26c2aab63f28de4c86a8f2cc6bd3c056e8c3829e`; it records the SHA-256 of the identifiers-only eligibility table (`43da219d917870d9d169f20a6d0a474bc59f27fe78e6ddfc6a84cb1fd25ebfad`), which is git-ignored. The eligibility step was an availability access, recorded in the access ledger (entry 11). T2 was read twice before the seal, on the ingested cohort as a whole (commits 7f4bd28 and the Brier row the same day): a disclosed deviation from section 3.3; see section 2.3. |
-| `glass_external_v1` | GLASS | — | — | — | Longitudinal external test | **Not yet created — cohort not downloaded** |
+| `glass_external_v1` | GLASS | — | — | — | Longitudinal external test | **Not created, and not used under this registration** (2026-11-27). T2 is reported as already conducted on CGGA and is not re-run, so no registered verdict needs GLASS. Any analysis of GLASS would need its own pre-registration. |
 
 T1 is scored outside this partition, by registered rule. Its subtype-accuracy row uses the
 CGGA microarray patients that carry a reference Verhaak label (108 at ingest; section 2.2
@@ -724,7 +747,7 @@ downloaded. CPTAC-GBM, any single-cell reference atlas other than the Neftel 201
 TCIA imaging, and the PDX growth curves and in vivo NSC tracking data required for T3
 have **not** been obtained. Neither has the CGGA microarray expression matrix. The
 external partition `cgga_external_v1` was sealed on 2026-11-27 (218 patients, all-test;
-§4.5); the GLASS manifest in §4.5 is a placeholder.
+§4.5); GLASS is not used under this registration (§3.3, §4.5).
 
 **Analyses already run.** The repository contains a working but *synthetic-data* pipeline:
 the L4 simulation layer and the L6 optimiser's objective are stubs that operate on
@@ -847,6 +870,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.2 item 2 (j) added; 5 (data not yet obtained) | Recorded the completed comparator search and named the comparator. 1 of 549 records, PMID 38174685 (Sun and Liu, *Folia Neuropathol* 2024; 7 genes; trained on TCGA log2(FPKM + 1); CGGA used for validation only), meets the rule as first registered. It decides the verdict, applied as published, on CGGA's own RSEM FPKM release (fetched before the deposit, ledger 13; genes and patients checked by name only, ledger 16). Option B's refitted gene set becomes a secondary, descriptive comparison in the same read. One CGGA read is added for this row, after the deposit. No threshold, decisive bound or decision rule changed. | Option B was adopted while 13 records were still unread, on the premise that none was eligible. One of those 13 proved eligible under the rule fixed before the search. The lead chose to restore that rule for the verdict and keep B as secondary. | **Yes.** CGGA had been read twice for T2, once for the seal's availability check, and for the FPKM download (checksum) and its gene-name check (availability) before this entry. No CGGA expression value, clinical field or outcome has been read for this row. |
 | 2026-11-27 | 2.2 item 2 (j) (option B's choice recorded) | Ran option B's registered choice before the deposit and recorded the result. 33 candidate gene sets were fixed and committed before any fit. R2 removed 10, read from CGGA gene names only (ledger entry 17). 23 were cross-validated on the v2 training split, and the best was the primary comparator's own 7 genes (C-index 0.615). The refitted model is frozen with its checksum. No threshold, bound or rule changed. | Item 2 (h) requires the chosen gene set to be named before the deposit. | **Yes.** As for the previous entry, plus the gene-name availability access of ledger entry 17. No CGGA expression value, clinical field or outcome has been read for this row. |
 | 2026-11-27 | 4.5 (no text changed; storage of the three manifests) | The SHA-256 values in section 4.5 are of the manifests as written, with CRLF line endings. Git had stored them with LF line endings, so a checkout outside Windows produced different bytes and failed to reproduce the registered checksums, although the content was identical. The manifests are now marked byte-exact in `.gitattributes` and stored as written. No partition, id, seed or checksum changed. | A registered checksum must reproduce on any platform. Found while preparing the deposit (`docs/deposit_checklist.md` item 2.5); approved by the project lead. | **Yes**, as for the entries above. No data was read for this entry. |
+| 2026-11-27 | 2.3 (decisions on T2's open items); 3.3 (GLASS removed); 3.4, 3.5 (as applied to T2); 4.5 (`glass_external_v1` row) | Wrote down five decisions that follow from registered text: the evaluation unit is the patient; T2 is FAIL on its C-index and Brier rows, and section 7's fallback applies; the two pre-seal reads are the reads of record, and T2 is not re-run; the KPS model is NOT EVALUABLE on CGGA; calibration and decision-curve analyses are not run for T2. GLASS is removed from section 3.3: no registered verdict needs it, because T2 is not re-run. No threshold, decisive bound, decision rule or partition changed. | These items were open in `docs/cgga_validation.md` sections 11 and 12.5 and `docs/deposit_checklist.md` items 1.3 to 1.5; a registration must not leave them implicit. | **Yes.** Written after CGGA had been read for T2. No data was read for this entry. |
 
 ---
 
