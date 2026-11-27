@@ -874,7 +874,8 @@ CGGA. L4 to L7 have not run on real data.
    proposed text was applied on 2026-11-27 at the project lead's request and logged as a
    dated amendment (pre-registration section 8).
 6. `configs/scoring_rules.yaml` says "per-gene z-scored" where rule 9(d) says per sample,
-   across genes.
+   across genes. **Closed after the stage:** the registry now uses 9(d)'s wording
+   (2026-11-27); the rule's id, analyses and manifest fields are unchanged.
 7. Whether `treatment_arm`, which reads only the first diagnosis record, misses
    treatments was not checked.
 8. The Neftel atlas is not on disk; T1's deconvolution row cannot be run.

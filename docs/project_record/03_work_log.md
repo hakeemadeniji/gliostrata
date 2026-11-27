@@ -187,7 +187,8 @@ in `06_evidence_reports.md`, stage 3b.
 | Deconvolution report (C6) | The default state and TME scoring on the 283 | No numerical failure; AC poorly identified; cohort-relative (6 of 50 highest states change when scored alone). Not validation | |
 | Neftel atlas (Part D) | File listing of `data/`; public sources looked up | Not on disk. Stopped; nothing downloaded | |
 | Verify | Full suite with sockets blocked; blocking and advisory lint | 1113 tests: 1112 passed, 1 skipped; 0 blocked connections; no CGGA access. Blocking lint clean; advisory lint 166 | |
-| Correct pre-registration 3.3 and 4.5 (after the stage, at the project lead's request) | The text proposed in Part A item 2, applied; a dated amendment in section 8 | `cgga_external_v1` is the primary external test for T2, T4 and T5; T1 is scored on its own registered scoring sets. No threshold, bound, rule, scoring set or partition changed; threshold-table checksum unchanged | The commit after `b0927de` |
+| Correct pre-registration 3.3 and 4.5 (after the stage, at the project lead's request) | The text proposed in Part A item 2, applied; a dated amendment in section 8 | `cgga_external_v1` is the primary external test for T2, T4 and T5; T1 is scored on its own registered scoring sets. No threshold, bound, rule, scoring set or partition changed; threshold-table checksum unchanged | `16b6c09` |
+| Align the scoring-rule registry with rule 9(d) (after the stage, at the project lead's request) | `configs/scoring_rules.yaml`, the T1 rule's description | "Per-gene z-scored" replaced by 9(d)'s wording: each sample z-scored across its own genes. Rule id, analyses and manifest fields unchanged | The commit after `16b6c09` |
 
 ## Reads of the external cohort, in total
 

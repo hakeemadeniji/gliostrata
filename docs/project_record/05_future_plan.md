@@ -279,9 +279,11 @@ Found in stage 3b (2026-11-27), not fixed:
   the commit that adds the manifest. The guard itself would admit the step: it is an
   `availability` access, and only a `values` access is subject to the deposit and seal
   gates. A script must still call it.
-- **`configs/scoring_rules.yaml` says "per-gene z-scored vector"** for the T1 rule, while
-  pre-registration 2.2 item 9(d) says each sample is z-scored across its genes. The
-  registry wording should be aligned with 9(d).
+- **Corrected on 2026-11-27, after stage 3b: `configs/scoring_rules.yaml` said
+  "per-gene z-scored vector"** for the T1 rule, while pre-registration 2.2 item 9(d) says
+  each sample is z-scored across its genes. The registry now uses 9(d)'s wording. Its
+  rule id, analyses and (null) manifest fields are unchanged, so the read guard's
+  behaviour is unchanged.
 - **`treatment_arm` takes treatments from the first diagnosis record only**
   (`download_tcga_clinical.py`, `flatten_case`). The live GDC lists 136 patients with a
   "Surgery, NOS" record against 39 in the raw file. Whether this changes `treatment_arm`

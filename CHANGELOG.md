@@ -139,6 +139,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   partition: it is the primary external test for T2, T4 and T5, and T1 is scored on the
   scoring sets of section 2.2 items 9 and 10. Logged as a dated amendment (section 8);
   no threshold, bound, rule, scoring set or partition changed.
+- `configs/scoring_rules.yaml`: the T1 rule's description now says what item 9(d)
+  registers (each sample z-scored across its own genes), not "per-gene z-scored". Wording
+  only; the read guard behaves as before.
 - `build_feature_store` takes each input by explicit name and raises on a column
   supplied by more than one input, a null-only column that shadows a computed feature,
   a column its input does not own (an outcome label among them), a stub or

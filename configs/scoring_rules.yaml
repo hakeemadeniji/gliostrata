@@ -31,7 +31,9 @@ rules:
     scoring_set: >-
       The CGGA microarray patients that carry a reference Verhaak label (108
       when the ingest was characterised). The classifier is trained on TCGA
-      RNA-seq and applied to each sample's per-gene z-scored vector (item 9d).
+      RNA-seq and applied to each sample's expression vector z-scored across
+      genes, for that sample alone: mean 0 and variance 1 over its genes, with
+      no shared reference and no cross-platform batch correction (item 9d).
       The 28 labelled RNA-seq patients are reported descriptively and are not
       part of the criterion.
     scoring_set_manifest: null
