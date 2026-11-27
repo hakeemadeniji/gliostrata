@@ -257,7 +257,7 @@ context only; it is not an external result.
 
 | Variant | Features | TCGA fit n | CGGA n | Internal C-index | External C-index | 95% CI | Reported as |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1. Committed baseline | age, sex, KPS, treatment arm | 594 | 0 | 0.6735 | -- | -- | NOT EVALUABLE. CGGA records no performance status, so KPS is missing for every patient. It was not imputed. |
+| 1. Committed baseline | age, sex, KPS, treatment arm | 594 passed, 592 modelled | 0 | 0.6735 | -- | -- | NOT EVALUABLE. CGGA records no performance status, so KPS is missing for every patient. It was not imputed on CGGA. On TCGA the fit imputes: KPS set to the median, 80, for 150 of the 592, with an indicator (HR 1.57); treatment arm missing for 22, coded as its own level (HR 1.20). |
 | 2. Transferable model | age, sex, treatment arm | 570 | 283 | 0.6520 | 0.5385 | 0.4994 to 0.5807 | FAIL |
 | 3. Molecular model (secondary) | age, sex, treatment arm, IDH, MGMT | 298 | 241 | 0.6606 | 0.5915 | 0.5477 to 0.6341 | Below threshold; not directly comparable to variant 2 |
 
@@ -270,12 +270,16 @@ context only; it is not an external result.
   discrimination no better than chance, and equally consistent with weak discrimination.
   This record commits to neither reading.
 
-**Where the shortfall sits.** Removing KPS costs about 0.022 on TCGA (0.6735 to 0.6520;
-the two internal figures come from slightly different fit sets, 592 and 570 patients).
-Moving the same three-feature model from TCGA to CGGA costs a further 0.113 (0.6520 to
-0.5385). The failure is therefore not primarily attributable to the feature divergence,
-that is, to KPS being unavailable in CGGA. Its mechanism is not investigated, and no
-cause is asserted here.
+**Where the gap sits (descriptive).** Two differences are on record between three
+C-indices, and neither carries an interval. The internal C-indices of the committed
+baseline and of the transferable model differ by 0.0215 (0.6735 to 0.6520). That contrast
+bundles three things: the KPS value; a missing-KPS indicator that is itself prognostic
+(HR 1.57); and a different fit set (592 modelled patients against 570). It is not an
+estimate of what KPS is worth. Moving the same three-feature model from TCGA to CGGA
+differs by a further 0.1135 (0.6520 to 0.5385). Read descriptively the second gap is
+about five times the first, which is consistent with the shortfall lying mainly in the
+change of cohort rather than in KPS being unavailable in CGGA. That is not a tested
+attribution. The mechanism is not investigated, and no cause is asserted here.
 
 **What was not done.**
 
@@ -560,8 +564,10 @@ partition demonstration quoted in §4.1 used patient identifiers and split assig
 
 **Models fitted, and on which patients.** No model has been fitted on CGGA: the T2 Cox
 variants were fitted on TCGA and only scored on CGGA, once (section 2.3). The development
-split's test set has not been held out from those fits. The T2 script fits each variant on
-every complete-case TCGA patient and reports a 5-fold cross-validated internal C-index, so
+split's test set has not been held out from those fits. The T2 script fits variants 2 and 3
+on every complete-case TCGA patient, and variant 1 on the 592 with an observed outcome
+(KPS imputed, see section 2.3), and reports a 5-fold cross-validated internal C-index for
+each, so
 the 169 patients in the test split of `tcga_gbm_clinical_v2` were in the fit set. The
 sealed external partition `cgga_external_v1` does not exist yet; it is to be created
 before T4 and T5 (section 2.2, item 7). This pre-registration is being written before any
@@ -635,6 +641,8 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-26 | 2.2 item 9(d) completed; item 9(c) one sentence added | Fixed the T1 cross-platform harmonisation rule: each sample's expression vector is z-scored across genes and the RNA-seq-trained classifier applied to it, with no shared reference and no batch correction. Added to item 9(c) that the floor of 30 is load-bearing under two-sided bounds. | The rule has to be fixed before the matrix it will be applied to is seen. It is a project choice, not the normalisation of Verhaak et al. (2010). | **No.** The microarray expression matrix has not been downloaded. |
 | 2026-11-26 | 4.1, 4.2, 4.4, 4.5, 5 (corrected); 9 (row added) | Reconciled passages written for the first TCGA cohort (the superseded v1 partition, and the claim that only clinical data was in hand) with the data in hand: 594 patients, `tcga_gbm_clinical_v2` (425/169), 284 RNA-seq samples, joined IDH and MGMT calls. Corrected section 5's claim that no model had been fitted on any test split: the T2 variants were fitted on all complete-case TCGA patients, which include the v2 test split. Recorded the all-test seal in 4.4 and in the section 9 table. | A registration attachment must not contradict the OSF form or the sealed manifests. | **Yes.** Written after the T2 read; changes no threshold, bound or rule. |
 | 2026-11-26 | 2.3 (Brier result added); 2.2 item 7, 2.3, 4.5 and 5 ("read once" corrected to two reads) | Recorded the outcome of T2's Brier row (Brier score at 18 months <= 0.25 on CGGA), evaluated on a second read and not met: the transferable model scores 0.2617 (95% CI 0.2391 to 0.2829). The rules for the row (IPCW score, the same patients and models as the C-index row, percentile bootstrap, verdict from the registry) were fixed in `scripts/validate_brier_cgga.py` and its tests before that read. Changes no threshold, no decisive bound, no decision rule and no other test's status. Full account: `docs/cgga_validation.md` section 12; result file: `data/results/cgga/brier18_external.json`. | Records a result rather than a plan. | **Yes.** Written after the second CGGA read and disclosed as such. That read, like the first, ran without a sealed `cgga_external_v1` manifest (section 4.5). |
+| 2026-11-27 | 2.3 (table row 1, the "Where the gap sits" paragraph, section 5 "Models fitted"; wording only) | Stated what variant 1's TCGA fit does with missing data, which the row had shown as a bare 594: 594 passed, 592 modelled; KPS set to the median, 80, for 150, with an indicator (HR 1.57); treatment arm missing for 22 (level, HR 1.20). Scoped "not imputed" to CGGA and to variants 2 and 3. Reframed the two internal contrasts as descriptive: neither carries an interval, and the first bundles three differences (the KPS value, the prognostic missing-KPS indicator, and fit sets of 592 against 570). No threshold, no decisive bound and no decision rule changed. | The independent review of commit `b83f9f7` found the imputation disclosed in one place and contradicted in another, and an attribution drawn from two differences that were never bootstrapped. | **No.** No data was read. CGGA had been read twice for T2 before this entry. |
+| 2026-11-27 | 2.3 (variant 1 internal C-index; note) | The code that computes variant 1's internal C-index imputed KPS with the median of all modelled patients before cross-validation, not the training-fold median its documentation stated. Corrected, and rerun on TCGA only: 0.673544 before and after (95% CI 0.6478 to 0.6994), because every training fold's median KPS is 80; the IDH sensitivity analysis is likewise unchanged (0.665650). The 0.6735 in the table is unchanged. No external number depends on the path: variant 1 is not evaluated on CGGA, and variants 2 and 3 impute nothing. | The review found that the code and its documentation disagreed. | **No.** TCGA only; no CGGA file was read. |
 
 ---
 

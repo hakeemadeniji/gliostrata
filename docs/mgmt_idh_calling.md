@@ -342,7 +342,9 @@ percentage points.
 **Cox C-index.** The committed clinical-only baseline (age, sex, KPS and
 treatment arm; 5-fold stratified cross-validation; pooled out-of-fold
 Harrell C-index) was fitted twice with identical settings. Only the
-patients differ between the two fits.
+patients differ between the two fits. KPS is imputed in both: it is missing for
+150 of the 592 and for 143 of the 569 modelled patients and is set to its
+median, 80, with a missingness indicator.
 
 | Cohort | Patients | Modelled | Deaths | C-index | 95% CI |
 | --- | --- | --- | --- | --- | --- |
@@ -362,6 +364,14 @@ patients differ between the two fits.
 - Per-fold C-indices are 0.649, 0.630, 0.693, 0.707 and 0.676 for the full
   cohort and 0.742, 0.594, 0.663, 0.663 and 0.669 without the IDH-mutant
   patients. The spread across folds is several times the size of the delta.
+
+**Rerun with fold-wise imputation (2026-11-27).** The fits above imputed KPS
+with the median of all modelled patients, computed before the folds were
+drawn. The code now takes the median from each fold's training rows, which its
+documentation had said it did. Rerun on TCGA only
+(`scripts/rerun_tcga_internal_cv.py`): full cohort 0.673544 before and after;
+without the IDH-mutant patients 0.665650 before and after. Every training
+fold's median KPS is 80. The delta stays at 0.0079 and "not flagged" stands.
 
 **Verhaak subtype distribution.** The committed signature classifier
 (`classify_verhaak`, default settings) was run on all 284 expression

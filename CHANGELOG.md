@@ -67,6 +67,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is added to that list in the commit that adds it, so the external partition
   will not be mislabelled "superseded".
 
+### Changed — conditions of the independent review of `b83f9f7` (2026-11-27)
+- Read guard hardened: a value read that cites a scoring rule must name a rule id
+  from the committed registry `configs/scoring_rules.yaml`; the rule must be
+  registered for that analysis and name a frozen scoring-set manifest whose
+  checksum still matches; and every input's checksum is recomputed at read time.
+  Free text no longer opens the partition gate. Ledger entries that are
+  observations or notes can be appended and are never counted as reads.
+- The unexplained access to the held-out cohort is identified and recorded: the
+  review agent's own workspace-wide text search opened five extracted CGGA text
+  files on 2026-11-27 (access ledger entries 8 and 9). No value was used.
+  `.clineignore`, `.rgignore` and `.clinerules` keep workspace-wide tools away
+  from the two CGGA directories.
+- Fold-wise imputation: `fit_clinical_baseline` now fits each cross-validation
+  fold's design on that fold's training rows, as its documentation said. The TCGA
+  C-index is unchanged (0.673544; 0.665650 without the IDH-mutant patients) and
+  the design matrices are byte-identical
+  (`tests/fixtures/tcga_fit_fingerprint.json`).
+- T2 account corrected: the KPS imputation of variant 1 is stated with its counts
+  wherever its fit was shown as 594; the Brier excess is no longer attributed to
+  an offset; the internal C-index contrasts are labelled descriptive, with no
+  interval.
+- CI: the `test` job installs `requirements-lock.txt`; a `test-floor` job runs the
+  suite on Python 3.10 from `requirements-floor.txt`; the partition-drift logic is
+  `scripts/ci_partition_drift.py`, which tests execute.
+- Calibration slope, intercept and decision-curve analysis: decided not to be
+  done for this thesis (`docs/cgga_validation.md`, section 12.5).
+
+### Added — stage R1
+- `requirements-lock.txt` (37 distributions, Python 3.14.3) and
+  `requirements-floor.txt`.
+- `scripts/rerun_tcga_internal_cv.py` and its tests; the rerun record
+  `data/results/tcga_gbm/foldwise_imputation_rerun.json` (git-ignored).
+- `data/provenance/file_manifest_checksums.json`: sizes, row counts and SHA-256 of
+  the per-modality GDC file manifests, which carry patient barcodes and are so
+  not committed.
+
 ### Fixed
 - `test_argmax_matches_input_subtype` computed an argmax and asserted nothing
   about it; it now asserts the match rate.

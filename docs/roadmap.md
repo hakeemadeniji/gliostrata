@@ -52,7 +52,7 @@ Status as of 2026-11-26. Three statuses are used:
 
 ## What the tests cover
 
-1042 tests in 27 modules: 1041 pass and 1 is skipped without the optional dependencies. They
+1075 tests in 31 modules: 1074 pass and 1 is skipped without the optional dependencies. They
 pass without network access and without heavy dependencies (scanpy, lifelines,
 botorch and PhysiCell are not required). Tests that read the real TCGA
 data skip when it is absent; no test reads CGGA; one workflow test skips when Snakemake is not

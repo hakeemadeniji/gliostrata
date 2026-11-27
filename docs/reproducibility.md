@@ -29,6 +29,19 @@ make dag               # print the real-cohort Snakemake DAG; executes nothing
 make pipeline-fixture  # run the whole pipeline on 12 synthetic patients -> .test/
 ```
 
+To reproduce the environment that produced the results on record, install from the
+lock file instead of from the floors:
+
+```bash
+pip install -c requirements-lock.txt -e ".[dev,workflow]"
+```
+
+`requirements-lock.txt` (2026-11-27) pins the 37 installed distributions of the
+project's runtime dependencies and its `dev` extra, as installed with Python 3.14.3.
+It is used as a constraints file here so that `snakemake` and `dvc` (the `workflow`
+extra), which are not in it, still resolve. CI's `test` job installs it exactly
+(`pip install -r requirements-lock.txt`, then the package with `--no-deps`).
+
 `make pipeline-fixture` writes, under `.test/`:
 
 | Layer | Artifact |
@@ -111,6 +124,10 @@ succeeded.
 | `workflow/`, `dvc.yaml`, `Makefile`, `.github/` | **git** | Pipeline definition. |
 | `data/partitions/*.json` | **git** | Sealed train/test splits. Kilobytes, must be diff-reviewable, must never be regenerated. See §4. |
 | `data/access_ledger.jsonl`, `configs/registration.yaml` | **git** | Every access to the held-out cohort, and the machine-readable registration state. Must be reviewable in a diff. |
+| `requirements-lock.txt`, `requirements-floor.txt` | **git** | The environment that produced the results on record, and the lowest versions pyproject accepts. CI's two test jobs install from them. |
+| `configs/scoring_rules.yaml` | **git** | The registered rules that may fix a scoring set for a read of the held-out cohort, with the manifest checksum each is tied to. Read by the read guard. |
+| `data/provenance/file_manifest_checksums.json` | **git** | Sizes, row counts and SHA-256 of the per-modality GDC file manifests, which are not committed because they carry patient barcodes. |
+| `.clineignore`, `.rgignore`, `.clinerules` | **git** | Keep workspace-wide search and indexing tools away from `data/raw/cgga/` and `data/processed/cgga/`. See section 7. |
 | `data/raw/**` (`clinical_*.parquet`, `expression/*.parquet`) | **DVC candidate — not yet tracked** | Reconstructible from the GDC, but only against *today's* GDC. See §3. |
 | `data/raw/**/_cache/` (1.2 GB of STAR TSVs) | **neither** | Pure download scratch. Excluded in both `.gitignore` and `.dvcignore`. Never track it. |
 | `data/interim/**`, `data/processed/**`, `data/results/**` | **neither (DVC candidate)** | Derived. Cheap to recompute from `data/raw/`. |
@@ -243,7 +260,9 @@ make verify-partition    # or: gliostrata freeze-partition --input ... --verify
 
 `--verify` writes nothing and exits non-zero on drift. Run it before every
 evaluation. The CI job `partition-drift` runs the parts of this check that are
-possible from git alone (§5).
+possible from git alone (§5). Those parts are `scripts/ci_partition_drift.py`, which
+`tests/test_ci_partition_drift.py` executes against a missing, a superseded, an
+external all-test and a tampered manifest.
 
 ### Known live drift (as of 2026-11-26)
 
@@ -273,13 +292,14 @@ re-freeze it.
 
 `.github/workflows/ci.yml`, on every push and pull request, Python **3.14**
 (the version this project is developed against; `pyproject.toml` declares
-`requires-python = ">=3.10"`).
+`requires-python = ">=3.10"`), except the `test-floor` job, which uses 3.10.
 
 | Job | What it does |
 | --- | --- |
-| `lint` | `ruff check --select E9,F63,F7,F82` as a **blocking** gate, plus the full project config as **advisory**. See the note below. |
-| `test` | `pip install -e ".[dev]"` then `python -m pytest -q`. |
-| `partition-drift` | Partition manifest integrity: sealed, digests match, and every id re-derives its frozen split from `(seed, patient_id)`. Plus a full `--verify` when the cohort happens to be in the checkout. |
+| `lint` | ruff at the version in the lock file. `ruff check --select E9,F63,F7,F82` as a **blocking** gate, plus the full project config as **advisory**. See the note below. |
+| `test` | Installs `requirements-lock.txt`, then the package with `--no-deps`; `python -m pytest -q`. Since 2026-11-27. |
+| `test-floor` | Python **3.10**: installs `requirements-floor.txt` (the lowest versions pyproject accepts), then the package; `python -m pytest -q`. New on 2026-11-27; it tests the `requires-python` claim and has not yet run on GitHub. |
+| `partition-drift` | `python scripts/ci_partition_drift.py`: partition manifest integrity, namely sealed, digests match, and every id re-derives its frozen split from `(seed, patient_id)`. Plus a full `--verify` when the cohort happens to be in the checkout. |
 | `workflow-dry-run` | `snakemake -n` on the real-cohort DAG, then a real offline fixture run, then `dvc stage list` / `dvc dag`. |
 
 ### CI never touches the network
@@ -289,7 +309,9 @@ Verified, not assumed. The suite was re-run with `socket.socket.connect`,
 results were **identical** to the normal run — no test attempted a connection.
 Re-verified 2026-11-26 on the full suite (1042 tests: 1041 passed, 1 skipped; the
 Python-level socket entry points replaced before pytest started) with zero blocked
-connection attempts.
+connection attempts, and again on 2026-11-27 (1075 tests: 1074 passed, 1 skipped,
+355 s) with zero blocked attempts and with a file-access tripwire that recorded no
+open and no listing of a CGGA path.
 Specifically:
 
 - `tests/test_tcga_download.py` and `tests/test_tcga_expression.py` load
@@ -308,8 +330,9 @@ Specifically:
 
 ### Why the blocking lint set is narrow
 
-The repo currently has 171 ruff findings under its own config (164 in
-`src`+`tests`, 7 in `scripts`, measured 2026-11-26), dominated by the `N803`/`N806` naming rules
+The repo currently has 170 ruff findings under its own config (30 in `src`,
+133 in `tests`, 7 in `scripts`, measured 2026-11-27; it had 171 the day before),
+dominated by the `N803`/`N806` naming rules
 (argument and variable names) — which is arguable in statistical code
 where `X`, `X_train` and `N` are the conventional names. Making the full set
 blocking today would land a red CI on the first commit and train everyone to
@@ -358,10 +381,11 @@ writes the predictions out.
 
 ### Infrastructure gaps
 
-- **No container.** No `Dockerfile`, no pinned lockfile. `requirements.txt`
-  and `environment.yml` use floors (`>=`), not pins, so two clean installs a
-  month apart can resolve to different versions. A reproducibility release
-  needs a lockfile and an image digest.
+- **No container.** No `Dockerfile` and no image digest. There is a lock file
+  since 2026-11-27 (`requirements-lock.txt`, which CI's `test` job installs
+  from), so two clean installs from it resolve the same 37 distributions.
+  `requirements.txt` and `environment.yml` still state floors, and `snakemake`
+  and `dvc` are not locked. A reproducibility release needs an image digest.
 - **No DVC remote.** Every derived artifact exists on one machine. §3.
 - **No GDC data-release pinning.** §1.2.
 - **No Zenodo DOI**, and nothing to mint one for yet.
@@ -378,7 +402,7 @@ writes the predictions out.
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite: 1042 tests, 1041 passing and 1 skipped, with all outbound sockets blocked.
+2. The test suite: 1075 tests, 1074 passing and 1 skipped, with all outbound sockets blocked.
 3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
    methylation calls (real GDC API code with cohort filtering, barcode parsing and
    a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does
@@ -393,3 +417,38 @@ To be fair to the scaffold, the following are real and verified:
    report of every exclusion and of each feature's range, and the SHA-256 of every
    input (`docs/project_record/06_evidence_reports.md`, stage 3). The values are
    measured; they are not validated.
+
+---
+
+## 7. Workspace-wide tools and the held-out cohort
+
+The read guard governs scripts (`docs/project_record/06_evidence_reports.md`, stage
+2). It does not govern the tools an editor or an AI agent points at the whole
+repository. On 2026-11-27T05:48:55Z a workspace-wide text search, run by the review
+agent at the start of a review, opened the five extracted CGGA text files under
+`data/raw/cgga/_cache/extracted/` and scanned them for two path strings. It returned
+nothing and no value was used, but it was an access that no project script made
+(access ledger entries 8 and 9).
+
+What is in place since then:
+
+- `.rgignore`: ripgrep's ignore file. It applies to `rg` and to tools built on it
+  that keep ripgrep's default ignore handling. `rg --no-ignore` and `rg -uu` skip it.
+- `.clineignore`: the agent's ignore file, for its file listing, reading and search
+  tools.
+- `.clinerules`: standing instructions for any AI agent working in this repository.
+  The first one is: never run a workspace-wide search here; scope every search to
+  `src`, `tests`, `scripts`, `docs`, `configs` or `workflow`.
+- `data/raw/**` and `data/processed/**` are git-ignored, which keeps them out of git
+  and out of any tool that respects `.gitignore`.
+
+Not verified: that the installed agent's search tool honours the two ignore files
+during its file walk. A live test was not run, because a failing test would open the
+held-out files again. The instruction in `.clinerules` is the control that does not
+depend on it.
+
+Still open: the plain-text copies themselves. The intended state is to keep only the
+compressed sources and to extract into a temporary directory inside a guarded read,
+deleting it afterwards. It is deferred, with its reason, in
+`docs/project_record/05_future_plan.md`, section 5.5.
+

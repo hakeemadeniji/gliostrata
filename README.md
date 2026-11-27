@@ -36,7 +36,7 @@ different stages, stated per layer:
 | L7 — Wet-lab handoff | `gliostrata.handoff.protocol` | **Working** (JSON protocol generator) |
 | — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification, access ledger and read guard |
 
-The test suite has 1042 tests in 27 modules: 1041 pass and 1 is skipped (it needs Snakemake, an
+The test suite has 1075 tests in 31 modules: 1074 pass and 1 is skipped (it needs Snakemake, an
 optional dependency). It passes with all outbound sockets blocked. Tests that need the real
 TCGA data skip when it is absent, and no test reads CGGA. Heavy optional dependencies
 (scanpy, lifelines, botorch, PhysiCell) are NOT required.
@@ -186,7 +186,7 @@ gliostrata/
 │   ├── cgga_external_eligibility.py  ← patients eligible for the sealed external partition
 │   ├── generate_synthetic_data.py
 │   └── run_full_pipeline.py
-├── tests/                         ← 27 test modules, 1042 tests
+├── tests/                         ← 31 test modules, 1075 tests
 ├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds; registration.yaml the registration state)
 ├── workflow/                      ← Snakemake workflow (Snakefile + rules/)
 ├── data/partitions/               ← sealed partition manifests (in git)
