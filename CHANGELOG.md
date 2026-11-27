@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — deposit preparation (2026-11-27)
+- `docs/t2_comparator_shortlist.md`: a proposed eligibility rule for T2's 2024 comparator,
+  four candidates checked against it (none eligible), and three paths for the lead. Nothing
+  registered; no CGGA file opened.
+- `docs/deposit_checklist.md`: the ordered steps to an OSF deposit, with two blocking text
+  fixes found in pre-registration section 5 and the T1 classifier that section 2.2 item 9(d)
+  does not yet name.
+
 ### Added — the sealed external partition (2026-11-27)
 - `data/partitions/cgga_external_v1.json`: all-test, 218 CGGA patients eligible by the
   registered rule, sealed after the T2 evaluation and before any T4 or T5 computation. It
