@@ -5,6 +5,16 @@ registered** in pre-registration section 2.2 item 2, as a dated amendment (secti
 before the search was run. The registered text, not this document, is authoritative: it
 differs from section 5 below only in wording.
 
+**Update, 2026-11-27, later.** The registered search was run once and found no model
+eligible to be re-run as published (`docs/t2_comparator_search/`), because almost no paper
+states the expression scale its coefficients expect. The lead then chose **option B**,
+amended before the deposit. The comparator is the eligible 2024 *gene set* that scores best
+in cross-validation on the TCGA v2 training split. It is refitted with the project's own
+estimator and expression scale on TCGA, then scored on `cgga_external_v1` against
+variant 2. The likely verdict is still FAIL (section 2, point 5). A PASS needs the
+comparator to score at or below chance on CGGA, which would say more about the comparator
+than about our model. Pre-registration section 2.2 item 2 holds the amended rule.
+
 No CGGA file was opened for this document, and no model was run. The candidates were
 judged on what their papers say.
 

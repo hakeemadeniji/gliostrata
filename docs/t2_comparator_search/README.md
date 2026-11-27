@@ -1,7 +1,10 @@
 # T2 comparator search: log
 
 Status: **run 2026-11-27, not yet closed.** 13 of the 549 records still await their full
-text (section 4). No outcome has been entered in the pre-registration.
+text (section 4). Under the rule as first registered (re-run as published), no model is
+eligible so far. Later the same day, before the deposit, the rule was amended (option B):
+the same candidates are judged as *gene sets*, to be refitted under the project's own
+conditions. Pre-registration section 2.2 item 2 holds the amended rule.
 
 This is the single search registered in pre-registration section 2.2 item 2 (b),
 committed in `aacedb1` before the search was run. The registered text is authoritative.

@@ -254,11 +254,13 @@ STOPPING RULES
 7. Ties. If more than 20 of the 50 T4 patients are tied, the p-value is still
    reported but the regret criterion is INCONCLUSIVE whatever its value, and patients
    are not dropped and re-run to remove the tie.
-8. Comparator. T2's improvement-over-baseline comparator is chosen by a registered
-   eligibility rule and one literature search, both fixed before the search was run.
-   If no model is eligible, or the comparator cannot be re-run on the identical frozen
-   partition, the criterion is NOT EVALUABLE. It is never scored against a number
-   quoted from a paper.
+8. Comparator. T2's improvement-over-baseline comparator comes from one registered
+   literature search of 2024 models, run once. As amended before the deposit, it is
+   the eligible published gene set with the best cross-validated C-index on the
+   development training split, refitted with the project's own estimator and
+   expression scale on TCGA, and scored on the identical frozen partition. If no gene
+   set is eligible, the criterion is NOT EVALUABLE. It is never scored against a
+   number quoted from a paper.
 9. External reads. CGGA has been read twice, both for T2 (its C-index row, then its
    Brier row). The only further registered reads of CGGA are T1, T4 and T5. Any other
    analysis of CGGA requires a new pre-registration.
@@ -294,6 +296,6 @@ STOPPING RULES
   with the two development manifests.
 - Revised on 2026-11-27: the T1 classifier is named under "Cross-platform harmonisation
   for T1", and rule 8 now says the T2 comparator is chosen by a registered rule and one
-  search (pre-registration section 2.2 item 2). If the search finds an eligible model,
-  rule 9 must gain one read before the deposit; if it finds none, rule 9 is unchanged.
-  Attach the search log.
+  search (pre-registration section 2.2 item 2). Revised again the same day: the comparator
+  is a published gene set refitted under the project's own conditions (option B). Once it
+  is named, rule 9 gains one read before the deposit. Attach `docs/t2_comparator_search/`.

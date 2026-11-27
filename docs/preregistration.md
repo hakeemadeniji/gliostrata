@@ -134,42 +134,54 @@ resolutions are pre-registered rather than chosen after the data is seen.
    distribution and no valid CI. *Registered resolution:* the comparator must be re-run on
    the identical frozen partition, and the metric is the paired bootstrap distribution of
    the difference. If the comparator cannot be re-run (no released code or weights), this
-   threshold is reported as **not evaluable**, never as a pass. *Comparator (registered
-   2026-11-27, before the deposit and before the search below was run):* the comparator
-   is chosen by a rule and one search, not named in advance. (a) *Eligibility.* A model
-   is eligible only if all of E1 to E5 hold. E1: peer-reviewed, first published online
-   or in print between 2024-01-01 and 2024-12-31. E2: it predicts overall survival and
-   applies to adult WHO grade 4 glioblastoma, IDH-wild-type included. E3: it can be
-   re-run without refitting, from a complete published formula (every term, its
-   coefficient and the expression scale it expects) or from released code with fitted
-   weights. E4: every input is available for `cgga_external_v1` from files already
-   obtained: CGGA RNA-seq and the CGGA clinical fields (age, sex, IDH, MGMT, 1p/19q,
-   radiotherapy, chemotherapy); not KPS, extent of resection, methylation arrays,
-   imaging or histology. E5: no patient of CGGA mRNAseq_325 or mRNAseq_693 was used for
-   its training, gene or feature selection, coefficient fitting or cut-off choice; use
-   for validation only is allowed and is disclosed. E6 (choice among eligible models):
-   the highest C-index the paper reports on an external cohort other than CGGA; ties go
-   to the earlier publication; if no eligible model reports one, the largest external
-   validation n. (b) *Search.* One PubMed search, run once after this item is committed:
-   `glioblastoma[tiab] AND (prognos*[tiab] OR survival[tiab]) AND (signature[tiab] OR model[tiab] OR nomogram[tiab] OR "risk score"[tiab]) AND 2024[dp]`. Every record is screened on title and abstract for E1, E2 and
-   E4, and every record that passes is screened on its full text for E3 and E5. The log
-   (query, date run, hit count, every record with its first failing criterion or
-   "eligible") is committed and attached to the deposit. (c) *Our side of the
-   comparison:* the transferable model (variant 2 of section 2.3: age, sex, treatment
-   arm), fitted on TCGA exactly as committed in `scripts/validate_cox_cgga.py`. It is the
-   stand-in that decided the C-index and Brier rows, because the committed model needs
-   KPS, which CGGA does not record. (d) *Partition and procedure:* `cgga_external_v1`,
-   complete cases on the union of both models' inputs; Harrell's C-index for each; a
-   paired percentile bootstrap over patients of the difference (variant 2 minus the
-   comparator), 1000 resamples, seed 42; the lower bound of the 95% interval decides.
-   The comparator is applied as published: its own transformation, coefficients and
-   identifiers, nothing re-estimated on CGGA. (e) *Outcomes.* If no model is eligible,
-   this threshold is NOT EVALUABLE, the log is the stated reason, and CGGA is not read
-   for it. If one is eligible, it is named here by a further amendment before the
-   deposit, OSF stopping rule 9 and section 5 gain exactly this one read, and the read
-   runs after the deposit under its own rule in `configs/scoring_rules.yaml`. The
-   candidates, the reasoning and the alternatives considered are in
-   `docs/t2_comparator_shortlist.md`.
+   threshold is reported as **not evaluable**, never as a pass. *Comparator (registered 2026-11-27 as a published model re-run without refitting; amended
+   the same day, before the deposit, after the registered search had been run; section 8).*
+   *As first registered:* a published model chosen by criteria E1 to E6 and one PubMed
+   search, applied as published. E1: peer-reviewed, first published in 2024. E2: predicts
+   overall survival in adult WHO grade 4 glioblastoma. E3: re-runnable without refitting,
+   with every coefficient and the expression scale it expects. E4: every input available
+   for `cgga_external_v1`. E5: no CGGA mRNAseq_325 or mRNAseq_693 patient used for training,
+   gene or feature selection, coefficient fitting or cut-off choice. E6: the best external
+   non-CGGA C-index. The search was run once, at 2026-11-27T17:48:54Z, and its query, protocols
+   and per-record log are committed (`docs/t2_comparator_search/`). Of 549 records none was
+   eligible, with 13 still awaiting their full text. Nearly every 2024 model with published
+   coefficients fails E3: it does not state the expression scale its coefficients expect.
+   *As amended, the comparator is a re-implementation under identical conditions*, which
+   needs no published scale. (a) *Candidates:* the records of that search, every one judged
+   by its committed protocols first, the 13 included. No other search is made. (b) *Eligible
+   gene sets:* E1, E2 and E5 as above, and two replacements for E3, E4 and E6. R1: the
+   published risk score is a function of bulk-tumour expression only, of genes or of
+   within-sample gene pairs, and every gene and pair is named in the main text or in a
+   supplementary file read in the review. R2: every gene is present under its symbol in both
+   the TCGA expression matrix and the CGGA RNA-seq count matrix. The CGGA gene names are read
+   as an availability access, recorded in the access ledger; no CGGA value is read for the
+   choice. (c) *Re-implementation, identical for every gene set:* expression is log2(CPM + 1),
+   computed for each sample from its STAR read counts, with the library size summed over the
+   genes present in both matrices; a gene pair is 1 when its first gene's value exceeds its
+   second's and 0 otherwise. The gene set's terms enter `CoxPHModel` (Breslow, ridge 1e-6, the
+   estimator of section 2.3) as covariates. No clinical covariate is added and no term is
+   selected or dropped. (d) *Choice:* each eligible gene set is scored by 5-fold stratified
+   cross-validation (`cross_validate_cox`, seed 42, pooled out-of-fold Harrell's C-index) on
+   the patients of the `tcga_gbm_clinical_v2` training split with an RNA-seq profile and an
+   observed outcome. The comparator is the gene set with the highest score; ties go to the
+   earlier publication. Neither the v2 test split nor CGGA is used for the choice. (e) *Final
+   fit:* the chosen gene set is refitted on every TCGA patient with an RNA-seq profile and an
+   observed outcome, as variant 2 was fitted on every complete-case TCGA patient. (f) *Our side
+   of the comparison* (unchanged): the transferable model (variant 2 of section 2.3: age, sex,
+   treatment arm), fitted on TCGA exactly as committed in `scripts/validate_cox_cgga.py`. It
+   decided the C-index and Brier rows, because the committed model needs KPS, which CGGA does
+   not record. (g) *Partition and procedure* (unchanged): `cgga_external_v1`, complete cases
+   on the union of both models' inputs; Harrell's C-index for each; a paired percentile
+   bootstrap over patients of the difference (variant 2 minus the comparator), 1000
+   resamples, seed 42. The lower bound of the 95% interval decides, through the registered
+   metric `T2_cindex_improvement_vs_baseline`. (h) *Outcomes:* if no gene set is eligible,
+   this threshold is NOT EVALUABLE and the log is the stated reason. Otherwise the chosen gene
+   set is named here by a further amendment before the deposit, and OSF stopping rule 9 and
+   section 5 gain exactly this one read. The read runs after the deposit, on the sealed
+   partition, through the read guard. (i) *What it measures:* the comparison is with a
+   published 2024 *gene set* refitted under the conditions of our own model, not with the
+   published model itself, and it is reported as such. The reasoning, the alternatives
+   considered and the likely verdict are in `docs/t2_comparator_shortlist.md`.
 3. **T3 tumour-growth RMSE "≤ 15% of final volume" — whose final volume, and over which
    curves?** *Registered resolution:* RMSE is computed over the full time course per PDX
    growth curve, normalised by that curve's own observed final volume, then averaged across
@@ -793,6 +805,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.2 item 2 (completed) | Replaced "TO BE COMPLETED BY AUTHOR: the specific 2024 baseline model" with a rule for choosing the comparator: eligibility criteria E1 to E6, one PubMed search with a fixed query, the log to be committed and attached, our side of the comparison (the transferable model, variant 2), the partition (`cgga_external_v1`) and the paired bootstrap. If no model is eligible the threshold is NOT EVALUABLE and CGGA is not read for it; if one is, it is named by a further amendment before the deposit, with exactly one added read. No threshold, decisive bound or decision rule changed. | The protocol names no baseline. A comparator picked by hand cannot show that a stronger one was not passed over, and many 2024 signatures were fitted on the CGGA batches the partition is made of (`docs/t2_comparator_shortlist.md`). Fixed before the search is run. | **Yes.** CGGA had been read twice for T2 before this entry. No comparator has been run, and the registered search had not been run when this entry was committed. Four candidates had been read in a preliminary, unregistered search (`docs/t2_comparator_shortlist.md` section 4). |
 | 2026-11-27 | 2.2 item 9(d) (classifier named) | Named the classifier that item 9(d) called "the RNA-seq-trained classifier": single-sample nearest centroid (Pearson) over the 831 resolved genes of the Verhaak 840-gene signature, against the frozen centroid set `verhaak840_tcga_all` (246 labelled TCGA patients, SHA-256 recorded), with a fixed tie order, no tuning and no other candidate; and the microarray input rules (exact symbol match, duplicate symbols averaged, log2 scale decided from the source's documentation before any value is read). The harmonisation rule itself is unchanged. | Decided in stage 3b (project record decision D6) on principle: a sample's call must not depend on the other samples scored. A classifier chosen after the deposit would be a post-hoc choice. | **No.** The CGGA microarray expression matrix has not been downloaded. The centroids were estimated on TCGA only; their agreement with TCGA labels was examined descriptively (section 5). CGGA had been read twice for T2 before this entry. |
 | 2026-11-27 | 5 ("Models fitted"; "Analyses already run") | "Models fitted" still said `cgga_external_v1` did not exist; it now gives the seal date, and that the T1 centroid set was estimated on all labelled TCGA patients, the v2 test split included. "Analyses already run" listed four TCGA analyses; it now also lists the four of stage 3b: the two centroid sets, the single-sample subtype calls with their descriptive agreement check (56 of 76 v2-test patients), the scoring-set dependence measurement, and the feature-store build. | The section exists so that what was done before the deposit is stated; both passages had become out of date. Found while preparing `docs/deposit_checklist.md`. | **No.** No data was read. CGGA had been read twice for T2, and once for the seal's availability check, before this entry. |
+| 2026-11-27 | 2.2 item 2 (comparator amended) | Kept the registered search and its candidates, and replaced "re-run as published" with a re-implementation under identical conditions. Each eligible 2024 gene set (E1, E2, E5; expression-only score with every gene and pair named; every gene present in TCGA and CGGA) is refitted with our Cox estimator on log2(CPM + 1). The comparator is the one with the best 5-fold cross-validated C-index on the v2 training split, refitted on all TCGA patients with RNA-seq and an outcome. Our side, the partition, the paired bootstrap and the threshold are unchanged. No threshold, decisive bound or decision rule changed. | The registered search, run once, found no model eligible to be re-run as published: almost no 2024 paper states the expression scale its coefficients expect (E3). The re-implementation removes that ambiguity, keeps CGGA out of gene selection and fitting, and compares both models under the same training data and estimator. Chosen by the project lead, knowing that a FAIL is the likely verdict (`docs/t2_comparator_shortlist.md`). | **Yes.** Written after the registered comparator search had been run and found no eligible model (13 records still unscreened). CGGA had been read twice for T2, and once for the seal's availability check, before this entry. No comparator has been fitted or scored; no CGGA value has been read for this row. |
 
 ---
 
