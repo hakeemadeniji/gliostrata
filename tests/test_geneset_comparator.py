@@ -13,6 +13,7 @@ from gliostrata.prediction.geneset_comparator import (
     log2_cpm,
     paired_bootstrap_difference,
     score_gene_set,
+    stratified_concordance_index,
 )
 
 
@@ -129,3 +130,37 @@ def test_paired_bootstrap_difference_is_paired_and_reproducible():
     assert out1["ci_low"] <= out1["difference"] <= out1["ci_high"]
     same = paired_bootstrap_difference(time, event, risk_a, risk_a, n_boot=50)
     assert same["difference"] == 0 and same["ci_low"] == 0 and same["ci_high"] == 0
+
+
+def test_stratified_cindex_counts_only_within_stratum_pairs():
+    from gliostrata.prediction.cox import concordance_index
+
+    rng = np.random.default_rng(5)
+    risk = rng.normal(size=120)
+    time, event = _survival(risk)
+    one = np.zeros(120, dtype=int)
+    assert stratified_concordance_index(time, event, risk, one) == pytest.approx(
+        concordance_index(time, event, risk))
+    # a shift between strata changes the pooled C-index but not the stratified one
+    strata = np.repeat(["b1", "b2"], 60)
+    shifted = risk + np.where(strata == "b2", 10.0, 0.0)
+    assert stratified_concordance_index(time, event, shifted, strata) == pytest.approx(
+        stratified_concordance_index(time, event, risk, strata))
+    assert concordance_index(time, event, shifted) != pytest.approx(
+        concordance_index(time, event, risk))
+    with pytest.raises(ValueError):
+        stratified_concordance_index(time, event, risk, np.arange(120))  # no within pairs
+
+
+def test_paired_bootstrap_with_strata_reports_both_versions():
+    rng = np.random.default_rng(6)
+    risk_a = rng.normal(size=100)
+    time, event = _survival(risk_a)
+    strata = np.repeat(["mRNAseq_693", "mRNAseq_325"], 50)
+    risk_b = risk_a + np.where(strata == "mRNAseq_325", 3.0, 0.0) + rng.normal(size=100)
+    out = paired_bootstrap_difference(time, event, risk_a, risk_b, strata=strata, n_boot=100)
+    assert out["stratified"] is True
+    assert out["n_by_stratum"] == {"mRNAseq_325": 50, "mRNAseq_693": 50}
+    assert out["cindex_comparator"] == pytest.approx(
+        stratified_concordance_index(time, event, risk_b, strata))
+    assert "unstratified_cindex_comparator" in out

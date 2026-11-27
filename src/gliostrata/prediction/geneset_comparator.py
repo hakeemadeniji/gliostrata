@@ -19,7 +19,10 @@ candidate:
 
 Nothing here reads CGGA. The evaluation script supplies CGGA's expression only after the
 deposit, through the read guard. :func:`paired_bootstrap_difference` is the registered
-paired percentile bootstrap of the C-index difference.
+paired percentile bootstrap of the C-index difference. With ``strata`` (the CGGA RNA-seq
+batch), each C-index counts only within-batch pairs, as amended in item 2 (g): the two
+batches were processed separately, and a shift between them would penalise an expression
+score but not the clinical model.
 """
 
 from __future__ import annotations
@@ -41,6 +44,7 @@ __all__ = [
     "choose_gene_set",
     "fit_gene_set",
     "score_gene_set",
+    "stratified_concordance_index",
     "paired_bootstrap_difference",
 ]
 
@@ -203,12 +207,38 @@ def score_gene_set(model: CoxPHModel, gene_set: GeneSet, expr: pd.DataFrame,
     return model.predict_log_hazard(design_matrix(expr, gene_set, samples))
 
 
-def paired_bootstrap_difference(time, event, risk_ours, risk_comparator, *, n_boot: int = 1000,
-                                seed: int = 42) -> dict:
+def stratified_concordance_index(time, event, risk, strata) -> float:
+    """Harrell's C-index over pairs within the same stratum, summed over strata.
+
+    A pair is comparable when both patients share a stratum and the one with the
+    shorter time had an event; ties in risk score 0.5. With one stratum this equals
+    :func:`concordance_index`.
+    """
+    time = np.asarray(time, dtype=float)
+    event = np.asarray(event).astype(int)
+    risk = np.asarray(risk, dtype=float)
+    strata = np.asarray(strata)
+    if not (len(time) == len(event) == len(risk) == len(strata)):
+        raise ValueError("time, event, risk and strata must be the same length")
+    same = strata[:, None] == strata[None, :]
+    comparable = same & (time[:, None] < time[None, :]) & (event[:, None] == 1)
+    n_comp = comparable.sum()
+    if n_comp == 0:
+        raise ValueError("no comparable within-stratum pairs; cannot compute a C-index")
+    ri, rj = risk[:, None], risk[None, :]
+    concordant = (comparable & (ri > rj)).sum()
+    tied = (comparable & (ri == rj)).sum()
+    return float((concordant + 0.5 * tied) / n_comp)
+
+
+def paired_bootstrap_difference(time, event, risk_ours, risk_comparator, *, strata=None,
+                                n_boot: int = 1000, seed: int = 42) -> dict:
     """Paired percentile bootstrap of C(ours) - C(comparator) over the same patients.
 
-    Both risk vectors are fixed; only the patients are resampled, with the same indices
-    for both models in each resample.
+    Both risk vectors are fixed; only the patients are resampled, from the whole set,
+    with the same indices for both models in each resample. With ``strata``, every
+    C-index is :func:`stratified_concordance_index`; the unstratified values are
+    returned as well, descriptively.
     """
     time = np.asarray(time, dtype=float)
     event = np.asarray(event).astype(int)
@@ -216,20 +246,33 @@ def paired_bootstrap_difference(time, event, risk_ours, risk_comparator, *, n_bo
     b = np.asarray(risk_comparator, dtype=float)
     if not (len(time) == len(event) == len(a) == len(b)):
         raise ValueError("time, event and both risks must be the same length")
-    c_a = concordance_index(time, event, a)
-    c_b = concordance_index(time, event, b)
-    rng = np.random.default_rng(seed)
+    s = None if strata is None else np.asarray(strata)
+    if s is not None and len(s) != len(time):
+        raise ValueError("strata must be the same length as time")
+
+    def cidx(idx, risk):
+        if s is None:
+            return concordance_index(time[idx], event[idx], risk[idx])
+        return stratified_concordance_index(time[idx], event[idx], risk[idx], s[idx])
+
     n = len(time)
+    full = np.arange(n)
+    c_a, c_b = cidx(full, a), cidx(full, b)
+    rng = np.random.default_rng(seed)
     diffs = []
     for _ in range(n_boot):
         idx = rng.integers(0, n, size=n)
         try:
-            diffs.append(concordance_index(time[idx], event[idx], a[idx])
-                         - concordance_index(time[idx], event[idx], b[idx]))
+            diffs.append(cidx(idx, a) - cidx(idx, b))
         except ValueError:
             continue
     d = np.asarray(diffs, dtype=float)
-    return {"cindex_ours": c_a, "cindex_comparator": c_b, "difference": c_a - c_b,
-            "ci_low": float(np.quantile(d, 0.025)), "ci_high": float(np.quantile(d, 0.975)),
-            "n": n, "n_events": int(event.sum()), "n_boot_valid": len(diffs),
-            "n_boot": n_boot, "seed": seed}
+    out = {"cindex_ours": c_a, "cindex_comparator": c_b, "difference": c_a - c_b,
+           "ci_low": float(np.quantile(d, 0.025)), "ci_high": float(np.quantile(d, 0.975)),
+           "n": n, "n_events": int(event.sum()), "n_boot_valid": len(diffs),
+           "n_boot": n_boot, "seed": seed, "stratified": s is not None}
+    if s is not None:
+        out["unstratified_cindex_ours"] = concordance_index(time, event, a)
+        out["unstratified_cindex_comparator"] = concordance_index(time, event, b)
+        out["n_by_stratum"] = {str(k): int(v) for k, v in zip(*np.unique(s, return_counts=True))}
+    return out
