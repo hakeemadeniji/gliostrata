@@ -1094,3 +1094,8 @@ note: T2 was not recomputed on the sealed partition.
    CGGA table is present, which it never is in CI; a local run of that step reads CGGA
    identifiers and should be recorded in the ledger.
 3. T4 and T5 still need a real simulator and response surface (future plan 5.2).
+4. A checksum access after the seal. To confirm the quoted checksums, the eligibility
+   table's bytes were hashed with `sha256sum` outside the read guard, after the seal
+   commit. It read bytes only and inspected no value, and it matched (`43da219d…`). It is
+   recorded as ledger entry 12 (kind `checksum`, 2026-11-27T12:41:06Z), which says it was
+   made a few minutes before it was recorded.

@@ -193,7 +193,7 @@ Stage R1 (2026-11-27) added none and removed one, which leaves 170. Stage 3b add
 | Comparator model for T2's improvement row | **Placeholder.** "TO BE COMPLETED BY AUTHOR" |
 | Amendments logged | Ten dated entries: five of 2026-11-26 and five of 2026-11-27 (stage R1, wording and the fold-wise rerun; the T1 scoring sets in sections 3.3 and 4.5; T1's deconvolution result in a new section 2.4; section 5 brought up to date). Four of the 2026-11-26 entries are marked as written after CGGA was read; the T1 harmonisation rule and the first three 2026-11-27 entries are marked "No" (no data read for them); the last two are marked "Yes", written after T1's deconvolution row was run |
 | Machine-readable registration state | `configs/registration.yaml`. The OSF DOI is `null` until the deposit; the read guard reads it |
-| Access ledger | `data/access_ledger.jsonl`. 12 entries (0 to 11); 2 are value reads, both T2 and both before deposit; 2 are checksum-only accesses (6 and 7); 5 are schema or availability accesses (0, 1, 3, 4 and 11, the last the eligibility step of the external seal on 2026-11-27); and 3 (8 to 10) are an observation and two notes, not accesses |
+| Access ledger | `data/access_ledger.jsonl`. 13 entries (0 to 12); 2 are value reads, both T2 and both before deposit; 3 are checksum-only accesses (6, 7 and 12, the last a check of the eligibility table's checksum after the seal); 5 are schema or availability accesses (0, 1, 3, 4 and 11, the last the eligibility step of the external seal on 2026-11-27); and 3 (8 to 10) are an observation and two notes, not accesses |
 
 Until the deposit is made the project has no pre-registration in the formal sense, and
 T1 to T5 are exploratory. Source: `docs/preregistration.md` header and section 8.
