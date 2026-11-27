@@ -139,8 +139,19 @@ resolutions are pre-registered rather than chosen after the data is seen.
 3. **T3 tumour-growth RMSE "≤ 15% of final volume" — whose final volume, and over which
    curves?** *Registered resolution:* RMSE is computed over the full time course per PDX
    growth curve, normalised by that curve's own observed final volume, then averaged across
-   curves; the bootstrap resamples curves. **TO BE COMPLETED BY AUTHOR: the specific
-   published PDX growth-curve dataset(s) and the number of curves.**
+   curves; the bootstrap resamples curves. *The dataset is not named at deposit,
+   because no source has been verified; what is registered instead is the rule that
+   fixes it.* (a) *Unit:* one curve is one PDX model, control arm, mean volume per
+   time point, with at least three time points; the number of curves is the sample
+   size. (b) *Qualifying rule:* a source is usable only if it gives longitudinal
+   volumes, a control arm, and a subtype call or RNA-seq for every model, and it must
+   span the four Verhaak subtypes with at least ten curves. (c) *Candidates, none
+   verified:* the Mayo Clinic Brain Tumor PDX National Resource and the Alcaniz 2023
+   panel. (d) *How the unknowns are fixed:* the dataset and its curve count are
+   entered in section 8 on the day the data are obtained, before any model is
+   calibrated. (e) *Dates:* data in hand by 2027-01-15; calibration complete by
+   2027-03-01. If the data are not in hand by that date, this criterion is NOT
+   EVALUABLE (item 8) and the tumour-growth layer is presented as uncalibrated.
 4. **T4 personalisation variance is a count with no sampling distribution.** "≥ 3 distinct
    configs in top-5 across 50 patients" over one fixed cohort has no CI unless the cohort
    is itself resampled. *Registered resolution:* patients are bootstrap-resampled and the
@@ -151,9 +162,18 @@ resolutions are pre-registered rather than chosen after the data is seen.
    injection-site set, with dose and schedule ignored for this count.
 5. **T4 regret reduction "≥ 25% lower regret" needs a regret definition.** *Registered
    resolution:* regret is the simple regret against the best configuration found by any
-   method in the shared evaluation budget, at a fixed, pre-declared budget of
-   **TO BE COMPLETED BY AUTHOR: number of objective evaluations**; the comparison is
-   paired per patient and the Wilcoxon signed-rank test is two-sided.
+   method in the shared evaluation budget, at a fixed, pre-declared budget of **60
+   objective evaluations per patient per method, initial design included**: GP-EI
+   spends 12 points on its Sobol initial design and 48 on GP iterations, and random
+   search makes 60 uniform draws. 60 is the optimizer code's existing default; it was
+   not tuned on any data and will not be recalibrated on the external cohort.
+   *Tie rule:* a patient whose regret is zero under both methods is a tie and is
+   dropped by the signed-rank test. At most 20 tied patients are tolerated; if more
+   are tied, the p-value is still reported but this threshold is INCONCLUSIVE
+   whatever its value, and it is not re-run after dropping patients. That is a
+   registered exception to section 6, under which a signed-rank p >= 0.01 is FAIL.
+   The comparison is paired per patient and the Wilcoxon signed-rank test is
+   two-sided.
 6. **T5 success and safety are defined on *predicted* outcomes.** Both metrics are
    computed from the project's own survival model, so T5 is a statement about internal
    consistency of the framework, not about realised patient benefit. This is registered
@@ -163,11 +183,42 @@ resolutions are pre-registered rather than chosen after the data is seen.
    protocol.** *Registered resolution:* both are drawn from the frozen external test
    partition (§4), never from the development cohort, and the T4 fifty are the first fifty
    by sorted patient id within that partition, so the selection is not outcome-dependent.
+   *Eligibility for that partition, registered in advance:* CGGA patients with an
+   RNA-seq profile, a survival outcome and a usable identifier mapping (at most 218
+   patients). Every eligible patient is held out; the external cohort has no training
+   split. The manifest is sealed after the single T2 read (section 2.3) and before any
+   T4 or T5 computation, and that ordering is recorded in section 8.
 8. **T3 depends on inputs that may never arrive.** NSC-migration validation requires in
    vivo tracking data that is published only in aggregate form in some sources. If the
    required data cannot be obtained, T3 is reported as **not evaluable**, with the reason
    stated, and the framework's simulation layer is presented as uncalibrated. This is
    distinct from a FAIL.
+9. **T1 subtype accuracy: which CGGA patients are scored, with which interval, and
+   below which n the criterion cannot be decided.** CGGA's reference Verhaak labels
+   exist only in its microarray batch, so the scoring set decides whether the 0.88
+   threshold can be decided at all. *Registered resolution:* (a) *Scoring set:* the
+   108 CGGA microarray patients that carry a reference label. The classifier is
+   trained on RNA-seq, so this is a cross-platform evaluation and is reported as
+   such. The 28 of these patients that also have RNA-seq are reported descriptively
+   and are not part of the criterion: on 28 patients even a perfect 28 of 28 falls
+   short (exact 95% lower bound 0.8766). (b) *Interval:* the exact binomial
+   (Clopper-Pearson) two-sided 95% interval, whose lower bound is the decisive
+   bound, replacing the percentile bootstrap for this metric only (section 3.1).
+   (c) *Minimum n:* if fewer than 30 labelled patients are available when T1 is run,
+   this criterion is NOT EVALUABLE rather than failed. A perfect score first clears
+   at 29 patients (0.8806); 30 is registered as the floor: 30 of 30 gives 0.8843 and
+   29 of 30 gives 0.8278. (d) *Harmonisation:* **TO BE COMPLETED BY AUTHOR: the
+   cross-platform harmonisation method.** It is entered in section 8 before the
+   microarray expression matrix is examined.
+10. **T1 state-deconvolution r has no ground truth in the project.** *Registered
+    resolution:* the truth is 100 pseudo-bulk mixtures simulated from the Neftel
+    2019 single-cell atlas (GEO GSE131928; 28 glioblastoma tumours) with imposed
+    Dirichlet random mixing weights; the imposed weights are what the estimated
+    fractions are correlated with. For item 1, "patients" here means mixtures and the
+    bootstrap resamples mixtures. Because the truth is simulated, this tests
+    recovery of known proportions and is an optimistic test; it is reported as such.
+    A CIBERSORTx run, if one is done, is a post-hoc sensitivity analysis and is
+    labelled exploratory.
 
 ### 2.3 Outcome of T2, recorded after the external read (2026-11-26)
 
@@ -272,7 +323,10 @@ The resampling unit is the **patient** (not the sample, row, or state-patient pa
 that multi-sample patients cannot inflate precision. Bootstrap seeds are fixed and
 recorded. Percentile intervals are used; where a metric is bounded (accuracy, fractions,
 correlations) the interval is clipped to the metric's natural range and the clipping is
-reported.
+reported. One exception is registered in advance: T1 subtype accuracy uses the exact
+binomial (Clopper-Pearson) interval instead (section 2.2, item 9), because a percentile
+bootstrap over a sample in which every patient is classified correctly is degenerate
+(lower = point = upper = 1.00) and would clear any threshold.
 
 ### 3.2 Multiple-comparison correction
 
@@ -413,7 +467,7 @@ is never a routine re-run.
 | Partition | Cohort | n | Split | Seed | Role | Sealed |
 | --- | --- | --- | --- | --- | --- | --- |
 | `tcga_gbm_clinical_v1` | TCGA-GBM clinical-only | 583 | 419 train / 164 test | 20251126 | **Development.** Internal held-out set for model-selection discipline. **Not** a pre-registered external test. | Yes (2026-11-26) |
-| `cgga_external_v1` | CGGA | — | — | — | Primary external test for T1, T2 | **Not created.** CGGA downloaded (commit e361bed) and read once for the single registered confirmatory evaluation, T2 (commit 7f4bd28), on the ingested cohort as a whole. Disclosed deviation from section 3.3; see section 2.3. |
+| `cgga_external_v1` | CGGA | — | — | — | Primary external test for T1, T2, T4 and T5 | **Not created.** CGGA downloaded (commit e361bed) and read once for the single registered confirmatory evaluation, T2 (commit 7f4bd28), on the ingested cohort as a whole. Disclosed deviation from section 3.3; see section 2.3. To be created as an all-test seal over the eligible patients of section 2.2 item 7 (at most 218), after the T2 read and before any T4 or T5 computation. |
 | `glass_external_v1` | GLASS | — | — | — | Longitudinal external test | **Not yet created — cohort not downloaded** |
 
 `tcga_gbm_clinical_v1` is unstratified because the `subtype` column of the current cohort
@@ -472,7 +526,7 @@ interim.**
 | **PASS** | The decisive 95% CI bound clears the threshold, and every registered side condition (T5's point-estimate limit, T4's Wilcoxon test) also holds. | Threshold met. |
 | **INCONCLUSIVE** | The point estimate is on the right side of the threshold but the decisive CI bound does not clear it; or a required auxiliary test was not reported. | Threshold **not** met; reported as an imprecise result, with the CI and the sample size that produced it. Never reported as a pass, and never as a trend toward one. |
 | **FAIL** | The point estimate itself misses the threshold; or a registered side condition is definitively violated (harm point estimate > 10%, Wilcoxon p ≥ 0.01). | Threshold not met; achieved value reported in full with its CI. |
-| **NOT EVALUABLE** | The data required to compute the metric could not be obtained, or a comparator could not be re-run on the frozen partition (see §2.2 items 2, 3, 8). | Reported as not evaluable, with the specific missing input named. Never pooled with PASS. |
+| **NOT EVALUABLE** | The data required to compute the metric could not be obtained, or a comparator could not be re-run on the frozen partition (see §2.2 items 2, 3, 8, 9). | Reported as not evaluable, with the specific missing input named. Never pooled with PASS. |
 
 Rules that bind regardless of outcome:
 
@@ -517,6 +571,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | Date | Section | Change | Reason | Test data already read? |
 | --- | --- | --- | --- | --- |
 | 2026-11-26 | 2.3 (added) | New subsection 2.3 added to record the outcome of protocol test T2 (external C-index >= 0.65 on CGGA), which was evaluated and not met. It changes no threshold, no decisive bound, no decision rule, and no other test's status. Full account: `docs/cgga_validation.md`; result file: `data/results/cgga/cox_external_validation.json`. | Records a result rather than a plan. The committed model is NOT EVALUABLE on CGGA (no KPS); the transferable model scored an external C-index of 0.5385 (95% CI 0.4994 to 0.5807). | **Yes.** Written after the CGGA external read and disclosed as such. The evaluation ran without a sealed `cgga_external_v1` manifest (section 4.5). |
+| 2026-11-26 | 2.2 items 3, 5, 7 (completed), 2.2 items 9 and 10 (added), 3.1 (one exception), 4.5 (`cgga_external_v1` row), 6 (cross-reference) | Completed the two items left open at draft stage: the T3 growth-curve rule and dates (item 3) and the T4 evaluation budget and tie rule (item 5). Registered the eligibility and sealing order of the external partition (item 7). Added the T1 subtype-accuracy guard rails (item 9: scoring set, exact interval, minimum n) and the T1 deconvolution ground truth (item 10). No threshold, no decisive bound and no metric changed. | The protocol left these under-specified, and each is a choice that could otherwise be made after seeing the data. The microarray harmonisation method (item 9d) is still open. | **Yes.** CGGA had been ingested and read once for T2 before this entry. None of T1, T3, T4 or T5 has been evaluated, and the counts used here (108 labelled patients, 28 with RNA-seq, 218 eligible) come from the schema-level ingest report, not from any model result. |
 
 ---
 
