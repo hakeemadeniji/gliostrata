@@ -60,8 +60,8 @@ intervention with no detectable personalisation signal in currently available pu
 If the optimizer converges to a single universal recommendation across all patients, the
 framework has not personalised therapy; it has rediscovered the existing fixed-payload
 approach under another name. H2 states that across a held-out cohort of fifty patients,
-the top-five recommended configurations **include at least three distinct payload/site
-combinations**.
+the top-five recommended configurations **include at least three distinct configurations**:
+distinct in carrier cell type, payload or number of injection sites (section 2.2 item 4).
 
 Pre-registered operationalisation: `T4_personalization_distinct_configs` ≥ 3.
 
@@ -241,7 +241,19 @@ resolutions are pre-registered rather than chosen after the data is seen.
    performed the CI is reported as degenerate (lower = point = upper) and labelled as such.
    Note also that "distinct configs" needs an equivalence rule: *registered resolution* —
    two configurations are the same if and only if they share carrier cell type, payload and
-   injection-site set, with dose and schedule ignored for this count.
+   number of injection sites, with dose and schedule ignored for this count. (The wording
+   "injection-site set" was corrected on 2026-11-27, because the configuration space has a
+   number of sites, not a set of locations.) *The configuration space, registered
+   2026-11-27 as coded in `src/gliostrata/optimization/config_space.py`:*
+   - carrier cell type: iPSC-NSC, MSC or HB1_F3_line;
+   - payload: CRAd, prodrug_enzyme, CAR or combo;
+   - dose: 1 x 10^6 to 5 x 10^7 cells (continuous);
+   - number of injection sites: 1 to 8 (integer);
+   - schedule: single, fractionated_x2 or fractionated_x3.
+
+   Two cell type x payload pairs are excluded as incompatible: HB1_F3_line x CAR and
+   MSC x CRAd. That leaves 10 cell type x payload pairs, so 240 discrete combinations with
+   dose as the one continuous dimension.
 5. **T4 regret reduction "≥ 25% lower regret" needs a regret definition.** *Registered
    resolution:* regret is the simple regret against the best configuration found by any
    method in the shared evaluation budget, at a fixed, pre-declared budget of **60
@@ -260,7 +272,8 @@ resolutions are pre-registered rather than chosen after the data is seen.
    computed from the project's own survival model, so T5 is a statement about internal
    consistency of the framework, not about realised patient benefit. This is registered
    explicitly: no T5 result may be described as a survival benefit, only as a *predicted*
-   RMST gain, and its credibility is bounded above by T2's result.
+   RMST gain, and its credibility is bounded above by T2's result. The RMST horizon, the
+   Stupp baseline, success and harm are defined in item 11.
 7. **"Held-out patients" for T5 and the 50-patient cohort for T4 are not named in the
    protocol.** *Registered resolution:* both are drawn from the frozen external test
    partition (§4), never from the development cohort, and the T4 fifty are the first fifty
@@ -335,6 +348,28 @@ resolutions are pre-registered rather than chosen after the data is seen.
     recovery of known proportions and is an optimistic test; it is reported as such.
     A CIBERSORTx run, if one is done, is a post-hoc sensitivity analysis and is
     labelled exploratory.
+11. **T4 and T5 need a model that does not yet exist** (registered 2026-11-27). The
+    simulator (L4) and the model that turns a configuration into a predicted survival
+    curve (the response surface) are stubs at the time of deposit. *Registered
+    resolution:*
+    (a) *Stupp baseline.* For each patient, the predicted survival under standard therapy
+    is the survival model's prediction with the treatment arm set to radiotherapy plus
+    temozolomide, and no stem-cell configuration.
+    (b) *Predicted RMST.* The restricted mean survival time to tau = 24 months, the area
+    under the predicted survival curve from 0 to 24 months. The gain of a configuration is
+    RMST(configuration) minus RMST(Stupp).
+    (c) *T5.* A patient is a success if the gain of the configuration chosen for them is at
+    least 3 months, and a harm if the gain is below 0.
+    (d) *T4.* The optimisation objective is the predicted RMST at tau = 24 months, and
+    regret (item 5) is measured in months of that RMST.
+    (e) *Contingent specification.* T4 and T5 start only after the simulator, the response
+    surface and the survival model they call are frozen and versioned, and entered in
+    section 8 with their checksums, by a dated amendment made before any T4 or T5 read of
+    CGGA. Such an amendment changes no threshold, bound or decision rule. It is
+    confirmatory because it precedes the read, and it is reported as specified after the
+    deposit.
+    (f) *Closing rule.* If they are not frozen by 2027-06-30, T4 and T5 are closed as NOT
+    EVALUABLE, the reason is stated, and H1 and H2 are reported as untested.
 
 ### 2.3 Outcome of T2, recorded after the external read (2026-11-26)
 
@@ -597,6 +632,11 @@ result is expressed as clinical utility rather than only as a discrimination sta
 
 ### 3.6 Sensitivity analyses (pre-specified, labelled exploratory)
 
+*Scope (registered 2026-11-27).* These analyses run only inside the reads already
+registered: T1, T2's improvement row, T4 and T5. They use the same data, are labelled
+exploratory, and never change a verdict. An analysis that would need a further read of
+CGGA is not run. T2's C-index and Brier rows, already evaluated, get none.
+
 1. Missing-data imputation: complete-case vs multiple imputation, reported side by side.
 2. Batch-effect correction: with and without cross-cohort harmonisation.
 3. Subgroup analysis by Verhaak subtype, MGMT methylation status and IDH status.
@@ -612,6 +652,50 @@ Code (GitHub plus a Zenodo DOI), container images, trained model weights, the fe
 store, and every partition manifest are released with the paper. The threshold-table
 checksum and the partition manifests are sufficient for a third party to confirm that the
 reported thresholds and partitions are the registered ones.
+
+### 3.8 Model checks and controls (registered 2026-11-27)
+
+None of these changes a model, an analysis or a verdict. Each runs inside a read already
+registered, so none adds an access to CGGA.
+
+1. **Proportional hazards.** Every Cox model fitted for a registered read is reported with
+   the Grambsch-Therneau test on scaled Schoenfeld residuals, per term and globally.
+   Event times are rank-transformed, as in R's `survival::cox.zph` (survival 2.x). The
+   implementation is `gliostrata.prediction.ph_test`; it matched lifelines to six decimals
+   on a reference case. A violation is reported as a limitation.
+   *Already known at registration:* the TCGA fit of variant 2, the model on our side of
+   T2's improvement row, violates proportional hazards in age (p = 0.0002; global
+   p = 0.0006). This was found when the synthetic dry run of item 3 was first run, before
+   the deposit. It changes nothing in the registered analysis.
+2. **Negative control.** In each read, each risk score's C-index is also computed against
+   outcomes permuted within CGGA batch: 1000 permutations, seed 42, with time and event
+   kept together. The mean and 95% range are reported; about 0.5 is expected.
+3. **Synthetic dry run.** Before each real read, the exact evaluation script runs end to
+   end on synthetic files in the formats of the real inputs, and its output is committed.
+   T2's improvement-row script refuses the real read until the dry-run output exists.
+4. **Positive controls already in place.** These are not new rows:
+   - T1's deconvolution row recovers proportions that are known by construction;
+   - T2's internal sanity check reproduces the committed C-index of variant 1 (0.6735).
+
+### 3.9 Blinding and procedural safeguards (registered 2026-11-27)
+
+The project has one analyst, so no analysis is run blind to the design or the outcomes. The
+safeguards are procedural:
+- every design choice is made without reference to the external outcomes;
+- every rule and every script for a read is committed before that read;
+- external test partitions are sealed, and a manifest is re-derived from (seed, patient
+  id) in CI;
+- the read guard refuses any value read that is not registered, deposited and declared,
+  and records every access, of any kind, in an append-only ledger;
+- each verdict is produced by the registered threshold function, not by judgement;
+- the synthetic dry run of section 3.8 runs before each read.
+
+### 3.10 Outliers (registered 2026-11-27)
+
+No observation is removed, trimmed or winsorised for being extreme. Values are used as
+recorded at source. Known implausible values are disclosed rather than corrected: three
+TCGA patients have KPS 0 at source. KPS enters only the committed four-feature model,
+which cannot be scored on CGGA.
 
 ---
 
@@ -779,7 +863,10 @@ whose state and TME scores are cohort-relative over the 283 profiled patients, 8
 patients among them. One more TCGA analysis followed, for option B of T2's comparator
 (section 2.2 item 2 (j)): 23 published gene sets, each refitted and scored by 5-fold
 cross-validation on the 200 v2-training patients with RNA-seq, then the chosen set
-refitted on 282 patients. The
+refitted on 282 patients. Then the synthetic dry run of section 3.8, which reads no CGGA
+file. Its proportional-hazards tests ran on the two TCGA fits: variant 2 violates
+proportional hazards in age (p = 0.0002), and option B's refit does not (global
+p = 0.41). The
 partition demonstration quoted in §4.1 used patient identifiers and split assignments only
 — no outcome variable was examined in connection with any split.
 
@@ -880,6 +967,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 4.5 (no text changed; storage of the three manifests) | The SHA-256 values in section 4.5 are of the manifests as written, with CRLF line endings. Git had stored them with LF line endings, so a checkout outside Windows produced different bytes and failed to reproduce the registered checksums, although the content was identical. The manifests are now marked byte-exact in `.gitattributes` and stored as written. No partition, id, seed or checksum changed. | A registered checksum must reproduce on any platform. Found while preparing the deposit (`docs/deposit_checklist.md` item 2.5); approved by the project lead. | **Yes**, as for the entries above. No data was read for this entry. |
 | 2026-11-27 | 2.3 (decisions on T2's open items); 3.3 (GLASS removed); 3.4, 3.5 (as applied to T2); 4.5 (`glass_external_v1` row) | Wrote down five decisions that follow from registered text: the evaluation unit is the patient; T2 is FAIL on its C-index and Brier rows, and section 7's fallback applies; the two pre-seal reads are the reads of record, and T2 is not re-run; the KPS model is NOT EVALUABLE on CGGA; calibration and decision-curve analyses are not run for T2. GLASS is removed from section 3.3: no registered verdict needs it, because T2 is not re-run. No threshold, decisive bound, decision rule or partition changed. | These items were open in `docs/cgga_validation.md` sections 11 and 12.5 and `docs/deposit_checklist.md` items 1.3 to 1.5; a registration must not leave them implicit. | **Yes.** Written after CGGA had been read for T2. No data was read for this entry. |
 | 2026-11-27 | Header; 5 (data in hand; analyses already run) | Completed the header: the author and affiliations, a committee not yet appointed, no funding and no conflicts, the start of the confirmatory phase immediately after the deposit, the repository URL, and the registered commit as the tag `prereg-deposit`. Only the DOI and the deposit date remain, and they exist only after the deposit. GLASS was removed from the IRB data list. Section 5 now lists the CGGA accesses that read no values (ledger entries 11, 13, 16, 17) and the TCGA cross-validation of option B. No threshold, bound or rule changed. | The deposit needs a complete header, and section 5 must be true at the moment of deposit. | **Yes**, as for the entries above. No data was read for this entry. |
+| 2026-11-27 | 1.4 (H2 wording); 2.2 items 4, 6, 11 (added); 3.6 (scope); 3.8, 3.9, 3.10 (added); 5 | Answered the gaps found against the OSF study-design questions, with the project lead's choices. (1) T4 and T5 get a contingent model specification (item 11): a Stupp baseline; RMST to 24 months, success at a gain of 3 months or more and harm at a gain below 0; and the simulator and response surface frozen by amendment before any T4 or T5 read, or NOT EVALUABLE after 2027-06-30. (2) The configuration space is registered as coded, and the distinctness rule counts the number of injection sites, not a site set. (3) Sensitivity analyses run only inside registered reads. (4) Added a proportional-hazards test, a permutation negative control and a synthetic dry run; the variant 2 PH result on TCGA is disclosed. (5) No outlier removal. (6) Blinding is procedural only, with one analyst. No threshold, decisive bound or decision rule changed. | The OSF study-design form asks for each of these; the registration left them open or implicit. | **Yes**, as for the entries above. No CGGA value was read; the dry run used synthetic files, and its PH tests used TCGA. |
 
 ---
 

@@ -188,3 +188,17 @@ def test_primary_config_matches_the_printed_formula():
     for gene, coef in cfg["coefficients"].items():
         assert f"Exp ({gene})" in cfg["formula_as_printed"]
         assert f"{abs(coef)}" in cfg["formula_as_printed"]
+
+
+def test_permuted_outcome_control_centres_on_one_half():
+    from gliostrata.prediction.geneset_comparator import permuted_outcome_control
+
+    rng = np.random.default_rng(11)
+    risk = rng.normal(size=120)
+    time, event = _survival(risk)
+    strata = np.repeat(["a", "b"], 60)
+    out = permuted_outcome_control(time, event, {"score": risk}, strata, n_perm=200, seed=1)
+    s = out["scores"]["score"]
+    assert abs(s["mean"] - 0.5) < 0.02 and s["q025"] < 0.5 < s["q975"]
+    again = permuted_outcome_control(time, event, {"score": risk}, strata, n_perm=200, seed=1)
+    assert again == out

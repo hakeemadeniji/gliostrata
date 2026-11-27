@@ -47,6 +47,7 @@ __all__ = [
     "stratified_concordance_index",
     "score_published",
     "paired_bootstrap_difference",
+    "permuted_outcome_control",
 ]
 
 CV_SEED = 42
@@ -295,3 +296,34 @@ def paired_bootstrap_difference(time, event, risk_ours, risk_comparator, *, stra
         out["unstratified_cindex_comparator"] = concordance_index(time, event, b)
         out["n_by_stratum"] = {str(k): int(v) for k, v in zip(*np.unique(s, return_counts=True))}
     return out
+
+
+def permuted_outcome_control(time, event, risks: dict, strata, *, n_perm: int = 1000,
+                             seed: int = 42) -> dict:
+    """Negative control (pre-registration section 3.8).
+
+    Each risk score's batch-stratified C-index is recomputed against outcomes permuted
+    within each stratum, with (time, event) kept together. With no real link between
+    the score and the outcome it should sit near 0.5. The same permutations are used for
+    every score.
+    """
+    time = np.asarray(time, dtype=float)
+    event = np.asarray(event).astype(int)
+    strata = np.asarray(strata)
+    rng = np.random.default_rng(seed)
+    groups = [np.flatnonzero(strata == s) for s in np.unique(strata)]
+    draws = {name: [] for name in risks}
+    for _ in range(n_perm):
+        perm = np.arange(len(time))
+        for g in groups:
+            perm[g] = rng.permutation(g)
+        for name, risk in risks.items():
+            draws[name].append(stratified_concordance_index(time[perm], event[perm],
+                                                            np.asarray(risk, float), strata))
+    out = {}
+    for name, vals in draws.items():
+        v = np.asarray(vals)
+        out[name] = {"mean": float(v.mean()), "q025": float(np.quantile(v, 0.025)),
+                     "q975": float(np.quantile(v, 0.975))}
+    return {"n_perm": n_perm, "seed": seed, "within": "stratum", "scores": out}
+

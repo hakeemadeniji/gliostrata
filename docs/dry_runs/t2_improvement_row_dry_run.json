@@ -1,0 +1,193 @@
+{
+ "primary": {
+  "cindex_ours": 0.4833860759493671,
+  "cindex_comparator": 0.5759493670886076,
+  "difference": -0.09256329113924044,
+  "ci_low": -0.2556554944014713,
+  "ci_high": 0.07081821442133246,
+  "n": 60,
+  "n_events": 44,
+  "n_boot_valid": 1000,
+  "n_boot": 1000,
+  "seed": 42,
+  "stratified": true,
+  "unstratified_cindex_ours": 0.4938625204582651,
+  "unstratified_cindex_comparator": 0.544189852700491,
+  "n_by_stratum": {
+   "mRNAseq_325": 24,
+   "mRNAseq_693": 36
+  },
+  "verdict": {
+   "metric_key": "T2_cindex_improvement_vs_baseline",
+   "test_id": "T2",
+   "metric": "Improvement over best-published 2024 baseline",
+   "status": "FAIL",
+   "point_estimate": -0.09256329113924044,
+   "ci_lower": -0.2556554944014713,
+   "ci_upper": 0.07081821442133246,
+   "threshold": 0.03,
+   "direction": "gte",
+   "ci_bound": "lower",
+   "decisive_value": -0.2556554944014713,
+   "reason": "FAIL: point estimate -0.0925633 does not clear >= 0.03; 95% CI lower bound -0.255655 does not clear >= 0.03.",
+   "justification": "Demonstrate improvement, not parity, against the 2024 state of the art.",
+   "auxiliary_requirement": null,
+   "auxiliary_satisfied": null
+  },
+  "comparator_pmid": "38174685"
+ },
+ "secondary_option_b": {
+  "cindex_ours": 0.4833860759493671,
+  "cindex_comparator": 0.4825949367088608,
+  "difference": 0.0007911392405063333,
+  "ci_low": -0.16080437876394943,
+  "ci_high": 0.15331966728563773,
+  "n": 60,
+  "n_events": 44,
+  "n_boot_valid": 1000,
+  "n_boot": 1000,
+  "seed": 42,
+  "stratified": true,
+  "unstratified_cindex_ours": 0.4938625204582651,
+  "unstratified_cindex_comparator": 0.4664484451718494,
+  "n_by_stratum": {
+   "mRNAseq_325": 24,
+   "mRNAseq_693": 36
+  },
+  "comparator_pmid": "38174685",
+  "note": "descriptive only; carries no verdict (pre-registration 2.2 item 2 (j))"
+ },
+ "checks": {
+  "negative_control": {
+   "n_perm": 1000,
+   "seed": 42,
+   "within": "stratum",
+   "scores": {
+    "variant_2": {
+     "mean": 0.5000094936708861,
+     "q025": 0.38924050632911394,
+     "q975": 0.6068433544303797
+    },
+    "primary": {
+     "mean": 0.5004857594936709,
+     "q025": 0.3939873417721519,
+     "q975": 0.6044303797468354
+    },
+    "secondary_option_b": {
+     "mean": 0.4994240506329114,
+     "q025": 0.39236550632911393,
+     "q975": 0.6091772151898734
+    }
+   }
+  },
+  "ph_test_variant_2_tcga": {
+   "transform": "rank",
+   "n": 570,
+   "n_deaths": 472,
+   "terms": [
+    {
+     "term": "age",
+     "rho": -0.17316886403570356,
+     "chisq": 14.361737885987232,
+     "df": 1,
+     "p": 0.00015083639775368592
+    },
+    {
+     "term": "sex_F",
+     "rho": -0.07507225433753882,
+     "chisq": 2.741455882079098,
+     "df": 1,
+     "p": 0.09777564955677545
+    },
+    {
+     "term": "treatment_arm_MonoTherapy",
+     "rho": -0.04481025918344678,
+     "chisq": 0.9517777661353825,
+     "df": 1,
+     "p": 0.3292671947130468
+    },
+    {
+     "term": "treatment_arm_NoAdjuvant",
+     "rho": 0.04343595803365155,
+     "chisq": 0.8839504279572699,
+     "df": 1,
+     "p": 0.3471219671341227
+    }
+   ],
+   "global": {
+    "chisq": 19.663852382995465,
+    "df": 4,
+    "p": 0.0005817741236363525
+   }
+  },
+  "ph_test_option_b_tcga": {
+   "transform": "rank",
+   "n": 282,
+   "n_deaths": 228,
+   "terms": [
+    {
+     "term": "CPPED1",
+     "rho": 0.05164975485158194,
+     "chisq": 0.5552174594542902,
+     "df": 1,
+     "p": 0.45619364481860336
+    },
+    {
+     "term": "F3",
+     "rho": -0.0454768429782427,
+     "chisq": 0.5275585051380187,
+     "df": 1,
+     "p": 0.46763512705520316
+    },
+    {
+     "term": "G0S2",
+     "rho": -0.07631939147252201,
+     "chisq": 1.4049074055502229,
+     "df": 1,
+     "p": 0.23590363601166833
+    },
+    {
+     "term": "MAPK1",
+     "rho": 0.002731250127746818,
+     "chisq": 0.0020099749059411787,
+     "df": 1,
+     "p": 0.9642406256406617
+    },
+    {
+     "term": "MME",
+     "rho": -0.10121352495240993,
+     "chisq": 2.7589023833031523,
+     "df": 1,
+     "p": 0.09671457223242816
+    },
+    {
+     "term": "MMP9",
+     "rho": 0.07615944206721877,
+     "chisq": 1.4412158855392476,
+     "df": 1,
+     "p": 0.22994268505881185
+    },
+    {
+     "term": "MPO",
+     "rho": 0.053643196619958165,
+     "chisq": 0.6420912664146602,
+     "df": 1,
+     "p": 0.42295453235960434
+    }
+   ],
+   "global": {
+    "chisq": 7.163512101241683,
+    "df": 7,
+    "p": 0.41205607460656013
+   }
+  },
+  "note": "section 3.8: reported, never decisive"
+ },
+ "flow": {
+  "n_input": 60,
+  "n_dropped_missing_feature": 0,
+  "n_dropped_missing_outcome": 0,
+  "n_unseen_category": 0
+ },
+ "synthetic": true
+}
