@@ -84,8 +84,9 @@ class TestHashPrimitives:
     def test_assign_split_rejects_bad_fraction(self):
         with pytest.raises(ValueError, match="test_fraction"):
             assign_split("PT-0001", seed=SEED, test_fraction=0.0)
-        with pytest.raises(ValueError, match="test_fraction"):
-            assign_split("PT-0001", seed=SEED, test_fraction=1.0)
+        # 1.0 is valid (an all-test partition); anything above it is not.
+        with pytest.raises(ValueError, match=r"must be in \(0, 1\]"):
+            assign_split("PT-0001", seed=SEED, test_fraction=1.5)
 
     def test_sha256_over_ids_is_order_independent(self):
         assert sha256_over_ids(["b", "a", "c"]) == sha256_over_ids(["c", "b", "a"])
@@ -428,6 +429,118 @@ class TestSeal:
 # ---------------------------------------------------------------------------
 # Verification / drift detection
 # ---------------------------------------------------------------------------
+
+
+class TestAllTestPartition:
+    """``test_fraction=1.0`` holds out every patient: the seal for an external cohort.
+
+    An external cohort has no training data, so its frozen partition is an empty
+    training list and a test list of every patient id.
+    """
+
+    def test_every_patient_is_held_out(self):
+        cohort = make_cohort(300)
+        result = partition_cohort(cohort, seed=SEED, test_fraction=1.0)
+        assert result.n_train == 0
+        assert result.train_ids == ()
+        assert result.test_ids == tuple(sorted(cohort["patient_id"]))
+        assert result.n_test == 300
+        assert result.test_fraction == 1.0
+        assert set(result.assignments().values()) == {"test"}
+
+    def test_duplicate_ids_are_collapsed(self):
+        cohort = pd.concat([make_cohort(50), make_cohort(50).head(7)], ignore_index=True)
+        result = partition_cohort(cohort, seed=SEED, test_fraction=1.0)
+        assert result.n_test == 50
+        assert result.n_train == 0
+
+    def test_is_independent_of_row_order_and_of_other_patients(self):
+        cohort = make_cohort(300)
+        full = partition_cohort(cohort, seed=SEED, test_fraction=1.0)
+        part = partition_cohort(
+            cohort.sample(frac=0.5, random_state=3), seed=SEED, test_fraction=1.0
+        )
+        assert part.n_train == 0
+        assert set(part.test_ids) <= set(full.test_ids)
+        assert part.n_test == len(part.test_ids)
+
+    def test_fraction_above_one_is_rejected(self):
+        with pytest.raises(ValueError, match=r"must be in \(0, 1\]"):
+            partition_cohort(make_cohort(10), seed=SEED, test_fraction=1.01)
+        with pytest.raises(ValueError, match=r"must be in \(0, 1\]"):
+            assign_split("PT-0001", seed=SEED, test_fraction=1.5)
+
+    def test_assign_split_at_one_is_always_test(self):
+        assert all(
+            assign_split(f"PT-{i:04d}", seed=SEED, test_fraction=1.0) == "test"
+            for i in range(200)
+        )
+
+    def test_stratified_all_test_balance_is_one(self):
+        result = partition_cohort(make_cohort(80), seed=SEED, stratify_by="subtype",
+                                  test_fraction=1.0)
+        assert all(row["test_fraction"] == 1.0 for row in stratum_balance(result).values())
+
+    def test_freeze_seals_with_an_empty_training_list(self, cohort_file, tmp_path):
+        cohort, path = cohort_file
+        result, manifest, mpath = freeze_partition(
+            cohort,
+            cohort_source=path,
+            manifest_path=tmp_path / "ext.json",
+            partition_name="ext_v1",
+            seed=SEED,
+            test_fraction=1.0,
+        )
+        assert result.n_train == 0
+        assert manifest.sealed is True
+        assert manifest.test_fraction == 1.0
+        assert manifest.n_train == 0
+        assert manifest.n_test == 300
+        assert manifest.train_ids == ()
+        assert manifest.train_ids_sha256 == sha256_over_ids([])
+        data = json.loads(mpath.read_text(encoding="utf-8"))
+        assert data["train_ids"] == []
+        assert len(data["test_ids"]) == 300
+        assert read_manifest(mpath).to_dict() == manifest.to_dict()
+
+    def test_verify_passes_and_detects_a_dropped_patient(self, cohort_file, tmp_path):
+        cohort, path = cohort_file
+        _, manifest, _ = freeze_partition(
+            cohort,
+            cohort_source=path,
+            manifest_path=tmp_path / "ext.json",
+            partition_name="ext_v2",
+            seed=SEED,
+            test_fraction=1.0,
+        )
+        assert verify_partition(manifest, cohort, cohort_source=path).ok
+        dropped = tuple(sorted(cohort["patient_id"]))[:1]
+        report = verify_partition(manifest, cohort.iloc[1:], cohort_source=path)
+        assert not report.ok
+        assert report.removed_ids == dropped
+        assert report.added_ids == () and report.moved_ids == ()
+
+    def test_sealed_all_test_manifest_refuses_overwrite(self, cohort_file, tmp_path):
+        cohort, path = cohort_file
+        mpath = tmp_path / "ext.json"
+        freeze_partition(
+            cohort,
+            cohort_source=path,
+            manifest_path=mpath,
+            partition_name="ext_v3",
+            seed=SEED,
+            test_fraction=1.0,
+        )
+        with pytest.raises(PartitionSealedError):
+            freeze_partition(
+                cohort,
+                cohort_source=path,
+                manifest_path=mpath,
+                partition_name="ext_v3",
+                seed=SEED + 1,
+                test_fraction=1.0,
+            )
+        assert read_manifest(mpath).seed == SEED
 
 
 class TestVerify:

@@ -38,6 +38,15 @@ test fraction equal to ``test_fraction`` independently of the others; the
 achieved fraction is close to, but not exactly, the target. That trade-off is
 deliberate and is recorded in ``docs/preregistration.md``.
 
+All-test partitions
+-------------------
+A test fraction of exactly ``1.0`` holds out every patient: the training list is
+empty and the test list is every unique patient id. That is the correct seal for
+an external cohort, which has no training data. It is produced by the same hash
+rule (every ``u`` lies in ``[0, 1)`` and is therefore below 1.0), so it keeps the
+determinism properties above and needs no second code path. The CLI spells it
+``--all-test``.
+
 Sealing
 -------
 :func:`write_manifest` with ``seal=True`` marks a manifest as frozen. Re-running
@@ -115,10 +124,11 @@ def assign_split(
     """Return ``"train"`` or ``"test"`` for one patient.
 
     Depends only on its arguments -- never on any other patient, on row order,
-    or on cohort size.
+    or on cohort size. A ``test_fraction`` of exactly ``1.0`` assigns ``"test"``
+    always: an all-test partition, for an external cohort with no training data.
     """
-    if not 0.0 < test_fraction < 1.0:
-        raise ValueError(f"test_fraction must be in (0, 1), got {test_fraction!r}.")
+    if not 0.0 < test_fraction <= 1.0:
+        raise ValueError(f"test_fraction must be in (0, 1], got {test_fraction!r}.")
     u = hash_unit_interval(_split_key(str(patient_id), seed, stratum))
     return "test" if u < test_fraction else "train"
 
@@ -206,7 +216,10 @@ def partition_cohort(
         it produces a different partition and is a pre-registration amendment.
     test_fraction:
         Target fraction of patients held out. Achieved fraction is close to but
-        not exactly this value, by construction (see module docstring).
+        not exactly this value, by construction (see module docstring). The one
+        exception is exactly ``1.0``, which holds out every patient: an
+        all-test partition with an empty training list, for an external cohort
+        that has no training data.
     stratify_by:
         Optional column whose value stratifies the hash. Must be constant per
         patient; a patient with conflicting values raises.
@@ -218,14 +231,15 @@ def partition_cohort(
     ------
     ValueError
         For a missing id/stratum column, an empty cohort, null patient ids, a
-        bad ``test_fraction``, or a patient with inconsistent stratum values.
+        ``test_fraction`` outside ``(0, 1]``, or a patient with inconsistent
+        stratum values.
     """
     if patient_id_col not in cohort.columns:
         raise ValueError(
             f"Cohort has no '{patient_id_col}' column; columns are {list(cohort.columns)}."
         )
-    if not 0.0 < test_fraction < 1.0:
-        raise ValueError(f"test_fraction must be in (0, 1), got {test_fraction!r}.")
+    if not 0.0 < test_fraction <= 1.0:
+        raise ValueError(f"test_fraction must be in (0, 1], got {test_fraction!r}.")
     if len(cohort) == 0:
         raise ValueError("Cannot partition an empty cohort.")
 

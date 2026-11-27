@@ -1,8 +1,10 @@
 """CLI smoke tests — verify the gliostrata command works end-to-end."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
 
 from gliostrata import __version__
@@ -145,3 +147,60 @@ def test_cli_manual_layer_by_layer(tmp_path):
     ])
     assert result.exit_code == 0, f"generate-protocol failed:\n{result.output}\n{result.exception!r}"
     assert len(list(protocols_dir.glob("*.json"))) == n
+
+
+def _write_id_cohort(path, n=12):
+    """A minimal cohort: patient ids only, which is all freeze-partition needs."""
+    import pandas as pd
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame({"patient_id": [f"EXT-{i:03d}" for i in range(n)]}).to_parquet(
+        path, index=False
+    )
+
+
+def test_cli_freeze_partition_all_test_seals_every_patient(tmp_path):
+    """`--all-test` writes a sealed manifest with no training split (external cohort)."""
+    cohort = tmp_path / "cohort.parquet"
+    manifest = tmp_path / "ext.json"
+    _write_id_cohort(cohort)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["freeze-partition", "--input", str(cohort), "--manifest", str(manifest),
+         "--all-test"],
+    )
+    assert result.exit_code == 0, result.output
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    assert data["sealed"] is True
+    assert data["test_fraction"] == 1.0
+    assert data["n_train"] == 0
+    assert data["n_test"] == 12
+    assert data["train_ids"] == []
+    assert "0 train / 12 test" in result.output
+
+    verified = runner.invoke(
+        cli,
+        ["freeze-partition", "--input", str(cohort), "--manifest", str(manifest),
+         "--verify"],
+    )
+    assert verified.exit_code == 0, verified.output
+    assert "VERIFIED" in verified.output
+
+
+@pytest.mark.parametrize(
+    "conflicting", [["--test-fraction", "0.3"], ["--stratify-by", "subtype"]]
+)
+def test_cli_all_test_is_exclusive_with_split_options(tmp_path, conflicting):
+    """`--all-test` contradicts the split options; refuse before writing anything."""
+    cohort = tmp_path / "cohort.parquet"
+    manifest = tmp_path / "m.json"
+    _write_id_cohort(cohort)
+    result = CliRunner().invoke(
+        cli,
+        ["freeze-partition", "--input", str(cohort), "--manifest", str(manifest),
+         "--all-test", *conflicting],
+    )
+    assert result.exit_code == 2
+    assert "--all-test" in result.output
+    assert not manifest.exists()

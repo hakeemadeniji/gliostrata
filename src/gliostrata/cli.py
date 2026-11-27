@@ -309,6 +309,11 @@ if __name__ == "__main__":
                    "pre-registration amendment, not a re-run.")
 @click.option("--test-fraction", default=0.30, show_default=True, type=float,
               help="Target fraction of patients held out.")
+@click.option("--all-test", "all_test", is_flag=True,
+              help="Hold out EVERY patient (test fraction 1.0): an empty training "
+                   "split and a test split holding every patient id. This is the "
+                   "seal for an external cohort, which has no training data. "
+                   "Exclusive with --test-fraction and --stratify-by.")
 @click.option("--stratify-by", default=None,
               help="Optional column to stratify on (e.g. subtype). Must be constant per patient.")
 @click.option("--verify", "verify_only", is_flag=True,
@@ -321,8 +326,11 @@ if __name__ == "__main__":
               help="Overwrite a sealed manifest. Only legitimate as a documented "
                    "pre-registration amendment with every model retrained from scratch.")
 @click.option("--notes", default="", help="Free-text provenance note stored in the manifest.")
-def freeze_partition_cmd(in_path: str, manifest_path: str, partition_name: str | None,
-                         seed: int, test_fraction: float, stratify_by: str | None,
+@click.pass_context
+def freeze_partition_cmd(ctx: click.Context, in_path: str, manifest_path: str,
+                         partition_name: str | None,
+                         seed: int, test_fraction: float, all_test: bool,
+                         stratify_by: str | None,
                          verify_only: bool, no_seal: bool, force: bool, notes: str) -> None:
     """Freeze (or verify) a train/test partition by seeded hash of patient_id.
 
@@ -336,6 +344,11 @@ def freeze_partition_cmd(in_path: str, manifest_path: str, partition_name: str |
     Verify before every evaluation run:
 
         gliostrata freeze-partition --input COHORT --manifest M.json --verify
+
+    Seal an external cohort, which has no training split, with every patient
+    held out (test fraction 1.0, empty training list):
+
+        gliostrata freeze-partition --input COHORT --manifest M.json --all-test
     """
     from gliostrata.evaluation import (
         PartitionSealedError,
@@ -344,6 +357,17 @@ def freeze_partition_cmd(in_path: str, manifest_path: str, partition_name: str |
         verify_partition,
     )
     from gliostrata.utils.io import read_parquet
+
+    if all_test:
+        # Refuse contradictory instructions before anything is read or written.
+        for name, flag in (("test_fraction", "--test-fraction"),
+                           ("stratify_by", "--stratify-by")):
+            if ctx.get_parameter_source(name) == click.ParameterSource.COMMANDLINE:
+                raise click.UsageError(
+                    "--all-test holds out every patient, so there is nothing to "
+                    f"split; do not also pass {flag}."
+                )
+        test_fraction = 1.0
 
     cohort = read_parquet(in_path)
 
