@@ -511,9 +511,13 @@ def freeze_partition_cmd(ctx: click.Context, in_path: str, manifest_path: str,
 
     if all_test:
         # Refuse contradictory instructions before anything is read or written.
+        # click.core.ParameterSource exists from click 8.0; the top-level alias
+        # does not exist in click 8.1, the declared floor.
+        from click.core import ParameterSource
+
         for name, flag in (("test_fraction", "--test-fraction"),
                            ("stratify_by", "--stratify-by")):
-            if ctx.get_parameter_source(name) == click.ParameterSource.COMMANDLINE:
+            if ctx.get_parameter_source(name) == ParameterSource.COMMANDLINE:
                 raise click.UsageError(
                     "--all-test holds out every patient, so there is nothing to "
                     f"split; do not also pass {flag}."
