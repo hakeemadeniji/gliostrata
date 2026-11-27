@@ -154,7 +154,14 @@ def test_the_repository_manifests_pass_with_the_ci_setting():
     assert "tcga_gbm_clinical_v1.json  [superseded (historical record)]" in p.stdout
     assert "tcga_gbm_clinical_v2.json  [ACTIVE]" in p.stdout
     assert "re-derived   : all 594 ids reproduce" in p.stdout
-    assert "cohort       : present at" in p.stdout  # the TCGA cohort is on disk here
+    # The cohort table is git-ignored: present on the development machine, absent
+    # in CI and in any clean checkout. Each case has its own line; both must pass.
+    manifest = json.loads((ROOT / CI_ACTIVE[0]).read_text(encoding="utf-8"))
+    if (ROOT / manifest["cohort_source"]).exists():
+        assert "cohort       : present at" in p.stdout
+    else:
+        assert "cohort       : NOT in this checkout" in p.stdout
+        assert "full --verify not run in CI" in p.stdout
     assert "All partition manifests verified." in p.stdout
 
 
