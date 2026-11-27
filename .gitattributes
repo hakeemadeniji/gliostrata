@@ -3,3 +3,7 @@
 # The frozen subtype centroid sets are verified byte for byte against
 # configs/subtype_centroids/CHECKSUMS.json by gliostrata.profiling.centroid.
 configs/subtype_centroids/*.json -text
+
+# T2 comparator artefacts are checksummed (pre-registration 2.2 item 2 (j); the
+# evaluate step verifies gene_universe.txt against chosen.json). Keep bytes exact.
+configs/t2_comparator/* -text

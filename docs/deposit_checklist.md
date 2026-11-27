@@ -30,6 +30,8 @@ Pre-registration sections are cited as "§". "OSF rule n" is a stopping rule in
 | 2.3 | After 1.1 to 1.5 and 2.1 to 2.2: bring `docs/osf_final_fields.md` back in line and remove its "Still open" note on the comparator. | **Blocks** |
 | 2.4 | Result files are git-ignored but cited. Upload them as OSF attachments: `data/results/cgga/cox_external_validation.json`, `data/results/cgga/brier18_external.json`, `data/results/t1/neftel_mixture_deconvolution.json`. The 2026-11-26 checksums of the first two are in `docs/project_record/06_evidence_reports.md`; confirm they still match before uploading. | Should |
 
+| 2.5 | **Registered manifest checksums are not reproducible across platforms (found 2026-11-27).** `core.autocrlf` is on, and `.gitattributes` protects only the centroid sets. The three partition manifests were written with CRLF line endings, and their SHA-256 in pre-registration section 4.5 (for example `040ba322…` for `cgga_external_v1`) is of those bytes. Git stores them with LF, so a Linux or macOS clone hashes to a different value (`08145351…`), with identical content. Proposed fix: mark `data/partitions/*.json -text` and re-add the files, so the stored bytes are the registered ones. This is a dated note, because it changes no manifest content. Needs the lead's approval, because it touches sealed artefacts. | **Blocks** (a registered checksum must reproduce) |
+
 ## 3. Repository (you; these steps are public)
 
 | # | Step | Status |
