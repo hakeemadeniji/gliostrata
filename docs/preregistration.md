@@ -207,9 +207,16 @@ resolutions are pre-registered rather than chosen after the data is seen.
    (c) *Minimum n:* if fewer than 30 labelled patients are available when T1 is run,
    this criterion is NOT EVALUABLE rather than failed. A perfect score first clears
    at 29 patients (0.8806); 30 is registered as the floor: 30 of 30 gives 0.8843 and
-   29 of 30 gives 0.8278. (d) *Harmonisation:* **TO BE COMPLETED BY AUTHOR: the
-   cross-platform harmonisation method.** It is entered in section 8 before the
-   microarray expression matrix is examined. (e) *Margin, stated so the choice of
+   29 of 30 gives 0.8278. Under these bounds the floor is load-bearing: below 29
+   patients even a perfect score would not clear. (d) *Harmonisation:* each
+   sample's expression vector is z-scored across genes (for that sample alone,
+   mean 0 and variance 1 over its genes), and the RNA-seq-trained classifier is
+   applied to the z-scored vector. There is no shared reference and no
+   cross-platform batch correction, and nothing in the rule depends on the
+   external data beyond the sample being scored. This is a project choice, not
+   the normalisation of Verhaak et al. (2010), who standardised each gene across
+   patients within each platform. The rule was fixed, and entered in section 8,
+   before the microarray expression matrix was downloaded. (e) *Margin, stated so the choice of
    scoring set can be checked:* on 108 patients the criterion tolerates up to 6
    errors (102 of 108 gives 0.8830; 101 of 108 gives 0.8710). An observed accuracy
    near 0.95 needs roughly 71 to 100 patients to clear (68 of 71 gives 0.8814; 95 of
@@ -408,12 +415,13 @@ u = sha256("{seed}|{patient_id}") mapped into [0, 1)
 test  if u < test_fraction  else  train
 ```
 
-Measured on the current TCGA-GBM clinical cohort (n = 583, seed 20251126,
-test_fraction 0.30): shuffling the input rows four different ways reproduced the identical
-419/164 split; adding 50 unrelated patients moved **0** of the 583 original patients; and
-removing 50 patients moved **0** of the remainder. The same perturbation applied to a
-`df.sample(frac=0.30)` split moved **173 of 583** patients. That contrast is the reason
-this procedure is registered.
+Measured on the first TCGA-GBM clinical cohort (the 583 patients frozen as
+`tcga_gbm_clinical_v1`; the cohort now in force is 594 patients, see section 4.5),
+seed 20251126, test_fraction 0.30): shuffling the input rows four different ways
+reproduced the identical 419/164 split; adding 50 unrelated patients moved **0** of the
+original patients; and removing 50 patients moved **0** of the remainder. The same
+perturbation applied to a `df.sample(frac=0.30)` split moved **173 of them**. That
+contrast is the reason this procedure is registered.
 
 Stratification, when used, salts the hash with the stratum label
 (`sha256("{seed}|{stratum}|{patient_id}")`) rather than ranking patients within each
@@ -435,7 +443,7 @@ each sorted id list and over the union; row counts per split; the cohort source 
 SHA-256 over **the source file's bytes**; the source row count; achieved per-stratum
 balance; an ISO-8601 UTC creation timestamp; a free-text provenance note; and the seal flag.
 
-The id-list hashes let a reviewer confirm the splits without reading 583 ids. The source
+The id-list hashes let a reviewer confirm the splits without reading the id lists. The source
 content hash catches the case the id list cannot see: a cohort file rewritten with the same
 patients but altered column values (an edited survival time, a re-imputed covariate).
 
@@ -467,17 +475,22 @@ flag, and is legitimate **only** as a documented amendment (§8) in which the ol
 is archived alongside the new one and every model is retrained from scratch. Re-freezing
 is never a routine re-run.
 
+An external cohort has no training data, so its seal holds out every patient: a test
+fraction of exactly 1.0 (CLI `--all-test`), an empty training list and a test list of
+every patient id. It is produced by the same hash rule as any other partition.
+
 ### 4.5 Partitions registered at the time of this pre-registration
 
 | Partition | Cohort | n | Split | Seed | Role | Sealed |
 | --- | --- | --- | --- | --- | --- | --- |
-| `tcga_gbm_clinical_v1` | TCGA-GBM clinical-only | 583 | 419 train / 164 test | 20251126 | **Development.** Internal held-out set for model-selection discipline. **Not** a pre-registered external test. | Yes (2026-11-26) |
+| `tcga_gbm_clinical_v1` | TCGA-GBM clinical-only | 583 | 419 train / 164 test | 20251126 | **Development.** Internal held-out set for model-selection discipline. **Not** a pre-registered external test. Superseded by `tcga_gbm_clinical_v2`; retained unmodified as the historical record. | Yes (2026-11-26) |
+| `tcga_gbm_clinical_v2` | TCGA-GBM clinical | 594 | 425 train / 169 test | 20251126 | **Development.** Supersedes v1 after the cohort was re-ingested (section 5). Unstratified. | Yes (2026-11-26) |
 | `cgga_external_v1` | CGGA | — | — | — | Primary external test for T1, T2, T4 and T5 | **Not created.** CGGA downloaded (commit e361bed) and read once for the single registered confirmatory evaluation, T2 (commit 7f4bd28), on the ingested cohort as a whole. Disclosed deviation from section 3.3; see section 2.3. To be created as an all-test seal over the eligible patients of section 2.2 item 7 (at most 218), after the T2 read and before any T4 or T5 computation. |
 | `glass_external_v1` | GLASS | — | — | — | Longitudinal external test | **Not yet created — cohort not downloaded** |
 
-`tcga_gbm_clinical_v1` is unstratified because the `subtype` column of the current cohort
+Both TCGA partitions are unstratified: the `subtype` column of the clinical cohort file
 is entirely null (see §5). When molecular data lands, the stratified partition must be
-created as a **new, separately named** partition, never by overwriting this one.
+created as a **new, separately named** partition, never by overwriting either of these.
 
 ---
 
@@ -485,32 +498,45 @@ created as a **new, separately named** partition, never by overwriting this one.
 
 This section exists so that no reader has to take on trust that the test data was untouched.
 
-**Data actually in hand.** One cohort: `data/raw/tcga_gbm/clinical_cohort.parquet`, 583
-TCGA-GBM patients, **clinical variables only** — patient id, age, sex, KPS, overall
-survival in months, vital status and treatment arm. The columns for extent of resection,
-MGMT methylation, IDH status, Verhaak subtype, the four Neftel state fractions and the three
-TME fractions exist in the schema but are **entirely null**: no expression, methylation,
-proteomic, single-cell or imaging data has been ingested.
+**Data actually in hand.** TCGA-GBM: `data/raw/tcga_gbm/clinical_cohort.parquet`, 594
+eligible patients from 617 case records, **clinical variables** — patient id, age, sex, KPS, overall
+survival in months, vital status and treatment arm; 284 bulk RNA-seq samples (STAR read
+counts and TPM); and MGMT promoter methylation and IDH mutation calls from the GDC, held
+in a separate joined table for 368 patients (IDH), 415 (MGMT) and 314 (both). In the
+clinical file itself the columns for extent of resection, MGMT, IDH, Verhaak subtype and
+the Neftel and TME fractions are **entirely null**. No proteomic, single-cell or imaging
+data has been ingested. The second cohort is CGGA: 305 unique patients in 333 rows,
+characterised at schema level and then read once for T2 (section 2.3).
 
 **Data not yet obtained.** CGGA has been downloaded and read once for the T2 evaluation;
 no further reads will occur without a new pre-registration. GLASS has **not** been
 downloaded. CPTAC-GBM, the single-cell reference atlases, TCIA imaging, and the PDX growth
-curves and in vivo NSC tracking data required for T3 have **not** been obtained. No
+curves and in vivo NSC tracking data required for T3 have **not** been obtained. Neither has the CGGA microarray expression
+matrix. No
 external test partition exists yet; the two external manifests in §4.5 are placeholders.
 
 **Analyses already run.** The repository contains a working but *synthetic-data* pipeline:
-the L2 profiling, L5 survival and L6 optimisation layers are stubs that operate on
+the L4 simulation layer and the L6 optimiser's objective are stubs that operate on
 generated data, exercised by the test suite and a dry-run CLI command. Those runs establish
-that the plumbing executes; they produce no result about glioblastoma and no number in this
-pre-registration is derived from them. Descriptive statistics of the TCGA clinical cohort
-(cohort size, age and survival distributions, censoring rate) have been inspected. The
+that the plumbing executes and produce no result about glioblastoma. Four analyses on real
+TCGA-GBM data have also been run; none is an external result, and no number in this
+pre-registration is derived from them apart from those in section 2.3: descriptive
+statistics of the clinical cohort (cohort size, age and survival distributions, censoring
+rate); the IDH sensitivity analyses (`scripts/idh_sensitivity_cox.py`,
+`scripts/idh_sensitivity_subtype.py`); a concordance check of the deconvolution module's
+marker panels on the expression matrix; and the T2 fit itself, whose internal C-index is
+cross-validated on TCGA. The
 partition demonstration quoted in §4.1 used patient identifiers and split assignments only
 — no outcome variable was examined in connection with any split.
 
-**Models trained on any test partition: none.** No model of any kind has been fitted to
-`tcga_gbm_clinical_v1`'s test split, and no external partition exists to contaminate. This
-pre-registration is being written *before* training begins, which is the only point at
-which it has any value.
+**Models fitted, and on which patients.** No model has been fitted on CGGA: the T2 Cox
+variants were fitted on TCGA and only scored on CGGA, once (section 2.3). The development
+split's test set has not been held out from those fits. The T2 script fits each variant on
+every complete-case TCGA patient and reports a 5-fold cross-validated internal C-index, so
+the 169 patients in the test split of `tcga_gbm_clinical_v2` were in the fit set. The
+sealed external partition `cgga_external_v1` does not exist yet; it is to be created
+before T4 and T5 (section 2.2, item 7). This pre-registration is being written before any
+confirmatory evaluation other than T2.
 
 **Prior expectations.** The thresholds in §2 are taken from published external benchmarks,
 not from any GlioStrata result. The protocol's own risk register judges a first-pass
@@ -577,6 +603,8 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | --- | --- | --- | --- | --- |
 | 2026-11-26 | 2.3 (added) | New subsection 2.3 added to record the outcome of protocol test T2 (external C-index >= 0.65 on CGGA), which was evaluated and not met. It changes no threshold, no decisive bound, no decision rule, and no other test's status. Full account: `docs/cgga_validation.md`; result file: `data/results/cgga/cox_external_validation.json`. | Records a result rather than a plan. The committed model is NOT EVALUABLE on CGGA (no KPS); the transferable model scored an external C-index of 0.5385 (95% CI 0.4994 to 0.5807). | **Yes.** Written after the CGGA external read and disclosed as such. The evaluation ran without a sealed `cgga_external_v1` manifest (section 4.5). |
 | 2026-11-26 | 2.2 items 3, 5, 7 (completed), 2.2 items 9 and 10 (added), 3.1 (one exception), 4.5 (`cgga_external_v1` row), 6 (cross-reference) | Completed the two items left open at draft stage: the T3 growth-curve rule and dates (item 3) and the T4 evaluation budget and tie rule (item 5). Registered the eligibility and sealing order of the external partition (item 7). Added the T1 subtype-accuracy guard rails (item 9: scoring set, exact interval, minimum n) and the T1 deconvolution ground truth (item 10). No threshold, no decisive bound and no metric changed. | The protocol left these under-specified, and each is a choice that could otherwise be made after seeing the data. The microarray harmonisation method (item 9d) is still open. | **Yes.** CGGA had been ingested and read once for T2 before this entry. None of T1, T3, T4 or T5 has been evaluated, and the counts used here (108 labelled patients, 28 with RNA-seq, 218 eligible) come from the schema-level ingest report, not from any model result. |
+| 2026-11-26 | 2.2 item 9(d) completed; item 9(c) one sentence added | Fixed the T1 cross-platform harmonisation rule: each sample's expression vector is z-scored across genes and the RNA-seq-trained classifier applied to it, with no shared reference and no batch correction. Added to item 9(c) that the floor of 30 is load-bearing under two-sided bounds. | The rule has to be fixed before the matrix it will be applied to is seen. It is a project choice, not the normalisation of Verhaak et al. (2010). | **No.** The microarray expression matrix has not been downloaded. |
+| 2026-11-26 | 4.1, 4.2, 4.4, 4.5, 5 (corrected); 9 (row added) | Reconciled passages written for the first TCGA cohort (the superseded v1 partition, and the claim that only clinical data was in hand) with the data in hand: 594 patients, `tcga_gbm_clinical_v2` (425/169), 284 RNA-seq samples, joined IDH and MGMT calls. Corrected section 5's claim that no model had been fitted on any test split: the T2 variants were fitted on all complete-case TCGA patients, which include the v2 test split. Recorded the all-test seal in 4.4 and in the section 9 table. | A registration attachment must not contradict the OSF form or the sealed manifests. | **Yes.** Written after the T2 read; changes no threshold, bound or rule. |
 
 ---
 
@@ -590,6 +618,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | §4.2 manifest | `PartitionManifest`; instances in `data/partitions/*.json` |
 | §4.3 verification | `verify_partition` → `DriftReport`; CLI `gliostrata freeze-partition --verify` |
 | §4.4 sealing | `write_manifest(..., force=...)`, `PartitionSealedError` |
+| §4.4 sealing, all-test | `freeze_partition(..., test_fraction=1.0)`; CLI `gliostrata freeze-partition --all-test` |
 | All of the above | `tests/test_evaluation.py` |
 
 Where this document and the code disagree, the code's checksum and manifests are the
