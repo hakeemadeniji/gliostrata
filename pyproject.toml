@@ -43,6 +43,8 @@ heavy = [
     "seaborn>=0.12",
 ]
 workflow = ["snakemake>=7.0", "dvc>=3.0"]
+# scripts/prepare_subtype_reference.py only; not locked (not in the results environment)
+reference = ["openpyxl>=3.1", "pyreadr>=0.5"]
 
 [project.scripts]
 gliostrata = "gliostrata.cli:cli"

@@ -1,0 +1,43 @@
+# Nothing under data/ enters an image, except the small git-tracked JSON that the
+# tests read (frozen partition manifests, provenance records). data/raw,
+# data/processed (including the held-out CGGA material), data/interim,
+# data/external, data/manual and data/results are all excluded by `data/*`.
+data/*
+!data/partitions
+!data/provenance
+data/**/_cache
+data/raw
+data/processed
+data/results
+
+# Version control and caches
+.git
+.gitattributes
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.benchmarks
+.coverage
+.coverage.*
+htmlcov
+__pycache__
+*.py[cod]
+*.egg-info
+.snakemake
+snakemake_logs
+
+# Scratch areas and local environments
+.test
+.venv
+venv
+env
+.env
+.env.local
+.ipynb_checkpoints
+.dvc/cache
+.dvc/tmp
+models
+notebooks
+*.swp
+Thumbs.db
+~$*

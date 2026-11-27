@@ -149,7 +149,7 @@ jobs:
           # pre-filter-revision cohort, kept unmodified and deliberately NOT
           # re-frozen. cgga_external_v1 (218 patients, all-test) is the external
           # partition, sealed 2026-11-27.
-          ACTIVE_MANIFESTS: data/partitions/tcga_gbm_clinical_v2.json data/partitions/cgga_external_v1.json
+          ACTIVE_MANIFESTS: data/partitions/tcga_gbm_clinical_v2.json data/partitions/cgga_external_v1.json data/partitions/cgga_t1_subtype_v1.json
         # A sealed train/test split is a pre-registration commitment: the split
         # is a pure function of (seed, patient_id), so it must keep reproducing
         # as the cohort is re-ingested. If a patient moves between train and
@@ -169,17 +169,14 @@ jobs:
         # never in a CI checkout; a verification of it where it is present reads
         # identifiers only and should be recorded in the access ledger.
         env:
-          ACTIVE_MANIFESTS: data/partitions/tcga_gbm_clinical_v2.json data/partitions/cgga_external_v1.json
-        run: |
-          for manifest in $ACTIVE_MANIFESTS; do
-            cohort=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['cohort_source'])" "$manifest")
-            if [ -f "$cohort" ]; then
-              echo "Verifying $manifest against $cohort"
-              gliostrata freeze-partition --input "$cohort" --manifest "$manifest" --verify
-            else
-              echo "Skipping: cohort $cohort is not present in this checkout (data/raw/** is gitignored)."
-            fi
-          done
+          ACTIVE_MANIFESTS: data/partitions/tcga_gbm_clinical_v2.json data/partitions/cgga_external_v1.json data/partitions/cgga_t1_subtype_v1.json
+        #
+        # The loop lives in scripts/ci_partition_verify.py (tested by
+        # tests/test_ci_partition_verify.py). For each present cohort it runs
+        # `gliostrata freeze-partition --input <cohort> --manifest <manifest>
+        # --verify`. It refuses a cohort under data/{raw,processed}/cgga unless
+        # --allow-held-out is passed; CI never passes it.
+        run: python scripts/ci_partition_verify.py
 
   workflow-dry-run:
     name: Snakemake DAG + offline fixture pipeline
