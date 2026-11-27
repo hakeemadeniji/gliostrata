@@ -1,0 +1,399 @@
+{
+ "what": "T2 improvement-row comparator, chosen under pre-registration 2.2 item 2 (option B).",
+ "pmid": "38174685",
+ "first_published": "2024-01-01",
+ "label": "7-gene NETs LASSO Cox risk score RS",
+ "genes": [
+  "CPPED1",
+  "F3",
+  "G0S2",
+  "MAPK1",
+  "MME",
+  "MMP9",
+  "MPO"
+ ],
+ "pairs": [],
+ "terms": [
+  "CPPED1",
+  "F3",
+  "G0S2",
+  "MAPK1",
+  "MME",
+  "MMP9",
+  "MPO"
+ ],
+ "source": "Results, Development of the prognostic model",
+ "coefficients": {
+  "CPPED1": 0.39154604647887975,
+  "F3": 0.1593543894950206,
+  "G0S2": -0.028383827684237806,
+  "MAPK1": -0.1181720022920694,
+  "MME": 0.03466192784561875,
+  "MMP9": 0.005033914504310773,
+  "MPO": 0.2519977987312655
+ },
+ "expression": "log2(CPM + 1) per sample from STAR read counts; library size over the gene universe",
+ "gene_universe_file": "configs/t2_comparator/gene_universe.txt",
+ "gene_universe_sha256": "92ec3389d8048da964f9a8bc2080ebf4eb9004180de56191c87cecf123ca7c20",
+ "n_universe": 33212,
+ "final_fit": {
+  "n": 282,
+  "n_events": 228,
+  "patients": "every TCGA patient with RNA-seq and an observed outcome"
+ },
+ "choice": {
+  "n": 200,
+  "set": "tcga_gbm_clinical_v2 training split with RNA-seq and an outcome",
+  "cv": "5-fold stratified, seed 42, pooled out-of-fold Harrell's C-index",
+  "table": [
+   {
+    "pmid": "38174685",
+    "first_published": "2024-01-01",
+    "n_terms": 7,
+    "cv_cindex": 0.6152867862,
+    "cv_ci_low": 0.5588520309,
+    "cv_ci_high": 0.6680186404,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 1,
+    "chosen": true
+   },
+   {
+    "pmid": "39435104",
+    "first_published": "2024-10-05",
+    "n_terms": 22,
+    "cv_cindex": 0.6060663869,
+    "cv_ci_low": 0.5520929943,
+    "cv_ci_high": 0.6554018591,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 2,
+    "chosen": false
+   },
+   {
+    "pmid": "38813229",
+    "first_published": "2024-05-14",
+    "n_terms": 14,
+    "cv_cindex": 0.5948747297,
+    "cv_ci_low": 0.5419621926,
+    "cv_ci_high": 0.6456280512,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 3,
+    "chosen": false
+   },
+   {
+    "pmid": "38763954",
+    "first_published": "2024-05-19",
+    "n_terms": 9,
+    "cv_cindex": 0.5888973674,
+    "cv_ci_low": 0.5392264943,
+    "cv_ci_high": 0.6379156463,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 4,
+    "chosen": false
+   },
+   {
+    "pmid": "39162363",
+    "first_published": "2024-08-20",
+    "n_terms": 3,
+    "cv_cindex": 0.5875619992,
+    "cv_ci_low": 0.5325237686,
+    "cv_ci_high": 0.6396658873,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 5,
+    "chosen": false
+   },
+   {
+    "pmid": "39253064",
+    "first_published": "2024-09-05",
+    "n_terms": 7,
+    "cv_cindex": 0.584764085,
+    "cv_ci_low": 0.5294421062,
+    "cv_ci_high": 0.6416320607,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 6,
+    "chosen": false
+   },
+   {
+    "pmid": "38566075",
+    "first_published": "2024-04-02",
+    "n_terms": 9,
+    "cv_cindex": 0.5722370596,
+    "cv_ci_low": 0.5235885399,
+    "cv_ci_high": 0.6235642158,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 7,
+    "chosen": false
+   },
+   {
+    "pmid": "38255198",
+    "first_published": "2024-01-01",
+    "n_terms": 2,
+    "cv_cindex": 0.5687396668,
+    "cv_ci_low": 0.5143733496,
+    "cv_ci_high": 0.6220810141,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 8,
+    "chosen": false
+   },
+   {
+    "pmid": "38510250",
+    "first_published": "2024-03-06",
+    "n_terms": 13,
+    "cv_cindex": 0.5603459239,
+    "cv_ci_low": 0.505910988,
+    "cv_ci_high": 0.6130614843,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 9,
+    "chosen": false
+   },
+   {
+    "pmid": "38462406",
+    "first_published": "2024-03-10",
+    "n_terms": 4,
+    "cv_cindex": 0.560282335,
+    "cv_ci_low": 0.506000068,
+    "cv_ci_high": 0.6145503483,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 10,
+    "chosen": false
+   },
+   {
+    "pmid": "39309926",
+    "first_published": "2024-09-03",
+    "n_terms": 5,
+    "cv_cindex": 0.5593920895,
+    "cv_ci_low": 0.5037828151,
+    "cv_ci_high": 0.6142076616,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 11,
+    "chosen": false
+   },
+   {
+    "pmid": "38638676",
+    "first_published": "2024-04-11",
+    "n_terms": 8,
+    "cv_cindex": 0.5530967824,
+    "cv_ci_low": 0.5038270244,
+    "cv_ci_high": 0.6037781983,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 12,
+    "chosen": false
+   },
+   {
+    "pmid": "39697698",
+    "first_published": "2024-11-27",
+    "n_terms": 7,
+    "cv_cindex": 0.5481368434,
+    "cv_ci_low": 0.4975712153,
+    "cv_ci_high": 0.6021823424,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 13,
+    "chosen": false
+   },
+   {
+    "pmid": "39286023",
+    "first_published": "2024-09-02",
+    "n_terms": 3,
+    "cv_cindex": 0.5399974564,
+    "cv_ci_low": 0.4886650579,
+    "cv_ci_high": 0.5953917342,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 14,
+    "chosen": false
+   },
+   {
+    "pmid": "39364731",
+    "first_published": "2024-10-04",
+    "n_terms": 2,
+    "cv_cindex": 0.539107211,
+    "cv_ci_low": 0.4896816479,
+    "cv_ci_high": 0.5910111161,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 15,
+    "chosen": false
+   },
+   {
+    "pmid": "39458959",
+    "first_published": "2024-10-02",
+    "n_terms": 4,
+    "cv_cindex": 0.5373267201,
+    "cv_ci_low": 0.48282798,
+    "cv_ci_high": 0.5900670561,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 16,
+    "chosen": false
+   },
+   {
+    "pmid": "39465756",
+    "first_published": "2024-10-04",
+    "n_terms": 8,
+    "cv_cindex": 0.5350375175,
+    "cv_ci_low": 0.4802398989,
+    "cv_ci_high": 0.5828062944,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 17,
+    "chosen": false
+   },
+   {
+    "pmid": "38365809",
+    "first_published": "2024-02-16",
+    "n_terms": 6,
+    "cv_cindex": 0.5218746026,
+    "cv_ci_low": 0.4668114934,
+    "cv_ci_high": 0.5788932732,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 18,
+    "chosen": false
+   },
+   {
+    "pmid": "38719174",
+    "first_published": "2024-05-07",
+    "n_terms": 3,
+    "cv_cindex": 0.5169146636,
+    "cv_ci_low": 0.4634561456,
+    "cv_ci_high": 0.5726724438,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 19,
+    "chosen": false
+   },
+   {
+    "pmid": "38606090",
+    "first_published": "2024-03-28",
+    "n_terms": 5,
+    "cv_cindex": 0.5118275467,
+    "cv_ci_low": 0.4624333144,
+    "cv_ci_high": 0.5577327376,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 20,
+    "chosen": false
+   },
+   {
+    "pmid": "39697704",
+    "first_published": "2024-11-19",
+    "n_terms": 10,
+    "cv_cindex": 0.5051507058,
+    "cv_ci_low": 0.4518519207,
+    "cv_ci_high": 0.5586829352,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 21,
+    "chosen": false
+   },
+   {
+    "pmid": "38214842",
+    "first_published": "2024-01-12",
+    "n_terms": 14,
+    "cv_cindex": 0.4899529442,
+    "cv_ci_low": 0.438297367,
+    "cv_ci_high": 0.5460673819,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 22,
+    "chosen": false
+   },
+   {
+    "pmid": "39465792",
+    "first_published": "2024-10-11",
+    "n_terms": 7,
+    "cv_cindex": 0.4261096274,
+    "cv_ci_low": 0.3763082578,
+    "cv_ci_high": 0.4778049266,
+    "n_obs": 200,
+    "n_events": 160,
+    "error": null,
+    "rank": 23,
+    "chosen": false
+   }
+  ]
+ },
+ "r2_dropped": {
+  "38279111": [
+   "AC002401.4",
+   "AC025171.5",
+   "AC068888.1",
+   "AC080112.1"
+  ],
+  "38320988": [
+   "C1orf61",
+   "CYR61",
+   "GLTSCR2"
+  ],
+  "38335383": [
+   "BORCS6"
+  ],
+  "38434266": [
+   "AC012558.1",
+   "AC025171.5"
+  ],
+  "38615384": [
+   "LINC00239"
+  ],
+  "38687369": [
+   "SDC-1"
+  ],
+  "38817361": [
+   "AC068987.2",
+   "AC097641.2",
+   "AL031432.5"
+  ],
+  "39136841": [
+   "GOS2"
+  ],
+  "39610810": [
+   "MLK1",
+   "MLK3",
+   "ZAK"
+  ],
+  "39896073": [
+   "AQP1"
+  ]
+ },
+ "inputs_sha256": {
+  "data/raw/tcga_gbm/expression/counts.parquet": "bc78e730b43d9a187d86dca2d604dec37af7736d0afcb98394b41d4ba1826d48",
+  "data/raw/tcga_gbm/expression/gene_annotation.parquet": "408434126c8e57807d79b0f44ab7b13ccde25699155d8fd0236f9adadba34960",
+  "data/raw/tcga_gbm/clinical_cohort.parquet": "a7f77418dc90ffbb327773de699965901324be6127cabf2ef745a12a07aa4bda",
+  "data/partitions/tcga_gbm_clinical_v2.json": "17adb31d6375df07f86975c2354fc91487119d21f9f2ae4c4d906597e8c55c16",
+  "configs/t2_comparator/gene_sets.json": "dfe0b4a5c6b4e0f71fa83d22f69a8cddd902b101365cadfabff6c15841bc760e"
+ }
+}
