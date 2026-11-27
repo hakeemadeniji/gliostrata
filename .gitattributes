@@ -7,3 +7,7 @@ configs/subtype_centroids/*.json -text
 # T2 comparator artefacts are checksummed (pre-registration 2.2 item 2 (j); the
 # evaluate step verifies gene_universe.txt against chosen.json). Keep bytes exact.
 configs/t2_comparator/* -text
+
+# Sealed partition manifests: their registered SHA-256 (pre-registration section 4.5)
+# is of the bytes as written. Keep them byte-exact on every platform.
+data/partitions/*.json -text
