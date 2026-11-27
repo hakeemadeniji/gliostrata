@@ -1,0 +1,313 @@
+# 2. Findings
+
+Every result the project has measured, as of 2026-11-26. Each section gives the design,
+the numbers, what they do and do not show, and where the numbers come from.
+
+**Reading labels.** **Met**: the point estimate and its decisive 95% bound both clear the
+threshold. **FAIL**: the point estimate misses. **INCONCLUSIVE**: the point estimate clears
+but the decisive bound does not. **NOT EVALUABLE**: cannot be computed on the data.
+**Internal**: measured on TCGA-GBM by cross-validation, context only. **External**: measured
+on CGGA.
+
+## 2.1 Summary
+
+| # | Finding | Status |
+| --- | --- | --- |
+| 1 | A Cox survival model fitted on TCGA-GBM shows no established discrimination on CGGA: external C-index 0.5385 (interval 0.4994 to 0.5807) against a threshold of 0.65. | T2 C-index: **not met** |
+| 2 | The same model's predicted 18-month survival is less accurate than predicting the cohort average for everyone: Brier 0.2617 against a threshold of 0.25. | T2 Brier: **not met** |
+| 3 | The registered four-feature model cannot be tested on CGGA, because CGGA records no performance status (KPS). | **Not evaluable** |
+| 4 | Most of the loss comes from changing cohort, not from losing KPS: about 0.02 against about 0.11 C-index. | Internal decomposition |
+| 5 | IDH and MGMT status were called from raw TCGA data for 368 and 415 of 594 patients. | Descriptive; pipeline works |
+| 6 | Excluding the 23 IDH-mutant patients moves the internal C-index by 0.0079, under the pre-specified limit of 0.01. | Sensitivity: **robust** |
+| 7 | The external cohort is 305 patients, not the ">1,000" the protocol assumed; 218 are eligible for T4 and T5. | Cohort fact |
+| 8 | T1's accuracy threshold cannot be met on the 28 labelled RNA-seq patients even with a perfect score; the 108-patient microarray set is needed. | Sample-size bound |
+
+Two of eleven registered thresholds have been evaluated. Both were not met.
+
+## 2.2 Finding 1: the survival model does not transfer to CGGA (T2, C-index)
+
+**Design.** A Cox proportional-hazards model was fitted on TCGA-GBM and scored once on
+CGGA with Harrell's C-index. Three variants were fixed, in the script and its tests, before
+CGGA was read, and all three are reported.
+
+- **Patients.** One row per patient (CGGA reuses identifiers: 333 rows are 305 patients).
+  Complete cases on the variant's features and the outcome; nothing imputed.
+- **Interval.** Percentile bootstrap over the evaluated CGGA patients, 1000 resamples, seed
+  42, with the TCGA model held fixed.
+- **Decision rule.** Decided by variant 2, as pre-specified. Met only if the point estimate
+  and the lower bound of its 95% interval are both >= 0.65.
+
+| Variant | Features | TCGA fit n | Internal C-index | CGGA n (deaths) | External C-index | 95% CI | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1. Committed baseline | age, sex, KPS, treatment arm | 594 | 0.6735 | not evaluable | -- | -- | Not evaluable: no KPS in CGGA |
+| 2. Transferable (decides) | age, sex, treatment arm | 570 | 0.6520 | 283 (239) | **0.5385** | 0.4994 to 0.5807 | **FAIL** |
+| 3. Molecular (secondary) | age, sex, treatment arm, IDH, MGMT | 298 | 0.6606 | 241 (204) | 0.5915 | 0.5477 to 0.6341 | FAIL; not comparable with variant 2 |
+
+Internal C-index: 5-fold stratified cross-validation, pooled out-of-fold.
+
+**What it shows.**
+- The whole 95% interval of the headline model lies below 0.65. This is not a near miss
+  that a larger sample would be expected to rescue.
+- The interval contains 0.50. These data do not establish that the model discriminates in
+  CGGA at all. They also do not establish that it cannot: the upper bound, 0.581, is
+  consistent with weak discrimination.
+
+**What it does not show.**
+- That clinical features lack prognostic value in CGGA. A TCGA-fitted model failing to
+  transfer is consistent with age, sex and treatment still mattering there.
+- That no Cox model can reach 0.65 on CGGA. One specification, fitted on one cohort, was
+  tested. Nothing else was tried, deliberately.
+- Why the model failed to transfer. Candidate explanations are listed in section 2.4; none
+  was tested, because testing them would mean further reads of the external cohort.
+
+**Variant 3 is a cross-platform comparison.** TCGA's IDH and MGMT calls come from this
+project's pipeline; CGGA's are text fields recorded by its contributing hospitals, with no
+established assay or threshold. Variant 3 is also scored on a different, smaller set of
+patients (241 against 283) and excludes the 20 no-adjuvant patients who were otherwise
+evaluable, because the TCGA fit set contained no such patient with both calls. Its 0.053
+advantage over variant 2 is therefore not evidence that the molecular markers help.
+
+Source: `docs/cgga_validation.md` sections 1 to 5;
+`data/results/cgga/cox_external_validation.json`; `scripts/validate_cox_cgga.py`.
+
+## 2.3 Finding 2: predicted survival is less accurate than the cohort average (T2, Brier)
+
+**Design.** The Brier score at 18 months is the average squared error between each
+patient's predicted probability of surviving 18 months and what happened. It runs from 0
+(perfect) to 1. Patients censored before 18 months are handled by
+inverse-probability-of-censoring weights (Graf et al. 1999). The models and the patients
+are the same as in section 2.2: the TCGA fits were confirmed identical to six decimals.
+Met only if the point estimate and the upper bound of its 95% interval are both <= 0.25.
+
+This was a **second read of CGGA**, made because this registered row had not been
+evaluated. The pre-registration allows one read per registered analysis.
+
+| Variant | CGGA n (deaths) | Alive at 18 months (observed) | Brier at 18 months | 95% CI | Null model | Result |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2. Transferable (decides) | 283 (239) | 0.457 | **0.2617** | 0.2391 to 0.2829 | 0.2481 | **FAIL** |
+| 3. Molecular (secondary) | 241 (204) | 0.478 | 0.2472 | 0.2226 to 0.2729 | 0.2495 | INCONCLUSIVE |
+
+The **null model** predicts the cohort's own observed 18-month survival for every patient.
+It is a descriptive reference, not a criterion.
+
+Brier scores at the other horizons named in the pre-registration (descriptive only):
+
+| Horizon | Variant 2 | 95% CI | Null model | Variant 3 | 95% CI | Null model |
+| --- | --- | --- | --- | --- | --- | --- |
+| 12 months | 0.2319 | 0.2112 to 0.2532 | 0.2277 | 0.2080 | 0.1842 to 0.2339 | 0.2146 |
+| 18 months | 0.2617 | 0.2391 to 0.2829 | 0.2481 | 0.2472 | 0.2226 to 0.2729 | 0.2495 |
+| 24 months | 0.2254 | 0.1972 to 0.2533 | 0.2202 | 0.2182 | 0.1874 to 0.2500 | 0.2229 |
+
+**What it shows.**
+- The headline model's point estimate is above 0.25 and so is the upper bound of its
+  interval: FAIL under the registered rule.
+- The model scores **worse than the null model at all three horizons** (0.2617 against
+  0.2481 at 18 months). Predicting the same survival probability for everyone would have
+  been closer to what happened.
+- Poor ranking alone cannot produce a Brier score above the null model's. It also requires
+  the predicted probabilities to be offset from the observed survival. The direction of
+  that offset was not examined.
+
+**A caution about the threshold itself.** With 45.7% of patients alive at 18 months, the
+uninformative score is about 0.457 x 0.543 = 0.248, just under the registered 0.25. In this
+cohort a model could have passed this row while discriminating not at all. The threshold
+was fixed from a published range before the external cohort was read, is reported as
+registered, and is not re-stated here.
+
+**Not done.** No calibration slope or intercept, calibration plot or decision-curve
+analysis. Each would be a further read of CGGA.
+
+Source: `docs/cgga_validation.md` section 12;
+`data/results/cgga/brier18_external.json`; `scripts/validate_brier_cgga.py`.
+
+## 2.4 Finding 3 and 4: the registered model is untestable, and the loss is mostly the cohort
+
+**The registered model cannot be evaluated on the registered cohort.** T2 was registered
+for a four-feature model that includes KPS. CGGA publishes no performance status in any of
+its three clinical files. KPS was not imputed: a TCGA median pasted onto Chinese patients
+and scored as an observation would describe the imputation, not the model. This is a
+feature-divergence problem, not a performance result.
+
+**Where the loss sits.** Variants 1 and 2 are both scored internally, so the result
+separates into two steps:
+
+| Step | C-index | Difference |
+| --- | --- | --- |
+| Committed baseline, TCGA (4 features) | 0.6735 | |
+| Transferable model, TCGA (3 features) | 0.6520 | -0.0215 from dropping KPS |
+| Same 3-feature model, CGGA | 0.5385 | -0.1135 from changing cohort |
+
+Removing KPS costs about 0.02 internally. Moving to CGGA costs a further 0.11 with the
+features held fixed, five times as much. The explanation "the model fell short because
+CGGA has no KPS" does not fit the numbers. The first step is approximate, because the two
+internal numbers come from slightly different fit sets (592 and 570 patients); the second
+is a like-for-like comparison of one fitted model on two cohorts.
+
+Candidate explanations for the second step, **none tested**:
+- A different population and care pathway. CGGA is a Chinese cohort with median age 52
+  against TCGA-GBM's 59, and age is one of only three predictors.
+- `treatment_arm` may not mean the same thing in the two cohorts, which derive it from
+  different source fields. The mix differs: 80 of 333 CGGA rows are mono-therapy (24%)
+  against 57 of 594 in TCGA (10%).
+
+Source: `docs/cgga_validation.md` sections 2.1, 4.2 and 5.
+
+## 2.5 Finding 5: molecular calls from raw TCGA data (descriptive)
+
+Two calling pipelines were run against the live GDC API. These are data-preparation
+results: they establish that the pipelines work and how many patients carry a call. They
+are not external validation.
+
+**IDH mutation status**, from open masked somatic-mutation files.
+
+| | |
+| --- | --- |
+| Files / patients with a primary-tumour file | 464 files; 373 patients tested |
+| IDH-mutant | 23 (6.2% of tested) |
+| IDH-wildtype | 350 (93.8% of tested) |
+| Cohort patients with a call | 368 of 594 |
+
+The mutant rate is the single-digit figure expected for primary glioblastoma.
+
+**MGMT promoter methylation**, from Illumina beta-value files. This is a two-probe
+average score, **not** the clinically validated MGMT-STP27 assay.
+
+| | |
+| --- | --- |
+| Files / callable patients | 450 files; 422 callable |
+| Methylated at the default threshold of 0.35 | 128 (30.3% of callable) |
+| Cohort patients with a call | 415 of 594 |
+
+**The binary call depends heavily on the threshold.** Moving the cut from 0.35 to 0.20
+changes the call for 48 patients (11% of the callable set). The two platforms also differ:
+33.3% methylated on 27k against 24.3% on 450k, with no harmonisation between them. The
+default is an a-priori working value, not a published cut-point; it was fixed before the
+cohort was downloaded and left unchanged. The continuous score should be preferred
+wherever a model allows it.
+
+Of the 594 cohort patients, **314 have both an IDH and an MGMT call**. Of the 284 with
+expression, **206 have both** and 12 have neither.
+
+Source: `docs/mgmt_idh_calling.md` section 6.
+
+## 2.6 Finding 6: the primary analysis is robust to excluding IDH-mutant patients
+
+**Why it was done.** Under WHO 2021 an IDH-mutant grade IV tumour is astrocytoma, not
+glioblastoma. All 23 IDH-mutant patients stay in the primary cohort, and the sensitivity
+analysis repeats the primary analysis without them. The decision rule was recorded before
+the IDH calls existed: flag the result if the C-index moves by more than 0.01.
+
+| Cohort | Patients | Modelled | Deaths | Internal C-index | 95% CI |
+| --- | --- | --- | --- | --- | --- |
+| Full (primary cohort) | 594 | 592 | 491 | 0.6735 | 0.6478 to 0.6994 |
+| Without the 23 IDH-mutant patients | 571 | 569 | 481 | 0.6656 | 0.6370 to 0.6913 |
+
+The C-index moved by **0.0079**, below the 0.01 limit: **not flagged**. The spread across
+cross-validation folds is several times the size of the change.
+
+**Subtype distribution** of the 284 TCGA expression samples, and of the 268 left after
+excluding the 16 IDH-mutant samples:
+
+| Subtype | Full | % | Without IDH-mutant | % | Change |
+| --- | --- | --- | --- | --- | --- |
+| Classical | 88 | 30.99 | 86 | 32.09 | +1.10 pp |
+| Mesenchymal | 82 | 28.87 | 77 | 28.73 | -0.14 pp |
+| Proneural | 67 | 23.59 | 61 | 22.76 | -0.83 pp |
+| Neural | 47 | 16.55 | 44 | 16.42 | -0.13 pp |
+
+No subtype share moved by more than 1.10 percentage points. Two things sit behind that
+stability: 14 of the 16 excluded samples were Proneural, and the classifier assigns labels
+by ranking within a cohort, so 8 of the 268 retained samples received a different label in
+the reduced run. The aggregate is stable; labels of samples near a subtype boundary are
+less so.
+
+**Not shown:** no paired test of the C-index difference was pre-specified, and none is
+reported.
+
+Source: `docs/mgmt_idh_calling.md` section 6.3;
+`data/results/tcga_gbm/idh_sensitivity_cox.json` and `idh_sensitivity_subtype.json`.
+
+## 2.7 Finding 7: the external cohort is much smaller than planned
+
+The protocol describes CGGA as ">1,000 samples". That figure is all glioma grades.
+
+| Step | n |
+| --- | --- |
+| Clinical rows pooled across three batches | 1,319 |
+| Primary GBM, WHO grade IV, positive survival | 333 rows |
+| Unique patients (identifiers are reused across batches) | **305** |
+| With an RNA-seq expression profile | 225 |
+| With expression and a complete survival outcome (**eligible for T4 and T5**) | **218** |
+
+CGGA requires no registration: its files download directly. This corrects the protocol's
+"open with registration".
+
+Source: `docs/cgga_ingestion.md` sections 1 and 2.
+
+## 2.8 Finding 8: a sample-size bound that shapes T1
+
+T1's subtyping threshold requires the lower bound of an exact two-sided 95% interval to
+reach 0.88.
+
+| Labelled patients | Best possible result | Lower bound | Clears 0.88 |
+| --- | --- | --- | --- |
+| 28 (RNA-seq with a reference label) | 28 of 28 | 0.8766 | No |
+| 30 | 30 of 30 | 0.8843 | Yes |
+| 108 (microarray with a reference label) | tolerates up to 6 errors | 0.8830 at 102 of 108 | Yes |
+
+Even a perfect score on the 28 RNA-seq patients cannot meet the threshold. The scoring set
+is therefore the 108-patient microarray set, at the cost of a cross-platform comparison.
+These bounds are two-sided; the decision memo carried one-sided figures, which are
+superseded.
+
+Source: `docs/preregistration.md` section 2.2 item 9; `docs/osf_final_fields.md`.
+
+## 2.9 What has not been shown
+
+A reader should be able to tell a measured result from an absence of one.
+
+- **No pre-registered test has been met.** T2's two evaluated rows failed. T1, T3, T4 and
+  T5 have not been run, so nothing can be said about subtyping accuracy, simulation
+  fidelity, the optimiser, or end-to-end benefit.
+- **No survival benefit has been demonstrated, predicted or otherwise.** T5, the test that
+  would measure a predicted benefit, has not been run, and its credibility is bounded by
+  T2, which failed.
+- **No calibration analysis exists.** No calibration slope, intercept, plot or
+  decision-curve analysis has been produced for any model.
+- **Nothing is validated against a published reference in L2.** The expression-based
+  subtyping and deconvolution code has unit tests but has not been shown to reproduce
+  published calls on a benchmark cohort.
+- **The pipeline's own "profiling" output is not measurement.** It is derived from the
+  clinical table.
+- **No end-to-end run on the real cohort has been recorded.**
+- **T2's improvement-over-baseline row is unevaluated**, because no comparator model has
+  been named.
+- **Both reads of CGGA happened without a sealed external partition**, because none
+  existed. This departs from the pre-registration's stated procedure and is disclosed in
+  its amendment log.
+
+## 2.10 Reproducing the results
+
+```bash
+# T2 C-index row (synthetic-data tests, then the evaluation)
+python -m pytest tests/test_validate_cox_cgga.py -q
+python scripts/validate_cox_cgga.py
+
+# T2 Brier row
+python -m pytest tests/test_validate_brier_cgga.py -q
+python scripts/validate_brier_cgga.py        # refuses to overwrite an existing result
+
+# Molecular calls, join and the IDH sensitivity analysis
+python scripts/download_tcga_mutations.py --out data/raw/tcga_gbm/mutations
+python scripts/download_tcga_methylation.py --out data/raw/tcga_gbm/methylation
+python scripts/join_molecular_calls.py
+python scripts/idh_sensitivity_cox.py
+python scripts/idh_sensitivity_subtype.py
+```
+
+- Both T2 scripts are deterministic (seed 42). Re-running one reproduces its numbers and
+  is not a new analysis. Anything else done with CGGA is.
+- The result files under `data/results/` and the raw data under `data/raw/` are not in
+  git. A clean checkout reproduces them only after the download scripts have been run.
+- The TCGA ingest queries the live GDC API, not a pinned release. The snapshot in use is
+  defined by the recorded file identifiers and checksums.
