@@ -1,0 +1,11 @@
+{
+ "what": "CGGA mRNA_array_301 gene-level expression, fetched for T1's subtype row.",
+ "retrieved_utc": "2026-11-27T22:25:00+00:00",
+ "ledger_seq": 21,
+ "file": {
+  "path": "data/raw/cgga/_cache/CGGA.mRNA_array_301_gene_level.20200506.txt.zip",
+  "url": "https://www.cgga.org.cn/download?file=download/20200506/CGGA.mRNA_array_301_gene_level.20200506.txt.zip&type=mRNA_array_301_gene_level&time=20200506",
+  "bytes": 29250338,
+  "sha256": "3cebab737d1ec2a2bfb9883f0b3ad850e64be67301069a5e1e3ab09683cb6df5"
+ }
+}

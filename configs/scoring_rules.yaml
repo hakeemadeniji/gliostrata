@@ -38,5 +38,5 @@ rules:
       reference and no cross-platform batch correction (item 9d).
       The 28 labelled RNA-seq patients are reported descriptively and are not
       part of the criterion.
-    scoring_set_manifest: null
-    scoring_set_manifest_sha256: null
+    scoring_set_manifest: data/partitions/cgga_t1_subtype_v1.json
+    scoring_set_manifest_sha256: 7adfc09f068b793fa60fed0d191b34a39dc44c2f5b14cf4cc865d84c25d94049

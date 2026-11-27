@@ -11,3 +11,5 @@ configs/t2_comparator/* -text
 # Sealed partition manifests: their registered SHA-256 (pre-registration section 4.5)
 # is of the bytes as written. Keep them byte-exact on every platform.
 data/partitions/*.json -text
+
+configs/t1_subtype/* -text

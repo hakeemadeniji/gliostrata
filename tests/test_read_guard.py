@@ -437,8 +437,13 @@ def test_the_committed_scoring_rule_registry_is_derived_from_the_preregistration
         assert rule.preregistration.startswith("docs/preregistration.md")
         assert "section" in rule.preregistration
         assert rule.scoring_set
-    # No scoring-set manifest is frozen yet, so today the rule path admits nothing.
-    assert all(rule.manifest is None for rule in rules.values())
+    # Since 2026-11-27 T1's scoring set is frozen (cgga_t1_subtype_v1). Every frozen
+    # manifest must be committed and still hash to the checksum recorded beside it.
+    for rule in rules.values():
+        if rule.manifest is not None:
+            path = ROOT / rule.manifest
+            assert path.is_file(), f"{rule.manifest} is named but not committed"
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == rule.manifest_sha256
 
 
 # ---------------------------------------------------------------------------

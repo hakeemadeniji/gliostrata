@@ -1,0 +1,84 @@
+{
+ "n_scored": 54,
+ "n_correct": 54,
+ "confusion_matrix": {
+  "Classical": {
+   "Classical": 10,
+   "Mesenchymal": 0,
+   "Proneural": 0,
+   "Neural": 0,
+   "no_call": 0
+  },
+  "Mesenchymal": {
+   "Classical": 0,
+   "Mesenchymal": 13,
+   "Proneural": 0,
+   "Neural": 0,
+   "no_call": 0
+  },
+  "Proneural": {
+   "Classical": 0,
+   "Mesenchymal": 0,
+   "Proneural": 13,
+   "Neural": 0,
+   "no_call": 0
+  },
+  "Neural": {
+   "Classical": 0,
+   "Mesenchymal": 0,
+   "Proneural": 0,
+   "Neural": 18,
+   "no_call": 0
+  }
+ },
+ "confusion_rows": "reference label",
+ "confusion_columns": "called subtype",
+ "accuracy": 1.0,
+ "ci_lower": 0.9339684857558858,
+ "ci_upper": 1.0,
+ "interval": "exact two-sided Clopper-Pearson 95%",
+ "verdict": {
+  "metric_key": "T1_subtype_accuracy_cgga",
+  "test_id": "T1",
+  "metric": "Subtyping accuracy (CGGA external)",
+  "status": "PASS",
+  "point_estimate": 1.0,
+  "ci_lower": 0.9339684857558858,
+  "ci_upper": 1.0,
+  "threshold": 0.88,
+  "direction": "gte",
+  "ci_bound": "lower",
+  "decisive_value": 0.9339684857558858,
+  "reason": "PASS: 95% CI lower bound 0.933968 >= 0.88.",
+  "justification": "Best published external subtyping accuracy is ~0.88-0.90.",
+  "auxiliary_requirement": null,
+  "auxiliary_satisfied": null
+ },
+ "negative_control": {
+  "n_perm": 1000,
+  "seed": 42,
+  "mean": 0.25822222222222224,
+  "range_95": [
+   0.14814814814814814,
+   0.3888888888888889
+  ],
+  "note": "section 3.8: reported, never decisive; about 1/4 expected"
+ },
+ "n_labelled": 54,
+ "n_genes_used_min": 831,
+ "n_genes_used_max": 831,
+ "scale_contingency_applied": false,
+ "n_genes_frozen": 831,
+ "input_scale": "log2_plus_one",
+ "centroid_set": "verhaak840_tcga_all",
+ "centroid_sha256": "c2b65d8ff0be2708bc8086e909f04a16a299823109186d674837c4d46f159bf7",
+ "exclusions": {
+  "n_manifest_ids": 60,
+  "n_outside_manifest_in_clinical_table": 5,
+  "n_manifest_without_clinical_row": 0,
+  "n_without_reference_label": 6,
+  "n_label_not_a_class": 0,
+  "n_labelled_without_expression": 0
+ },
+ "synthetic": true
+}

@@ -1,0 +1,15 @@
+{
+ "scale": "log2_plus_one",
+ "decided": "2026-11-27, from documentation only, before any CGGA microarray value was read",
+ "rule": "pre-registration 2.2 item 9(d): as distributed if the source's documentation says the values are log2, otherwise log2(x + 1)",
+ "evidence": {
+  "Zhao et al. 2021, Genomics Proteomics Bioinformatics (PMC8498921), Methods": "GeneSpring GX11.0 was applied to calculate probe intensity.",
+  "https://www.cgga.org.cn/about.jsp": "Probe intensities were normalized using GeneSpring GX 11.0.",
+  "finding": "Neither source, nor the download page, states that the values are log2 (checked 2026-11-27: no 'log2' in either text). The 'otherwise' branch applies.",
+  "detail": "docs/t1_microarray_scale_evidence.md"
+ },
+ "contingencies_registered_2026-11-27": [
+  "If any value is below 0, the values are already on a log scale (linear intensities cannot be negative) and are used as distributed; the output records that this applied.",
+  "A frozen gene with a missing or non-finite value is dropped for that sample only; genes used per sample are reported."
+ ]
+}

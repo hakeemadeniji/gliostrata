@@ -338,7 +338,16 @@ resolutions are pre-registered rather than chosen after the data is seen.
    that scale is decided from the documentation, and recorded, before any value is read.
    The number of genes used is reported. The code applies log2(TPM + 1) to RNA-seq; the
    microarray input rules are implemented in the T1 script, which is committed before
-   the read. (e) *Margin, stated so the choice of
+   the read. *Input scale and two format contingencies (amended 2026-11-27, after the OSF
+   submission and before any microarray value was read):* CGGA's documentation says the
+   intensities were "normalized using GeneSpring GX 11.0" and does not say log2, so the
+   values enter as log2(x + 1) (`configs/t1_subtype/input_scale.json`). If any value is
+   below 0, the values are already on a log scale, because linear intensities cannot be
+   negative, and they are used as distributed; the output records this. A frozen gene
+   with a missing value is dropped for that sample only, and the genes used per sample
+   are reported. The script is `scripts/t1_subtype_cgga.py`; it reads only the
+   `mRNA_array_301` rows of the cohort file, and it refuses the read until its synthetic
+   dry run exists. (e) *Margin, stated so the choice of
    scoring set can be checked:* on 108 patients the criterion tolerates up to 6
    errors (102 of 108 gives 0.8830; 101 of 108 gives 0.8710). An observed accuracy
    near 0.95 needs roughly 71 to 100 patients to clear (68 of 71 gives 0.8814; 95 of
@@ -839,7 +848,7 @@ read for T2's improvement row registered in section 2.2 item 2 (j), will occur w
 pre-registration. GLASS has **not** been
 downloaded. CPTAC-GBM, any single-cell reference atlas other than the Neftel 2019 atlas,
 TCIA imaging, and the PDX growth curves and in vivo NSC tracking data required for T3
-have **not** been obtained. Neither has the CGGA microarray expression matrix. The
+have **not** been obtained. The CGGA microarray expression matrix was fetched on 2026-11-27 and stored unopened (ledger entry 21), and T1's 108-patient scoring set is frozen (`cgga_t1_subtype_v1`). The
 external partition `cgga_external_v1` was sealed on 2026-11-27 (218 patients, all-test;
 §4.5); GLASS is not used under this registration (§3.3, §4.5).
 
@@ -974,6 +983,8 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | Header; 5 (data in hand; analyses already run) | Completed the header: the author and affiliations, a committee not yet appointed, no funding and no conflicts, the start of the confirmatory phase immediately after the deposit, the repository URL, and the registered commit as the tag `prereg-deposit`. Only the DOI and the deposit date remain, and they exist only after the deposit. GLASS was removed from the IRB data list. Section 5 now lists the CGGA accesses that read no values (ledger entries 11, 13, 16, 17) and the TCGA cross-validation of option B. No threshold, bound or rule changed. | The deposit needs a complete header, and section 5 must be true at the moment of deposit. | **Yes**, as for the entries above. No data was read for this entry. |
 | 2026-11-27 | 1.4 (H2 wording); 2.2 items 4, 6, 11 (added); 3.6 (scope); 3.8, 3.9, 3.10 (added); 5 | Answered the gaps found against the OSF study-design questions, with the project lead's choices. (1) T4 and T5 get a contingent model specification (item 11): a Stupp baseline; RMST to 24 months, success at a gain of 3 months or more and harm at a gain below 0; and the simulator and response surface frozen by amendment before any T4 or T5 read, or NOT EVALUABLE after 2027-06-30. (2) The configuration space is registered as coded, and the distinctness rule counts the number of injection sites, not a site set. (3) Sensitivity analyses run only inside registered reads. (4) Added a proportional-hazards test, a permutation negative control and a synthetic dry run; the variant 2 PH result on TCGA is disclosed. (5) No outlier removal. (6) Blinding is procedural only, with one analyst. No threshold, decisive bound or decision rule changed. | The OSF study-design form asks for each of these; the registration left them open or implicit. | **Yes**, as for the entries above. No CGGA value was read; the dry run used synthetic files, and its PH tests used TCGA. |
 | 2026-11-27 | 2.2 item 5 (aggregate added) | Registered how T4's percentage regret reduction is aggregated: 100 x (1 - mean regret under GP-EI / mean regret under random search) over the 50 patients, with a patient-bootstrap CI. No threshold, bound or rule changed. | The registration defined regret per patient but not its aggregate; chosen by the project lead. | **Yes**, as for the entries above. T4 has not been run. |
+| 2026-11-27 | 2.2 item 9 (scoring set frozen; input file named); 5 | **Made after the OSF submission of the registered commit `c7d7a95` (tag `prereg-deposit`), while approval was pending.** Froze T1's subtype scoring set by its registered rule. All 108 eligible CGGA mRNA_array_301 patients carry a reference label and have an expression column; they are sealed all-test as `data/partitions/cgga_t1_subtype_v1.json` (SHA-256 `7adfc09f068b793fa60fed0d191b34a39dc44c2f5b14cf4cc865d84c25d94049`), and `configs/scoring_rules.yaml` now names it. The classifier's input is CGGA's gene-level release (CGGA.mRNA_array_301_gene_level.20200506; SHA-256 in `data/provenance/cgga_microarray_sources.json`); the registered rule matches genes by symbol. No threshold, bound or rule changed. | Section 3.3 and item 9 require the scoring set to be frozen as a manifest before the read. | **No** T1 data read. The microarray file was fetched and hashed (ledger entries 19 to 21; the first attempt failed with HTTP 500). The freeze read only sample ids and whether a label is present, never a label or an expression value (entry 22). |
+| 2026-11-27 | 2.2 item 9(d) (input scale decided; two format contingencies) | **Made after the OSF submission of `c7d7a95`, before any microarray value was read.** Decided the input scale from documentation, as registered: log2(x + 1), because CGGA's sources say only that intensities were normalised with GeneSpring GX 11.0. Added two format contingencies so that the one read cannot fail on format: a negative value means the data are already log-scale and are used as distributed; a missing value drops that gene for that sample. No threshold, bound, scoring set or classifier changed. | Item 9(d) requires the scale to be decided from documentation before the read. A read that crashes on an unexpected format would waste the one registered read. | **No.** No T1 value was read: the matrix has been opened only for its header (sample ids). |
 
 ---
 

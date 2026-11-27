@@ -33,7 +33,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "ci_partition_drift.py"
 CI_YAML = ROOT / ".github" / "workflows" / "ci.yml"
 CI_ACTIVE = ["data/partitions/tcga_gbm_clinical_v2.json",
-             "data/partitions/cgga_external_v1.json"]
+             "data/partitions/cgga_external_v1.json",
+             "data/partitions/cgga_t1_subtype_v1.json"]
 
 
 def _run(cwd, active):
@@ -157,6 +158,8 @@ def test_the_repository_manifests_pass_with_the_ci_setting():
     assert "re-derived   : all 594 ids reproduce" in p.stdout
     assert "cgga_external_v1.json  [ACTIVE]" in p.stdout
     assert "re-derived   : all 218 ids reproduce" in p.stdout
+    assert "cgga_t1_subtype_v1.json  [ACTIVE]" in p.stdout
+    assert "re-derived   : all 108 ids reproduce" in p.stdout
     # The cohort table is git-ignored: present on the development machine, absent
     # in CI and in any clean checkout. Each case has its own line; both must pass.
     manifest = json.loads((ROOT / CI_ACTIVE[0]).read_text(encoding="utf-8"))
