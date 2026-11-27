@@ -1,0 +1,1040 @@
+{
+ "what": "Option B candidate gene sets for T2's secondary, descriptive comparison (pre-registration 2.2 item 2 (b)): records of the registered search that reached full text, passed E1, E2 and E5, and whose expression-only risk score names every term in readable text (R1). Symbols are as printed; R2 (presence in both TCGA and CGGA) is applied by scripts/t2_comparator.py select. Fixed and committed before any gene set was fitted.",
+ "extraction": "one reviewer per paper (protocol docs/t2_comparator_search/protocols/4_gene_sets.md); every terms_evidence quote checked by script against its source file; 7 ambiguous records adjudicated against eligibility",
+ "gene_sets": [
+  {
+   "pmid": "38174685",
+   "first_published": "2024-01-01",
+   "label": "7-gene NETs LASSO Cox risk score RS",
+   "genes": [
+    "CPPED1",
+    "F3",
+    "G0S2",
+    "MAPK1",
+    "MME",
+    "MMP9",
+    "MPO"
+   ],
+   "pairs": [],
+   "source": "Results, Development of the prognostic model",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38214842",
+   "first_published": "2024-01-12",
+   "label": "14-gene CDI = sum(expression x coefficient)",
+   "genes": [
+    "BCL2A1",
+    "CASP3",
+    "CLTB",
+    "CTSK",
+    "CYP1B1",
+    "ICAM1",
+    "MMP9",
+    "PTPN2",
+    "RAC2",
+    "S100A9",
+    "TEX264",
+    "TNFAIP3",
+    "VDAC1",
+    "ZKSCAN3"
+   ],
+   "pairs": [],
+   "source": "fulltext/38214842.txt, Discussion",
+   "symbol_notes": "Coefficients not printed in text; genes only."
+  },
+  {
+   "pmid": "38255198",
+   "first_published": "2024-01-01",
+   "label": "Two-gene risk score 0.2138 x STC1(printed SEC1) + 0.2702 x MDK",
+   "genes": [
+    "STC1",
+    "MDK"
+   ],
+   "pairs": [],
+   "source": "fulltext/38255198.txt, section 3.3",
+   "symbol_notes": "Formula prints 'SEC1' for STC1 (typo; text says STC1). Figure 3 caption says '17-gene risk signature' but text says two genes; listed STC1, MDK as printed in text. Listed 'STC1' as the text names it."
+  },
+  {
+   "pmid": "38279111",
+   "first_published": "2024-01-26",
+   "label": "Four-lncRNA immune-related signature (not the radiomics or multifactor model)",
+   "genes": [
+    "AC025171.5",
+    "AC068888.1",
+    "AC080112.1",
+    "AC002401.4"
+   ],
+   "pairs": [],
+   "source": "fulltext/38279111.txt, Results (signature construction)",
+   "symbol_notes": "Paper has two signatures plus a combined clinical+radiomics+lncRNA model; lncRNA signature chosen as the expression risk score."
+  },
+  {
+   "pmid": "38320988",
+   "first_published": "2024-02-06",
+   "label": "71-gene scRNA-derived connectivity signature score = up-set score minus down-set score",
+   "genes": [
+    "CHI3L1",
+    "ID3",
+    "NMB",
+    "CRYAB",
+    "APOE",
+    "AGT",
+    "CITED1",
+    "ATP1B2",
+    "CLU",
+    "TNFRSF12A",
+    "SPARC",
+    "FABP7",
+    "ATF3",
+    "ANXA2",
+    "GADD45B",
+    "SOCS3",
+    "TAGLN2",
+    "NEK6",
+    "CYR61",
+    "GFAP",
+    "TIMP1",
+    "CEBPD",
+    "HOPX",
+    "MT2A",
+    "FEZ1",
+    "SPARCL1",
+    "GAP43",
+    "CST3",
+    "TUBB2A",
+    "CNN3",
+    "DNAJB1",
+    "TMSB10",
+    "CALM1",
+    "B2M",
+    "NDUFB2",
+    "PTN",
+    "S100A16",
+    "C1orf61",
+    "CD63",
+    "GAPDH",
+    "HNRNPH1",
+    "HNRNPA1",
+    "EEF2",
+    "MT-ND3",
+    "GLTSCR2",
+    "NOVA1",
+    "MARCKSL1",
+    "PABPC1",
+    "BTG2",
+    "TCF12",
+    "MTRNR2L8",
+    "RPL36A",
+    "SOX4",
+    "ZBTB20",
+    "BTG1",
+    "RPSAP58",
+    "PTPRS",
+    "EGFR",
+    "KCNQ1OT1",
+    "OLIG1",
+    "DSEL",
+    "OLIG2",
+    "HES6",
+    "CHD7",
+    "MEST",
+    "ACAP3",
+    "TNK2",
+    "DLL3",
+    "SHD",
+    "DLL1",
+    "SMOC1"
+   ],
+   "pairs": [],
+   "source": "supp/38320988/x/41467_2024_45067_MOESM4_ESM.xlsx.txt, Supplementary Data 1",
+   "symbol_notes": "Score = mean(40 upregulated genes) minus mean(31 downregulated genes); GeneGroup column in Supp Data 1 gives direction. Paper also has 245-gene RNA-seq set, not used."
+  },
+  {
+   "pmid": "38335383",
+   "first_published": "2024-02-09",
+   "label": "LCDG risk signature, sum of expression x beta over 14 hub genes (TCGA glioma)",
+   "genes": [
+    "ACP2",
+    "AGA",
+    "AP3S2",
+    "BORCS6",
+    "CTNS",
+    "GATA2",
+    "GNS",
+    "HPS6",
+    "KIF1B",
+    "LAPTM4A",
+    "NCOA4",
+    "PSAP",
+    "SNAPIN",
+    "SPAG9"
+   ],
+   "pairs": [],
+   "source": "fulltext/38335383.txt, Discussion (hub LCDG list)",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38365809",
+   "first_published": "2024-02-16",
+   "label": "Six-gene DRIC risk score (CD276, TNFRSF14, TNFSF14, TNFSF4, CD40, TNFRSF18)",
+   "genes": [
+    "CD276",
+    "TNFRSF14",
+    "TNFSF14",
+    "TNFSF4",
+    "CD40",
+    "TNFRSF18"
+   ],
+   "pairs": [],
+   "source": "fulltext/38365809.txt, Results (risk score formula)",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38434266",
+   "first_published": "2024-02-22",
+   "label": "2-pair DEirlncRNA signature (Cox stepwise), final model",
+   "genes": [],
+   "pairs": [
+    [
+     "AC012558.1",
+     "AC025171.5"
+    ],
+    [
+     "FOXD2-AS1",
+     "AL596330.1"
+    ]
+   ],
+   "source": "supp/38434266/x/mmc6.xls (Table S5) column headers",
+   "symbol_notes": "Pair order taken from Table S5 headers; four lncRNAs all confirmed in main text Fig. 6 paragraph."
+  },
+  {
+   "pmid": "38462406",
+   "first_published": "2024-03-10",
+   "label": "4-gene DisulfidptosisScore",
+   "genes": [
+    "IGFBP5",
+    "COL8A1",
+    "IGFBP6",
+    "AKR1C3"
+   ],
+   "pairs": [],
+   "source": "Results 3.5 and Fig. 6 legend",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38510250",
+   "first_published": "2024-03-06",
+   "label": "13-gene prognostic risk score (LASSO then multivariate Cox)",
+   "genes": [
+    "TMEM60",
+    "MCTP2",
+    "VKORC1L1",
+    "ABHD12",
+    "FAM120AOS",
+    "CCM2",
+    "ETV4",
+    "FGR",
+    "ACCS",
+    "TUBA1C",
+    "ILKAP",
+    "ZNF823",
+    "ILF2"
+   ],
+   "pairs": [],
+   "source": "fulltext/38510250.txt, 'Prognostic correlation analysis' section",
+   "symbol_notes": "Abstract prints 'MEM60' for TMEM60 (typo). Text uses 'overall' survival loosely: outcome described as survival status/time in TCGA GBM."
+  },
+  {
+   "pmid": "38566075",
+   "first_published": "2024-04-02",
+   "label": "9-ORG risk score (LASSO + Cox)",
+   "genes": [
+    "H6PD",
+    "BMP2",
+    "SPP1",
+    "HADHA",
+    "SLC25A20",
+    "TXNIP",
+    "ACTA1",
+    "CCND1",
+    "EEF1A1"
+   ],
+   "pairs": [],
+   "source": "fulltext/38566075.txt, abstract Results and risk score formula",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38606090",
+   "first_published": "2024-03-28",
+   "label": "CP-model, five-gene cuproptosis LASSO-Cox risk score",
+   "genes": [
+    "ANKRD9",
+    "SLC31A1",
+    "LCAT",
+    "SNCA",
+    "SORD"
+   ],
+   "pairs": [],
+   "source": "fulltext/38606090.txt, Discussion",
+   "symbol_notes": "Results text prints 'SLC31A' (heatmap paragraph); Discussion prints SLC31A1, used here."
+  },
+  {
+   "pmid": "38615384",
+   "first_published": "2024-04-13",
+   "label": "9-gene LASSO prognostic risk score",
+   "genes": [
+    "EREG",
+    "BDKRB1",
+    "PLA2R1",
+    "PODNL1",
+    "PTGES",
+    "LINC00239",
+    "TSLP",
+    "CLEC4G",
+    "VGF"
+   ],
+   "pairs": [],
+   "source": "Results 3.6 (text and continuing line)",
+   "symbol_notes": "Text names three genes in one line then PODNL1, PTGES, LINC00239, TSLP, CLEC4G, VGF after the figure legend; 3+6=9."
+  },
+  {
+   "pmid": "38638676",
+   "first_published": "2024-04-11",
+   "label": "8-gene LASSO risk score (Table 3)",
+   "genes": [
+    "AP2A2",
+    "ATP9A",
+    "CMTM6",
+    "COMMD3",
+    "DNM1",
+    "KIF5B",
+    "RAB11B",
+    "VPS26A"
+   ],
+   "pairs": [],
+   "source": "fulltext/38638676.txt, Table 3 (coefficients of the risk score formula)",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38687369",
+   "first_published": "2024-01-01",
+   "label": "4-gene LASSO-Cox signature, final risk score",
+   "genes": [
+    "SDC-1",
+    "PLAUR",
+    "FN1",
+    "CXCL13"
+   ],
+   "pairs": [],
+   "source": "fulltext/38687369.txt, Abstract conclusion",
+   "symbol_notes": "SDC-1 is printed; presumably SDC1 (syndecan-1)."
+  },
+  {
+   "pmid": "38719174",
+   "first_published": "2024-05-07",
+   "label": "3-gene Cox-coefficient risk score",
+   "genes": [
+    "COL8A1",
+    "ANG",
+    "COL4A1"
+   ],
+   "pairs": [],
+   "source": "Results 3.1",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38763954",
+   "first_published": "2024-05-19",
+   "label": "9-MRG LASSO-Cox risk score (final model for OS analysis)",
+   "genes": [
+    "ABCG2",
+    "SHC1",
+    "TRPM2",
+    "RAB38",
+    "PAK1",
+    "GSTP1",
+    "MMP9",
+    "MUL1",
+    "MMP2"
+   ],
+   "pairs": [],
+   "source": "fulltext/38763954.txt, Results section on risk model",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "38813229",
+   "first_published": "2024-05-14",
+   "label": "TTK signature (14-gene LASSO Cox score), used for main survival analysis",
+   "genes": [
+    "CRCP",
+    "C7orf31",
+    "ANG",
+    "ACTG1",
+    "DUSP6",
+    "SLC4A10",
+    "STYXL1",
+    "SV2B",
+    "DERL2",
+    "MAP7D3",
+    "RPL7A",
+    "ZNF561",
+    "C6orf136",
+    "CDC73"
+   ],
+   "pairs": [],
+   "source": "supp/38813229/x/Supplementary Table S3.xlsx.txt, Sheet1",
+   "symbol_notes": "C7orf31 and C6orf136 are old-style symbols (now C7orf31 / C6orf136 aliases); report as printed."
+  },
+  {
+   "pmid": "38817361",
+   "first_published": "2024-05-15",
+   "label": "Four-gene disulfidptosis-related risk signature",
+   "genes": [
+    "CLCNKA",
+    "AC068987.2",
+    "AC097641.2",
+    "AL031432.5"
+   ],
+   "pairs": [],
+   "source": "fulltext/38817361.txt, Results (prognostic signature paragraph)",
+   "symbol_notes": "Two of the genes are lncRNAs (AC068987.2, AC097641.2, AL031432.5 are lncRNA clone-based names)."
+  },
+  {
+   "pmid": "39136841",
+   "first_published": "2024-08-13",
+   "label": "PTM score, eight-gene LASSO-Cox, TCGA training",
+   "genes": [
+    "NSUN5",
+    "ANKH",
+    "TSPAN4",
+    "GOS2",
+    "NAGLU",
+    "CCT6A",
+    "NCOA4",
+    "WDR46"
+   ],
+   "pairs": [],
+   "source": "fulltext/39136841.txt, section 'Construction and validation of a pro-tumor macrophage-associated signature (PTM)'",
+   "symbol_notes": "GOS2 printed; almost certainly G0S2 (zero)."
+  },
+  {
+   "pmid": "39162363",
+   "first_published": "2024-08-20",
+   "label": "3-gene necroptosis RiskScore (final model formula)",
+   "genes": [
+    "GZMB",
+    "PLAUR",
+    "SOCS3"
+   ],
+   "pairs": [],
+   "source": "Results 3.4 RiskScore model",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39253064",
+   "first_published": "2024-09-05",
+   "label": "CIC-related seven-gene LASSO risk score (TCGA-GBM, validated CGGA)",
+   "genes": [
+    "PTX3",
+    "TIMP1",
+    "IGFBP2",
+    "SLC47A2",
+    "SNCAIP",
+    "LGALS3",
+    "LOXL1"
+   ],
+   "pairs": [],
+   "source": "fulltext/39253064.txt, section 'The CIC-Related Prognostic Model...' and coefficient table",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39286023",
+   "first_published": "2024-09-02",
+   "label": "3-gene risk score 0.131*LOXL1+0.170*LOXL4+0.136*GUCA1A",
+   "genes": [
+    "LOXL1",
+    "LOXL4",
+    "GUCA1A"
+   ],
+   "pairs": [],
+   "source": "fulltext/39286023.txt, Results",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39309926",
+   "first_published": "2024-09-03",
+   "label": "Five-gene risk score (MAP1LC3A, MPO, GATA4, S100A4, SPP1)",
+   "genes": [
+    "MAP1LC3A",
+    "MPO",
+    "GATA4",
+    "S100A4",
+    "SPP1"
+   ],
+   "pairs": [],
+   "source": "fulltext/39309926.txt, Discussion paragraph",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39364731",
+   "first_published": "2024-10-04",
+   "label": "2-gene mRNA risk score, 0.14xFABP5 + 0.25xADRA1B",
+   "genes": [
+    "FABP5",
+    "ADRA1B"
+   ],
+   "pairs": [],
+   "source": "fulltext/39364731.txt, Results: Establishment and validation of a prognostic model",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39435104",
+   "first_published": "2024-10-05",
+   "label": "22-IRGP LASSO risk score (final, used for KM/ROC)",
+   "genes": [],
+   "pairs": [
+    [
+     "AGAP2",
+     "IGHA1"
+    ],
+    [
+     "ATCAY",
+     "DLL3"
+    ],
+    [
+     "BCL2A1",
+     "LUM"
+    ],
+    [
+     "C1R",
+     "HLA-DPB1"
+    ],
+    [
+     "C5AR1",
+     "HLA-DQB1"
+    ],
+    [
+     "CD163",
+     "HLA-DQB1"
+    ],
+    [
+     "CHI3L2",
+     "HLA-DMA"
+    ],
+    [
+     "CMKLR1",
+     "POSTN"
+    ],
+    [
+     "CXCL10",
+     "LOXL1"
+    ],
+    [
+     "CXCL11",
+     "MMP7"
+    ],
+    [
+     "DLL3",
+     "NSG2"
+    ],
+    [
+     "GPC2",
+     "ZDHHC22"
+    ],
+    [
+     "HLA-DPA1",
+     "VGF"
+    ],
+    [
+     "HLA-DQA1",
+     "LOXL1"
+    ],
+    [
+     "HLA-DQB1",
+     "NNAT"
+    ],
+    [
+     "HLA-DRB6",
+     "RPRM"
+    ],
+    [
+     "IGHG1",
+     "IGLC2"
+    ],
+    [
+     "LTF",
+     "SAA1"
+    ],
+    [
+     "NNAT",
+     "RNASE6"
+    ],
+    [
+     "NNAT",
+     "VOPP1"
+    ],
+    [
+     "TACC3",
+     "ZNF488"
+    ],
+    [
+     "VGF",
+     "ZDHHC22"
+    ]
+   ],
+   "source": "fulltext/39435104.txt, Table 1 (Information of 22 IRGPs)",
+   "symbol_notes": "HLA-DRB6 is a pseudogene, printed as is. Gene order as in Table 1 Gene1/Gene2."
+  },
+  {
+   "pmid": "39458959",
+   "first_published": "2024-10-02",
+   "label": "Four-gene SIGI LASSO risk score",
+   "genes": [
+    "DUSP6",
+    "MMP2",
+    "MMP13",
+    "BMP2"
+   ],
+   "pairs": [],
+   "source": "fulltext/39458959.txt, Section 2.2",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39465756",
+   "first_published": "2024-10-04",
+   "label": "8-gene cell cycle risk score (Section 3.2)",
+   "genes": [
+    "ANAPC4",
+    "CCNB1",
+    "CDC25B",
+    "CHEK1",
+    "PLK1",
+    "SMAD3",
+    "YWHAG",
+    "YWHAZ"
+   ],
+   "pairs": [],
+   "source": "fulltext/39465756.txt, Section 3.2",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39465792",
+   "first_published": "2024-10-11",
+   "label": "LASSO risk model of 7 RA metabolism genes",
+   "genes": [
+    "ADH4",
+    "DHRS3",
+    "DHRS9",
+    "LRAT",
+    "RDH10",
+    "RDH12",
+    "RDH5"
+   ],
+   "pairs": [],
+   "source": "fulltext/39465792.txt, Section 3.1",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39610810",
+   "first_published": "2024-11-21",
+   "label": "New LASSO 3-gene MLK signature (Section 3.3)",
+   "genes": [
+    "ZAK",
+    "MLK1",
+    "MLK3"
+   ],
+   "pairs": [],
+   "source": "fulltext/39610810.txt, Section 3.3",
+   "symbol_notes": "MLK1 = MAP3K9 and MLK3 = MAP3K11 (HGNC aliases); symbols as printed."
+  },
+  {
+   "pmid": "39697698",
+   "first_published": "2024-11-27",
+   "label": "7-gene palmitoylation-related LASSO risk score formula.",
+   "genes": [
+    "FERMT1",
+    "TIMP4",
+    "CA14",
+    "UPP1",
+    "SOD3",
+    "IGFBP6",
+    "COL22A1"
+   ],
+   "pairs": [],
+   "source": "fulltext/39697698.txt, Results (risk score formula)",
+   "symbol_notes": null
+  },
+  {
+   "pmid": "39697704",
+   "first_published": "2024-11-19",
+   "label": "10-gene LASSO prognostic immune-related risk score (Table 1); nomogram adds age/gender separately.",
+   "genes": [
+    "CLCF1",
+    "PTX3",
+    "TNFRSF14",
+    "SDC2",
+    "VGF",
+    "AREG",
+    "PLAUR",
+    "GRN",
+    "AQP9",
+    "IGLV6-57"
+   ],
+   "pairs": [],
+   "source": "fulltext/39697704.txt, Table 1",
+   "symbol_notes": "IGLV6-57 is an immunoglobulin variable segment, may be absent from TCGA gene matrices."
+  },
+  {
+   "pmid": "39896073",
+   "first_published": "2024-12-23",
+   "label": "19-gene CHRG LASSO-Cox risk score (expression only); nomogram adds age/grade/IDH separately.",
+   "genes": [
+    "ALB",
+    "AOC1",
+    "AQP1",
+    "CDK1",
+    "HEPHL1",
+    "IL1A",
+    "LCAT",
+    "LOX",
+    "LOXL2",
+    "LOXL3",
+    "MOXD1",
+    "MT-CO2",
+    "MT1G",
+    "MT1M",
+    "MT1X",
+    "SNCG",
+    "STEAP3",
+    "XAF1",
+    "XIAP"
+   ],
+   "pairs": [],
+   "source": "supp/39896073/x/vdae233_suppl_Supplementary_Tables.docx.txt, Supplementary Table 3",
+   "symbol_notes": "Terms evidence quote contains one gene only (others in separate table rows). MT-CO2 is a mitochondrial gene."
+  }
+ ],
+ "screen": [
+  {
+   "pmid": "38174685",
+   "outcome": "pass",
+   "detail": "7 genes, 0 pairs"
+  },
+  {
+   "pmid": "38214842",
+   "outcome": "pass",
+   "detail": "14 genes, 0 pairs"
+  },
+  {
+   "pmid": "38255198",
+   "outcome": "pass",
+   "detail": "2 genes, 0 pairs"
+  },
+  {
+   "pmid": "38279111",
+   "outcome": "pass",
+   "detail": "4 genes, 0 pairs"
+  },
+  {
+   "pmid": "38320988",
+   "outcome": "pass",
+   "detail": "71 genes, 0 pairs"
+  },
+  {
+   "pmid": "38322416",
+   "outcome": "fail",
+   "detail": "E2: Single-gene paper (MAPKAPK2); the 'risk score' is just high/low MAPKAPK2 expression, no multi-gene risk score proposed."
+  },
+  {
+   "pmid": "38335383",
+   "outcome": "pass",
+   "detail": "14 genes, 0 pairs"
+  },
+  {
+   "pmid": "38365809",
+   "outcome": "pass",
+   "detail": "6 genes, 0 pairs"
+  },
+  {
+   "pmid": "38369937",
+   "outcome": "fail",
+   "detail": "R1: Risk score is built on PSI values of alternative-splicing events; the final model events are not named in text (only figures and supplementary tables)."
+  },
+  {
+   "pmid": "38419527",
+   "outcome": "fail",
+   "detail": "E2: Metabolism subtype classification and PCA-based MRG score for subtype membership; no survival risk score. Five single hub genes tested individually."
+  },
+  {
+   "pmid": "38434266",
+   "outcome": "pass",
+   "detail": "0 genes, 2 pairs"
+  },
+  {
+   "pmid": "38462406",
+   "outcome": "pass",
+   "detail": "4 genes, 0 pairs"
+  },
+  {
+   "pmid": "38495835",
+   "outcome": "fail",
+   "detail": "E2: Single-gene study (HIF1A expression) with nomogram including clinical covariates; no multi-term expression risk score proposed."
+  },
+  {
+   "pmid": "38510250",
+   "outcome": "pass",
+   "detail": "13 genes, 0 pairs"
+  },
+  {
+   "pmid": "38516683",
+   "outcome": "fail",
+   "detail": "R1: No expression risk score with named terms: prognosis uses a P-NPC ssGSEA score from marker genes listed only in a heatmap figure, and the nomogram adds age and treatment scores."
+  },
+  {
+   "pmid": "38566075",
+   "outcome": "pass",
+   "detail": "9 genes, 0 pairs"
+  },
+  {
+   "pmid": "38606090",
+   "outcome": "pass",
+   "detail": "5 genes, 0 pairs"
+  },
+  {
+   "pmid": "38615384",
+   "outcome": "pass",
+   "detail": "9 genes, 0 pairs"
+  },
+  {
+   "pmid": "38638676",
+   "outcome": "pass",
+   "detail": "8 genes, 0 pairs"
+  },
+  {
+   "pmid": "38674418",
+   "outcome": "fail",
+   "detail": "E2: Paper proposes no multi-gene risk score; single lncRNA NDUFA6-DT as biomarker, nomogram with clinical terms built on that single gene."
+  },
+  {
+   "pmid": "38687369",
+   "outcome": "pass",
+   "detail": "4 genes, 0 pairs"
+  },
+  {
+   "pmid": "38698847",
+   "outcome": "fail",
+   "detail": "E2: No risk score: GSVA/consensus clusters (C1-C3) of redox network signatures; subtype membership with KM comparisons only."
+  },
+  {
+   "pmid": "38719174",
+   "outcome": "pass",
+   "detail": "3 genes, 0 pairs"
+  },
+  {
+   "pmid": "38733169",
+   "outcome": "fail",
+   "detail": "E2: 20-gene ANN uses mutation status as inputs and predicts immunotherapy response (responder/nonresponder), not an OS risk score; also mutation-based."
+  },
+  {
+   "pmid": "38763954",
+   "outcome": "pass",
+   "detail": "9 genes, 0 pairs"
+  },
+  {
+   "pmid": "38765057",
+   "outcome": "fail",
+   "detail": "R1: Risk score built from 21 prognostic chemotherapy-related genes, but the genes appear only in a forest plot (Figure 2a); no readable text or supplement lists them."
+  },
+  {
+   "pmid": "38813229",
+   "outcome": "pass",
+   "detail": "14 genes, 0 pairs"
+  },
+  {
+   "pmid": "38817361",
+   "outcome": "pass",
+   "detail": "4 genes, 0 pairs"
+  },
+  {
+   "pmid": "38832259",
+   "outcome": "fail (adjudicated)",
+   "detail": "R1: the text states 31 genes in two places and lists 21; the unweighted score's terms are ambiguous."
+  },
+  {
+   "pmid": "38841168",
+   "outcome": "fail",
+   "detail": "R1: Glyco-model of nine genes (lasso/Cox) for OS, but the nine genes are not named in main text and there is no supplement; terms only in figures."
+  },
+  {
+   "pmid": "38890658",
+   "outcome": "fail",
+   "detail": "E2: Paper builds multiomics molecular subtypes and subtype predictors; no expression risk score for OS."
+  },
+  {
+   "pmid": "38927654",
+   "outcome": "fail",
+   "detail": "E2: Risk score is a logistic-regression 2-year-survival (binary) class from genes, not a continuous OS risk model; not an OS relation per protocol."
+  },
+  {
+   "pmid": "39068393",
+   "outcome": "fail (adjudicated)",
+   "detail": "R1: the five-gene model's formula is an image; the Results' 13-gene LASSO set and the Discussion's five genes disagree."
+  },
+  {
+   "pmid": "39071633",
+   "outcome": "fail (adjudicated)",
+   "detail": "R1: the published model (Table 2) combines 19 transcripts with 2 radiomic features; the risk score itself includes non-expression terms."
+  },
+  {
+   "pmid": "39136841",
+   "outcome": "pass",
+   "detail": "8 genes, 0 pairs"
+  },
+  {
+   "pmid": "39144445",
+   "outcome": "fail",
+   "detail": "E2: Paper reports single-gene COPZ2 expression and a nomogram with clinical covariates; no multi-gene risk score proposed."
+  },
+  {
+   "pmid": "39162363",
+   "outcome": "pass",
+   "detail": "3 genes, 0 pairs"
+  },
+  {
+   "pmid": "39216042",
+   "outcome": "fail (adjudicated)",
+   "detail": "R1: the third gene is HNRNPC in the abstract and validation but RBM15 in a Results sentence."
+  },
+  {
+   "pmid": "39216044",
+   "outcome": "fail",
+   "detail": "R1: Risk score is built from PSI values of alternative splicing events; the final seven AS events are not named in text (only figures); supplementary tables list only top events/genes, not model terms."
+  },
+  {
+   "pmid": "39253064",
+   "outcome": "pass",
+   "detail": "7 genes, 0 pairs"
+  },
+  {
+   "pmid": "39262462",
+   "outcome": "fail",
+   "detail": "R1: Only SH2D4A is a named expression term; the LASSO risk score is described via figures with no gene list or coefficients in text; terms not named in readable text."
+  },
+  {
+   "pmid": "39265619",
+   "outcome": "fail",
+   "detail": "R1: eGBM-molGPA is a clinical/molecular grading score (KPS, surgical extent, MGMT, SVZ, TMT, TERT, TP53), not a function of bulk expression."
+  },
+  {
+   "pmid": "39286023",
+   "outcome": "pass",
+   "detail": "3 genes, 0 pairs"
+  },
+  {
+   "pmid": "39309926",
+   "outcome": "pass",
+   "detail": "5 genes, 0 pairs"
+  },
+  {
+   "pmid": "39322177",
+   "outcome": "excluded",
+   "detail": "E5 failed at full text"
+  },
+  {
+   "pmid": "39333603",
+   "outcome": "fail",
+   "detail": "E2: Random forest/XGBoost classify binary survival status of glioma patients, not a risk score related to overall survival time."
+  },
+  {
+   "pmid": "39364731",
+   "outcome": "pass",
+   "detail": "2 genes, 0 pairs"
+  },
+  {
+   "pmid": "39435104",
+   "outcome": "pass",
+   "detail": "0 genes, 22 pairs"
+  },
+  {
+   "pmid": "39444320",
+   "outcome": "fail",
+   "detail": "E2: Studies three single genes (TWIST2, GATA3, HES5) individually; no multi-gene risk score proposed."
+  },
+  {
+   "pmid": "39458959",
+   "outcome": "pass",
+   "detail": "4 genes, 0 pairs"
+  },
+  {
+   "pmid": "39465756",
+   "outcome": "pass",
+   "detail": "8 genes, 0 pairs"
+  },
+  {
+   "pmid": "39465792",
+   "outcome": "pass",
+   "detail": "7 genes, 0 pairs"
+  },
+  {
+   "pmid": "39525666",
+   "outcome": "fail",
+   "detail": "R1: Final score is a pathway activation level (17-gene GBM TMZ pathway, +/-1 weights times case-to-normal ratio against external healthy-brain controls), not a bulk-tumour-only fitted risk score; unsure, so fail. Biomarker/TMZ-response framing."
+  },
+  {
+   "pmid": "39539547",
+   "outcome": "fail",
+   "detail": "R1: Formula in Fig 7 legend names 4 genes (SOD3, SPAG4, FREM3, SPP1) but text repeatedly says five model genes; fifth term unaccounted for, so terms uncertain."
+  },
+  {
+   "pmid": "39610810",
+   "outcome": "pass",
+   "detail": "3 genes, 0 pairs"
+  },
+  {
+   "pmid": "39630160",
+   "outcome": "fail (adjudicated)",
+   "detail": "R1: two risk scores are published (8 genes; 3 genes) and both are validated; which is final is ambiguous."
+  },
+  {
+   "pmid": "39640533",
+   "outcome": "fail (adjudicated)",
+   "detail": "E2: the paper reports 'survival' without stating overall survival; the risk-score formula is not given."
+  },
+  {
+   "pmid": "39697698",
+   "outcome": "pass",
+   "detail": "7 genes, 0 pairs"
+  },
+  {
+   "pmid": "39697704",
+   "outcome": "pass",
+   "detail": "10 genes, 0 pairs"
+  },
+  {
+   "pmid": "39697739",
+   "outcome": "fail (adjudicated)",
+   "detail": "E2: the paper reports 'survival' without stating overall survival."
+  },
+  {
+   "pmid": "39736337",
+   "outcome": "fail",
+   "detail": "R1: The 12 hub genes of the mitophagy risk model are not named in text (only Venn diagram/heatmap figures); only BNIP3, HK2, FBXL4, ATG5, SNX7 appear incidentally."
+  },
+  {
+   "pmid": "39816535",
+   "outcome": "fail",
+   "detail": "E2: Single gene (CTF1) prognostic analysis and nomogram with CTF1 plus clinical factors; no multi-gene risk score."
+  },
+  {
+   "pmid": "39857625",
+   "outcome": "fail",
+   "detail": "E2: No prognostic risk score; transcriptomic ferroptosis/lncRNA/ceRNA analysis and CIRBP cell experiments only."
+  },
+  {
+   "pmid": "39896073",
+   "outcome": "pass",
+   "detail": "19 genes, 0 pairs"
+  }
+ ]
+}
