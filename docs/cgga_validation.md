@@ -12,6 +12,8 @@ Implementation: `scripts/validate_cox_cgga.py`. Tests: `tests/test_validate_cox_
 > evaluation. Nothing was tuned, selected or retried against it. The three variants
 > below were fixed, in the script and its tests, before the first CGGA evaluation. All
 > three are reported. None was chosen after the fact.
+>
+> The outcome is recorded in the pre-registration, `docs/preregistration.md` section 2.3.
 
 ---
 

@@ -169,6 +169,98 @@ resolutions are pre-registered rather than chosen after the data is seen.
    stated, and the framework's simulation layer is presented as uncalibrated. This is
    distinct from a FAIL.
 
+### 2.3 Outcome of T2, recorded after the external read (2026-11-26)
+
+> This subsection is a post-registration record of a result.
+> The registered specification it refers to is fixed at commit 239aca3; the git history
+> provides the timestamp. It is not part of the registered specification: it changes no
+> threshold, no decisive bound and no decision rule. It was written after the CGGA
+> external data had been read and is disclosed as such (section 8).
+
+**T2 (external C-index >= 0.65): evaluated 2026-11-26, NOT MET.** Under the decision
+rules in section 6, the C-index row of T2 is reported as **FAIL** for the model that
+could be evaluated: its point estimate is below the threshold and its whole 95% interval
+is below it. The committed four-feature model is **NOT EVALUABLE** on CGGA. This is one
+of the eleven pre-registered thresholds in section 2; the other ten are not reported
+here. T2's two other rows (improvement over a 2024 baseline; Brier score at 18 months)
+were not evaluated.
+
+**What was measured.** The project's Cox proportional-hazards model was fitted on
+TCGA-GBM and scored once on CGGA with Harrell's C-index. The 95% CI is a percentile
+bootstrap over the evaluated CGGA patients (1000 resamples, seed 42) with the fitted
+model held fixed. Internal C-index is 5-fold cross-validation on TCGA, quoted for
+context only; it is not an external result.
+
+| Variant | Features | TCGA fit n | CGGA n | Internal C-index | External C-index | 95% CI | Reported as |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1. Committed baseline | age, sex, KPS, treatment arm | 594 | 0 | 0.6735 | -- | -- | NOT EVALUABLE. CGGA records no performance status, so KPS is missing for every patient. It was not imputed. |
+| 2. Transferable model | age, sex, treatment arm | 570 | 283 | 0.6520 | 0.5385 | 0.4994 to 0.5807 | FAIL |
+| 3. Molecular model (secondary) | age, sex, treatment arm, IDH, MGMT | 298 | 241 | 0.6606 | 0.5915 | 0.5477 to 0.6341 | Below threshold; not directly comparable to variant 2 |
+
+- Variant 3 was scored on a different, smaller sample of CGGA patients than variant 2
+  (241 against 283), so it is not directly comparable and the 0.053 gap between the two
+  is not a test of whether molecular features compensate for the loss of KPS. Its IDH
+  and MGMT inputs are CGGA's own clinical annotations rather than this project's calls,
+  so it is also a cross-platform comparison.
+- An external C-index of 0.5385 whose interval contains 0.50 is consistent with
+  discrimination no better than chance, and equally consistent with weak discrimination.
+  This record commits to neither reading.
+
+**Where the shortfall sits.** Removing KPS costs about 0.022 on TCGA (0.6735 to 0.6520;
+the two internal figures come from slightly different fit sets, 592 and 570 patients).
+Moving the same three-feature model from TCGA to CGGA costs a further 0.113 (0.6520 to
+0.5385). The failure is therefore not primarily attributable to the feature divergence,
+that is, to KPS being unavailable in CGGA. Its mechanism is not investigated, and no
+cause is asserted here.
+
+**What was not done.**
+
+1. No tuning, feature selection or hyper-parameter search was performed against CGGA.
+2. The three variants in the table were pre-specified before the first CGGA evaluation,
+   and all three are reported. None was selected after the fact.
+3. There were no re-runs after the first evaluation.
+4. The mechanism of the external-validation failure was not investigated, because doing
+   so would require additional CGGA reads and would contaminate the external partition.
+
+**Pre-registration integrity.**
+
+1. The CGGA external partition has been read once, for the single registered
+   confirmatory evaluation. Before that read it had only been characterised at schema
+   level (row counts, missingness, value ranges), with no feature related to any
+   outcome. This is the constraint any pre-registered protocol operates under.
+2. Any further analysis on CGGA would require a new, separately pre-registered
+   exploratory analysis.
+3. T1, T3, T4 and T5 are unchanged by this amendment.
+
+**Relation to the registered expectations.** Section 5 registered, in advance, an external
+survival C-index below 0.65 as the most likely first-pass outcome, and section 7
+pre-committed the response to it, which applies here. The threshold is reported as FAIL
+and is not re-stated. Of what that fallback calls for, only the achieved C-index with its
+CI is reported; the calibration and decision-curve analyses it also names (sections 3.4
+and 3.5) have not been run.
+
+**Deviations disclosed.**
+
+- No sealed `cgga_external_v1` manifest existed when T2 was run (section 4.5 lists it as
+  not yet created), so the evaluation used the ingested CGGA cohort as a whole rather
+  than a frozen partition as section 3.3 specifies.
+- CGGA's 333 rows are 305 unique patients; each patient was scored once. A patient
+  missing a feature of the variant being scored, or the outcome, was excluded rather
+  than imputed, which gives the CGGA n in the table.
+
+The full account is `docs/cgga_validation.md`; the result file is
+`data/results/cgga/cox_external_validation.json`, regenerated by
+`scripts/validate_cox_cgga.py`.
+
+**Anticipated but not pre-registered.** The T2 result leaves open questions: whether the
+cross-cohort shift of about 0.113 reflects population, treatment era, cohort composition
+or measurement differences; whether a model whose primary features are molecular would
+transfer better; and which cohort could test the committed four-feature model at all,
+given that CGGA cannot supply KPS. These are questions, not hypotheses, and none is
+registered here. Any such analysis would need its own pre-registration, its own stated
+hypothesis, and its own decision about whether the remaining CGGA reads are worth
+spending. It is not executed here and its results are not anticipated by this document.
+
 ---
 
 ## 3. Analysis plan
@@ -321,7 +413,7 @@ is never a routine re-run.
 | Partition | Cohort | n | Split | Seed | Role | Sealed |
 | --- | --- | --- | --- | --- | --- | --- |
 | `tcga_gbm_clinical_v1` | TCGA-GBM clinical-only | 583 | 419 train / 164 test | 20251126 | **Development.** Internal held-out set for model-selection discipline. **Not** a pre-registered external test. | Yes (2026-11-26) |
-| `cgga_external_v1` | CGGA | — | — | — | Primary external test for T1, T2 | **Not yet created — cohort not downloaded** |
+| `cgga_external_v1` | CGGA | — | — | — | Primary external test for T1, T2 | **Not created.** CGGA downloaded (commit e361bed) and read once for the single registered confirmatory evaluation, T2 (commit 7f4bd28), on the ingested cohort as a whole. Disclosed deviation from section 3.3; see section 2.3. |
 | `glass_external_v1` | GLASS | — | — | — | Longitudinal external test | **Not yet created — cohort not downloaded** |
 
 `tcga_gbm_clinical_v1` is unstratified because the `subtype` column of the current cohort
@@ -341,7 +433,8 @@ MGMT methylation, IDH status, Verhaak subtype, the four Neftel state fractions a
 TME fractions exist in the schema but are **entirely null**: no expression, methylation,
 proteomic, single-cell or imaging data has been ingested.
 
-**Data not yet obtained.** CGGA has **not** been downloaded. GLASS has **not** been
+**Data not yet obtained.** CGGA has been downloaded and read once for the T2 evaluation;
+no further reads will occur without a new pre-registration. GLASS has **not** been
 downloaded. CPTAC-GBM, the single-cell reference atlases, TCIA imaging, and the PDX growth
 curves and in vivo NSC tracking data required for T3 have **not** been obtained. No
 external test partition exists yet; the two external manifests in §4.5 are placeholders.
@@ -423,7 +516,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 
 | Date | Section | Change | Reason | Test data already read? |
 | --- | --- | --- | --- | --- |
-| — | — | No amendments to date. | — | — |
+| 2026-11-26 | 2.3 (added) | New subsection 2.3 added to record the outcome of protocol test T2 (external C-index >= 0.65 on CGGA), which was evaluated and not met. It changes no threshold, no decisive bound, no decision rule, and no other test's status. Full account: `docs/cgga_validation.md`; result file: `data/results/cgga/cox_external_validation.json`. | Records a result rather than a plan. The committed model is NOT EVALUABLE on CGGA (no KPS); the transferable model scored an external C-index of 0.5385 (95% CI 0.4994 to 0.5807). | **Yes.** Written after the CGGA external read and disclosed as such. The evaluation ran without a sealed `cgga_external_v1` manifest (section 4.5). |
 
 ---
 
