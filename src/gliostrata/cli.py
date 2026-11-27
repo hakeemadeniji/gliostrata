@@ -8,7 +8,8 @@ Commands:
     gliostrata ingest                 — L0: ingest from a public source (stub)
     gliostrata harmonize              — L1: harmonize + QC (stub)
     gliostrata profile                — L2: tumor profiling (stub)
-    gliostrata build-feature-store    — L3: assemble unified feature store
+    gliostrata harmonize-clinical     — L1: clinical table with owned columns + label table
+    gliostrata build-feature-store    — L2 + L3: feature store (--mode synthetic | real)
     gliostrata optimize               — L6: Bayesian configuration optimization
     gliostrata generate-protocol      — L7: wet-lab protocol document generation
 """
@@ -85,7 +86,7 @@ def pipeline_dry_run(config_path: str | None, n: int, out_path: str | None) -> N
 
     from gliostrata.data.harmonize import harmonize
     from gliostrata.data.ingest import generate_synthetic_cohort
-    from gliostrata.features.store import build_feature_store
+    from gliostrata.features.store import build_synthetic_store, stub_layer_frame
     from gliostrata.handoff.protocol import generate_protocols
     from gliostrata.optimization.bayesian import optimize_configurations
     from gliostrata.prediction.survival import predict_survival
@@ -105,10 +106,11 @@ def pipeline_dry_run(config_path: str | None, n: int, out_path: str | None) -> N
     tme = deconvolve_tme(harmonized, seed=cfg.seed)
     click.echo(f"  L2  profiling       : {subtypes['subtype'].nunique()} subtypes, "
                f"states+TME fractions computed")
-    # L3
-    feature_store = build_feature_store(harmonized, subtypes, states, tme)
+    # L3 (synthetic mode), then the one-hot layout the L5-L7 stubs consume
+    store = build_synthetic_store(harmonized, subtypes, states, tme)
+    feature_store = stub_layer_frame(store)
     click.echo(f"  L3  feature store   : {feature_store.shape[0]} patients × "
-               f"{feature_store.shape[1]} features")
+               f"{feature_store.shape[1]} features (synthetic)")
     # L5
     survival_pred = predict_survival(feature_store, seed=cfg.seed)
     click.echo(f"  L5  survival pred   : median predicted OS = "
@@ -215,26 +217,164 @@ def profile(in_path: str, out_path: str) -> None:
     click.echo(f"Profiled {len(profiled)} patients -> {out_path}")
 
 
-@cli.command("build-feature-store")
-@click.option("--input", "in_path", required=True, type=click.Path(exists=True))
-@click.option("--out", "out_path", required=True, type=click.Path())
-def build_feature_store_cmd(in_path: str, out_path: str) -> None:
-    """L3 — assemble the unified patient feature store."""
-    from gliostrata.features.store import build_feature_store
-    from gliostrata.profiling.states import deconvolve_states
-    from gliostrata.profiling.subtype import classify_subtypes
-    from gliostrata.profiling.tme import deconvolve_tme
-    from gliostrata.utils.io import read_parquet, write_parquet
+@cli.command("harmonize-clinical")
+@click.option("--cohort", "cohort_path", default="data/raw/tcga_gbm/clinical_cohort.parquet",
+              show_default=True, type=click.Path(), help="L0 clinical cohort.")
+@click.option("--raw", "raw_path", default="data/raw/tcga_gbm/clinical_raw.parquet",
+              show_default=True, type=click.Path(),
+              help="Raw GDC clinical records, used only to trace why a value is missing.")
+@click.option("--clinical-out", default="data/interim/tcga_gbm_clinical_harmonized.parquet",
+              show_default=True, type=click.Path())
+@click.option("--labels-out", default="data/interim/tcga_gbm_labels.parquet",
+              show_default=True, type=click.Path())
+def harmonize_clinical_cmd(cohort_path: str, raw_path: str, clinical_out: str,
+                           labels_out: str) -> None:
+    """L1 — clinical table with explicitly owned columns, and a separate label table.
 
-    df = read_parquet(in_path)
-    feature_store = build_feature_store(
-        df,
-        classify_subtypes(df),
-        deconvolve_states(df),
-        deconvolve_tme(df),
-    )
-    write_parquet(feature_store, out_path)
-    click.echo(f"Feature store: {feature_store.shape} -> {out_path}")
+    The clinical table carries no L2 or molecular name; a column under such a
+    name that holds a value stops the command. Outcomes go to the label table.
+    Every missing value gets a reason code. Nothing is imputed. Refuses any
+    path containing "cgga".
+
+    \b
+    Also writes a provenance sidecar next to the clinical table,
+    <clinical stem>_provenance.json (by default
+    data/interim/tcga_gbm_clinical_harmonized_provenance.json): the SHA-256 of
+    the L0 inputs and of both outputs. build-feature-store --mode real reads it
+    and stops if it is missing or no longer matches the clinical table.
+    """
+    from gliostrata.features.build import run_harmonize_clinical
+    from gliostrata.features.contract import FeatureStoreError
+
+    try:
+        r = run_harmonize_clinical(cohort_path, raw_path, clinical_out, labels_out)
+    except (FeatureStoreError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from None
+    click.echo(f"Harmonized clinical table: {r['n_patients']} patients -> {clinical_out}")
+    click.echo(f"Label table -> {labels_out}")
+    click.echo(f"Provenance (input and output SHA-256) -> {r['outputs']['provenance']}")
+    for table in ("clinical_reasons", "label_reasons"):
+        for col, counts in r[table].items():
+            click.echo(f"  missing {col:<22} {counts}")
+
+
+@cli.command("build-feature-store")
+@click.option("--mode", type=click.Choice(["synthetic", "real"]), default="synthetic",
+              show_default=True,
+              help="synthetic: offline simulator + L2 stubs (tests, fixture runs). "
+                   "real: TCGA expression through the real L2 (single-sample subtype, "
+                   "state and TME scores) and L3.")
+@click.option("--input", "in_path", default=None, type=click.Path(),
+              help="synthetic mode: harmonized synthetic cohort Parquet.")
+@click.option("--clinical", default=None, type=click.Path(),
+              help="real mode: L1 clinical table (harmonize-clinical).")
+@click.option("--labels", default=None, type=click.Path(),
+              help="real mode: L1 label table (harmonize-clinical).")
+@click.option("--expression", default=None, type=click.Path(),
+              help="real mode: gene x sample TPM matrix.")
+@click.option("--annotation", default=None, type=click.Path(),
+              help="real mode: gene annotation of the TPM matrix.")
+@click.option("--mgmt-calls", default=None, type=click.Path(),
+              help="real mode: MGMT call table.")
+@click.option("--idh-calls", default=None, type=click.Path(),
+              help="real mode: IDH call table.")
+@click.option("--mgmt-manifest", default=None, type=click.Path(),
+              help="real mode: methylation GDC file manifest (which patients were assayed).")
+@click.option("--idh-manifest", default=None, type=click.Path(),
+              help="real mode: mutation GDC file manifest (which patients were sequenced).")
+@click.option("--centroids", default=None, type=click.Path(),
+              help="real mode: frozen subtype centroid set (JSON); only "
+                   "verhaak840_tcga_v2train is accepted.")
+@click.option("--partition", default=None, type=click.Path(),
+              help="real mode: frozen development partition, for per-split counts.")
+@click.option("--out", "out_path", default=None, type=click.Path(),
+              help="Features table (Parquet). Real-mode default "
+                   "data/processed/tcga_gbm_feature_store.parquet.")
+@click.option("--labels-out", default=None, type=click.Path(),
+              help="Label table (default: <out stem>_labels.parquet).")
+@click.option("--missing-out", default=None, type=click.Path(),
+              help="Missing-value reason table (default: <out stem>_missing.parquet).")
+@click.option("--columns-out", default=None, type=click.Path(),
+              help="Column metadata JSON (default: <out stem>_columns.json).")
+@click.option("--report", "report_path", default=None, type=click.Path(),
+              help="Build report JSON: inputs with SHA-256, views and their flow counts.")
+def build_feature_store_cmd(mode: str, in_path: str | None, clinical: str | None,
+                            labels: str | None, expression: str | None,
+                            annotation: str | None, mgmt_calls: str | None,
+                            idh_calls: str | None, mgmt_manifest: str | None,
+                            idh_manifest: str | None, centroids: str | None,
+                            partition: str | None, out_path: str | None,
+                            labels_out: str | None, missing_out: str | None,
+                            columns_out: str | None, report_path: str | None) -> None:
+    """L2 + L3 — run profiling and assemble the feature store.
+
+    \b
+    The store holds every cohort patient, one row each, and never filters.
+    It is written as four files: the features table, a separate label table
+    (outcomes are labels, never features), a missing-value reason table and
+    a column-metadata JSON (role, source layer, source file SHA-256, class).
+    Model-ready populations are named views; the report gives their flow
+    counts, split by the frozen development partition in real mode.
+
+    \b
+    --mode synthetic (default): --input HARMONIZED --out STORE. Offline.
+    --mode real: TCGA only. Every input defaults to its repository path.
+    A stub L2 output, a missing centroid set, or any path containing "cgga"
+    stops the command before anything is written.
+    """
+    from gliostrata.features.build import REAL_DEFAULTS, run_real, run_synthetic
+    from gliostrata.features.contract import FeatureStoreError
+
+    try:
+        if mode == "synthetic":
+            if not in_path or not out_path:
+                raise click.UsageError("--mode synthetic needs --input and --out")
+            store = run_synthetic(in_path, out_path, labels_out=labels_out,
+                                  missing_out=missing_out, columns_out=columns_out,
+                                  report=report_path)
+            click.echo(f"Feature store (SYNTHETIC): {len(store.features)} patients x "
+                       f"{store.features.shape[1]} columns -> {out_path}")
+            return
+        if in_path:
+            raise click.UsageError("--input is for --mode synthetic; real mode takes "
+                                   "--clinical, --labels, --expression, ...")
+        d = REAL_DEFAULTS
+        r = run_real(
+            clinical=clinical or d["clinical"], labels=labels or d["labels"],
+            expression=expression or d["expression"],
+            annotation=annotation or d["annotation"],
+            mgmt_calls=mgmt_calls or d["mgmt_calls"], idh_calls=idh_calls or d["idh_calls"],
+            mgmt_manifest=mgmt_manifest or d["mgmt_manifest"],
+            idh_manifest=idh_manifest or d["idh_manifest"],
+            centroids=centroids or d["centroids"], partition=partition or d["partition"],
+            out=out_path or d["out"],
+            labels_out=labels_out or (None if out_path else d["labels_out"]),
+            missing_out=missing_out or (None if out_path else d["missing_out"]),
+            columns_out=columns_out or (None if out_path else d["columns_out"]),
+            report=report_path or d["report"],
+        )
+    except FeatureStoreError as exc:
+        raise click.ClickException(str(exc)) from None
+
+    click.echo("Feature store (REAL, development cohort TCGA). Measured, not validated.")
+    click.echo(f"  patients in the store              {r['n_patients']}")
+    c = r["counts"]
+    click.echo(f"  expression samples                 {c['n_expression_samples']} "
+               f"({c['n_expression_samples_outside_cohort']} outside the cohort, not scored)")
+    click.echo(f"  centroid set                       {r['centroid_set']['set_id']}")
+    for name, view in r["views"].items():
+        click.echo(f"\n  view {name}: {view['n']} patients")
+        for step in view["flow"]:
+            split = ""
+            if "n_remaining_train" in step:
+                split = (f"  (train {step['n_remaining_train']}, "
+                         f"test {step['n_remaining_test']})")
+            click.echo(f"    {step['step']:<26} -{step['n_excluded']:<4} "
+                       f"-> {step['n_remaining']}{split}")
+    click.echo("\nWrote:")
+    for rec in r["outputs"].values():
+        click.echo(f"  {rec['path']}  sha256 {rec['sha256']}")
+    click.echo(f"  {report_path or REAL_DEFAULTS['report']}")
 
 
 @cli.command()
@@ -250,11 +390,16 @@ def optimize(in_path: str, out_path: str, n_top: int, seed: int) -> None:
 
     Generates a ranked set of therapeutic configurations per patient.
     """
+    from gliostrata.features.contract import FeatureStoreError
+    from gliostrata.features.store import stub_layer_frame
     from gliostrata.optimization.bayesian import optimize_configurations
     from gliostrata.prediction.survival import predict_survival
     from gliostrata.utils.io import ensure_dir, read_parquet, write_parquet
 
-    feature_store = read_parquet(in_path)
+    try:
+        feature_store = stub_layer_frame(read_parquet(in_path))
+    except FeatureStoreError as exc:
+        raise click.ClickException(f"L6 is a stub that cannot use this store: {exc}") from None
     survival_pred = predict_survival(feature_store, seed=seed)
     configs = optimize_configurations(feature_store, survival_pred, n_top=n_top, seed=seed)
     out_dir = ensure_dir(out_path)
@@ -271,12 +416,17 @@ def optimize(in_path: str, out_path: str, n_top: int, seed: int) -> None:
               help="Output directory for protocol JSON documents.")
 def generate_protocol_cmd(in_path: str, fs_path: str, out_path: str) -> None:
     """L7 — generate wet-lab handoff protocol documents."""
+    from gliostrata.features.contract import FeatureStoreError
+    from gliostrata.features.store import stub_layer_frame
     from gliostrata.handoff.protocol import generate_protocols, protocols_to_json
     from gliostrata.prediction.survival import predict_survival
     from gliostrata.utils.io import ensure_dir, read_parquet, write_json
 
     configs = read_parquet(in_path)
-    feature_store = read_parquet(fs_path)
+    try:
+        feature_store = stub_layer_frame(read_parquet(fs_path))
+    except FeatureStoreError as exc:
+        raise click.ClickException(f"L7 is a stub that cannot use this store: {exc}") from None
     survival_pred = predict_survival(feature_store)
     protocols = generate_protocols(configs, feature_store, survival_pred)
     out_dir = ensure_dir(out_path)

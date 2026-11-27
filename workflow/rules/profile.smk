@@ -17,6 +17,11 @@
 # That gap is why the expression matrices are declared as a top-level target in
 # the Snakefile rather than as an input to this rule: declaring them as an input
 # would make the DAG claim a data dependency the code does not have.
+#
+# The REAL L2 is not this rule: with source=tcga, build_feature_store
+# (`gliostrata build-feature-store --mode real`, features.smk) reads the
+# expression input and runs the single-sample subtype classifier and the
+# state / TME scoring. This stub rule's output is consumed by nothing.
 # ---------------------------------------------------------------------------
 
 

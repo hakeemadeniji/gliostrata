@@ -128,7 +128,7 @@ class TestEndToEndPipeline:
     def test_pipeline_runs_on_synthetic_data(self):
         from gliostrata.data.harmonize import harmonize
         from gliostrata.data.ingest import generate_synthetic_cohort
-        from gliostrata.features.store import build_feature_store
+        from gliostrata.features.store import synthetic_feature_frame
         from gliostrata.handoff.protocol import generate_protocols
         from gliostrata.optimization.bayesian import optimize_configurations
         from gliostrata.prediction.survival import predict_survival
@@ -145,7 +145,7 @@ class TestEndToEndPipeline:
         states = deconvolve_states(harmonized)
         tme = deconvolve_tme(harmonized)
         # L3
-        fs = build_feature_store(harmonized, subtypes, states, tme)
+        fs = synthetic_feature_frame(harmonized, subtypes, states, tme)
         # L5
         surv = predict_survival(fs)
         # L6
@@ -192,7 +192,7 @@ class TestEnrichedProtocolSchema:
     def _protocols(n=10, seed=42):
         from gliostrata.data.harmonize import harmonize
         from gliostrata.data.ingest import generate_synthetic_cohort
-        from gliostrata.features.store import build_feature_store
+        from gliostrata.features.store import synthetic_feature_frame
         from gliostrata.handoff.protocol import generate_protocols
         from gliostrata.optimization.bayesian import optimize_configurations
         from gliostrata.prediction.survival import predict_survival
@@ -201,7 +201,7 @@ class TestEnrichedProtocolSchema:
         from gliostrata.profiling.tme import deconvolve_tme
 
         harmonized = harmonize(generate_synthetic_cohort(n=n, seed=seed))
-        fs = build_feature_store(
+        fs = synthetic_feature_frame(
             harmonized,
             classify_subtypes(harmonized),
             deconvolve_states(harmonized),
@@ -326,14 +326,19 @@ class TestEnrichedProtocolSchema:
 
         protocols, fs = self._protocols()
         fs_indexed = fs.set_index("patient_id")
+        # Since stage 3b the feature frame carries no outcome label: outcomes
+        # live in the store's separate label table.
+        assert "overall_survival_months" not in fs.columns
+        assert "vital_status" not in fs.columns
         for pid, proto in protocols.items():
-            # The source row really does carry the outcome labels...
             row = fs_indexed.loc[pid]
-            assert "overall_survival_months" in row.index
-            assert pd.notna(row["overall_survival_months"])
-            assert "vital_status" in row.index
             assert "treatment_arm" in row.index
-            # ...but the projection must not surface them.
+            # Put labels back on a copy of the row: the projection must still
+            # refuse to surface them.
+            with_labels = row.copy()
+            with_labels["overall_survival_months"] = 12.0
+            with_labels["vital_status"] = 1
+            assert not (OUTCOME_DENYLIST & set(_patient_summary(with_labels)))
             summary = proto["patient_summary"]
             for leaked in ("observed_overall_survival_months", "overall_survival_months",
                            "vital_status", "treatment_arm"):

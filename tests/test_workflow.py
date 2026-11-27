@@ -444,6 +444,8 @@ class TestDvcYamlParses:
             for dep in stage["deps"]:
                 if dep.startswith(("src/", "scripts/", "configs/")):
                     continue  # a source-code dep, not a pipeline artifact
+                if dep.startswith("data/partitions/"):
+                    continue  # a frozen manifest in git: read, never produced
                 assert dep in producer, (
                     f"stage {name} depends on {dep}, which no stage produces and "
                     f"which is not source code — this is exactly the staleness "
@@ -496,7 +498,7 @@ class TestDvcStagePathsMatchReality:
     def test_source_code_deps_exist_on_disk(self):
         for name, stage in _dvc_stages().items():
             for dep in stage["deps"]:
-                if not dep.startswith(("src/", "scripts/", "configs/")):
+                if not dep.startswith(("src/", "scripts/", "configs/", "data/partitions/")):
                     continue
                 assert (REPO_ROOT / dep).exists(), (
                     f"stage {name} depends on {dep}, which does not exist"

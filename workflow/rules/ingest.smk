@@ -40,7 +40,9 @@ rule ingest_tcga_clinical:
 # full cohort) and assembles gene x sample matrices. The cache is deliberately
 # excluded from both git and DVC; see .dvcignore and docs/reproducibility.md.
 #
-# The matrices are produced but NOT YET CONSUMED by L2 — see profile.smk.
+# With source=tcga the TPM matrix and its annotation are consumed by
+# build_feature_store (--mode real; see features.smk). The stub `profile` rule
+# still does not read them — see profile.smk.
 rule ingest_tcga_expression:
     input:
         cohort=CLINICAL_COHORT,

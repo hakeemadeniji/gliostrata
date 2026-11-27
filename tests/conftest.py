@@ -20,9 +20,10 @@ def medium_cohort():
 
 @pytest.fixture
 def feature_store(medium_cohort):
-    """L3 feature store built from the medium cohort."""
+    """L3 feature store of the medium cohort (synthetic mode), in the one-hot
+    layout the L5 to L7 stubs consume (gliostrata.features.store.stub_layer_frame)."""
     from gliostrata.data.harmonize import harmonize
-    from gliostrata.features.store import build_feature_store
+    from gliostrata.features.store import synthetic_feature_frame
     from gliostrata.profiling.states import deconvolve_states
     from gliostrata.profiling.subtype import classify_subtypes
     from gliostrata.profiling.tme import deconvolve_tme
@@ -31,7 +32,7 @@ def feature_store(medium_cohort):
     subtypes = classify_subtypes(cohort)
     states = deconvolve_states(cohort)
     tme = deconvolve_tme(cohort)
-    return build_feature_store(cohort, subtypes, states, tme)
+    return synthetic_feature_frame(cohort, subtypes, states, tme)
 
 
 @pytest.fixture

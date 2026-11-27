@@ -9,7 +9,7 @@ import argparse
 
 from gliostrata.data.harmonize import harmonize
 from gliostrata.data.ingest import generate_synthetic_cohort
-from gliostrata.features.store import build_feature_store
+from gliostrata.features.store import synthetic_feature_frame
 from gliostrata.handoff.protocol import generate_protocols
 from gliostrata.optimization.bayesian import optimize_configurations
 from gliostrata.prediction.survival import predict_survival
@@ -51,7 +51,7 @@ def main() -> None:
     print(f"  L2  profiling       : subtypes/states/TME → {out_dir}/L2_*.parquet")
 
     # L3
-    feature_store = build_feature_store(harmonized, subtypes, states, tme)
+    feature_store = synthetic_feature_frame(harmonized, subtypes, states, tme)
     write_parquet(feature_store, out_dir / "L3_feature_store.parquet")
     print(f"  L3  feature store   : {feature_store.shape} → {out_dir}/L3_feature_store.parquet")
 

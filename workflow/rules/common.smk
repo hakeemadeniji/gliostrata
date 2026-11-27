@@ -54,6 +54,12 @@ config.setdefault("expression_limit", 0)
 config.setdefault("partition_manifest", "tcga_gbm_clinical_v2.json")
 config.setdefault("verify_partition", config["source"] == "tcga")
 
+# Frozen subtype centroid set for the single-sample classifier (L2, real mode).
+# Committed under configs/; its checksum is recorded beside it.
+config.setdefault(
+    "subtype_centroids", "configs/subtype_centroids/verhaak840_tcga_v2train.json"
+)
+
 # CIBERSORTx mixture export — a manual round trip to an external web tool,
 # deliberately outside `rule all`. See workflow/rules/export.smk.
 config.setdefault("cibersortx_gene_set", "protein_coding")
@@ -97,14 +103,26 @@ METHYLATION = f"{RAW}/methylation"
 METH_FILE_MANIFEST = f"{METHYLATION}/file_manifest.parquet"
 MGMT_CALLS = f"{METHYLATION}/mgmt_calls.parquet"
 
-# L1 — harmonization
+# L1 — harmonization. HARMONIZED is the stub pass-through the synthetic chain
+# and the stub L2 use. CLINICAL_HARMONIZED / CLINICAL_LABELS are the real L1
+# clinical table (owned columns only, no L2 names) and its label table.
 HARMONIZED = f"{INTERIM}/{COHORT}_harmonized.parquet"
+CLINICAL_HARMONIZED = f"{INTERIM}/{COHORT}_clinical_harmonized.parquet"
+CLINICAL_LABELS = f"{INTERIM}/{COHORT}_labels.parquet"
+# Written by harmonize-clinical next to the clinical table: SHA-256 of its L0
+# inputs and of both outputs. build-feature-store --mode real reads it.
+CLINICAL_PROVENANCE = f"{INTERIM}/{COHORT}_clinical_harmonized_provenance.json"
+SUBTYPE_CENTROIDS = str(config["subtype_centroids"])
 
 # L2 — profiling
 PROFILED = f"{PROCESSED}/{COHORT}_profiled.parquet"
 
-# L3 — feature store
+# L3 — feature store: four files plus the build report
 FEATURE_STORE = f"{PROCESSED}/{COHORT}_feature_store.parquet"
+FEATURE_LABELS = f"{PROCESSED}/{COHORT}_feature_store_labels.parquet"
+FEATURE_MISSING = f"{PROCESSED}/{COHORT}_feature_store_missing.parquet"
+FEATURE_COLUMNS_JSON = f"{PROCESSED}/{COHORT}_feature_store_columns.json"
+FEATURE_REPORT = f"{RESULTS}/feature_store_build_report.json"
 
 # L6 — optimization  (`gliostrata optimize --out DIR` writes DIR/ranked_configurations.parquet)
 CONFIG_DIR = f"{RESULTS}/configs"
@@ -150,3 +168,45 @@ def partition_targets() -> list:
     if not PurePosixPath(PARTITION_MANIFEST).name:
         return []
     return [PARTITION_STAMP]
+
+
+def feature_store_inputs(_wildcards=None) -> dict:
+    """Inputs of build_feature_store, per `source`.
+
+    synthetic — the harmonized synthetic cohort; the L2 stubs run inside the
+                command (`--mode synthetic`, labelled synthetic in every file).
+    tcga      — the real L2 and L3 (`--mode real`): the L1 clinical and label
+                tables, the TPM matrix and its annotation (the expression
+                input; its SHA-256 is recorded in the build report), the MGMT
+                and IDH call tables, the frozen centroid set and the frozen
+                development partition (for per-split counts; read, never
+                written).
+    """
+    if SOURCE == "synthetic":
+        return {"harmonized": HARMONIZED}
+    return {
+        "clinical": CLINICAL_HARMONIZED,
+        "labels": CLINICAL_LABELS,
+        "clinical_provenance": CLINICAL_PROVENANCE,
+        "expression": EXPR_TPM,
+        "annotation": EXPR_GENE_ANNOTATION,
+        "mgmt_calls": MGMT_CALLS,
+        "idh_calls": IDH_CALLS,
+        "mgmt_manifest": METH_FILE_MANIFEST,
+        "idh_manifest": IDH_FILE_MANIFEST,
+        "centroids": SUBTYPE_CENTROIDS,
+        "partition": PARTITION_MANIFEST,
+    }
+
+
+def feature_store_args(_wildcards, input) -> str:
+    """The mode and input flags of `gliostrata build-feature-store`."""
+    if SOURCE == "synthetic":
+        return f"--mode synthetic --input {input.harmonized}"
+    return (
+        f"--mode real --clinical {input.clinical} --labels {input.labels} "
+        f"--expression {input.expression} --annotation {input.annotation} "
+        f"--mgmt-calls {input.mgmt_calls} --idh-calls {input.idh_calls} "
+        f"--mgmt-manifest {input.mgmt_manifest} --idh-manifest {input.idh_manifest} "
+        f"--centroids {input.centroids} --partition {input.partition}"
+    )

@@ -29,12 +29,17 @@
 #     would store 39 MB per re-run to save a few seconds of compute. It has a
 #     Snakemake rule (workflow/rules/export.smk) and no DVC stage.
 #   * `scripts/download_cgga.py`, `src/gliostrata/prediction/cox.py`,
-#     `src/gliostrata/profiling/verhaak.py`,
-#     `src/gliostrata/profiling/deconvolve.py` and
+#     `src/gliostrata/profiling/verhaak.py` and
 #     `src/gliostrata/optimization/bayes_opt.py` -- real modules built alongside
 #     the stubs but NOT wired into the CLI pipeline. They are absent from this
 #     file because adding stages for them would assert they are in the
-#     pipeline. Wiring them is a change to src/gliostrata/cli.py.
+#     pipeline. `profiling/deconvolve.py` and `profiling/centroid.py` ARE wired:
+#     `build_feature_store` runs them (`gliostrata build-feature-store --mode
+#     real`). The `profile` stage below is still the stub and feeds nothing.
+#   * The L5 to L7 stages (`optimize`, `generate_protocol`) are stubs that
+#     consume a one-hot layout. On the real store they stop with an error
+#     instead of encoding an absent value (no resection, a missing KPS or call)
+#     as a value: L5 to L7 have not been run on real data.
 
 stages:
   # --- L0a: TCGA-GBM clinical ingest (NETWORK: GDC REST API) ---
@@ -113,18 +118,73 @@ stages:
     outs:
       - data/processed/tcga_gbm_profiled.parquet
 
-  # --- L3: unified feature store ---
-  # Takes the HARMONIZED table, not the profiled one: the CLI re-runs the three
-  # L2 functions internally. Hence the profiling dep alongside the store code.
-  build_feature_store:
-    cmd: gliostrata build-feature-store --input data/interim/tcga_gbm_harmonized.parquet
-      --out data/processed/tcga_gbm_feature_store.parquet
+  # --- L1 (real): clinical table with owned columns, and the label table ---
+  # No L2 or molecular names in the clinical table; outcomes in a separate
+  # label table; every missing value traced to the raw GDC record.
+  harmonize_clinical:
+    cmd: gliostrata harmonize-clinical
+      --cohort data/raw/tcga_gbm/clinical_cohort.parquet
+      --raw data/raw/tcga_gbm/clinical_raw.parquet
+      --clinical-out data/interim/tcga_gbm_clinical_harmonized.parquet
+      --labels-out data/interim/tcga_gbm_labels.parquet
     deps:
-      - data/interim/tcga_gbm_harmonized.parquet
-      - src/gliostrata/features/store.py
-      - src/gliostrata/profiling
+      - data/raw/tcga_gbm/clinical_cohort.parquet
+      - data/raw/tcga_gbm/clinical_raw.parquet
+      - src/gliostrata/data/clinical.py
+      - src/gliostrata/features/build.py
+    outs:
+      - data/interim/tcga_gbm_clinical_harmonized.parquet
+      - data/interim/tcga_gbm_labels.parquet
+      - data/interim/tcga_gbm_clinical_harmonized_provenance.json
+
+  # --- L2 + L3 (real): profiling on the expression input, and the store ---
+  # `--mode real`: single-sample subtype calls against the frozen centroid
+  # set, state and TME enrichment scores, and the store (every cohort patient,
+  # one row each; four files). The expression matrix and its annotation are
+  # deps, so DVC records their checksums; the build report records them too.
+  # The partition manifest is read for per-split counts and never written.
+  # A stub L2 output, a missing centroid set or a "cgga" path stops it.
+  build_feature_store:
+    cmd: gliostrata build-feature-store --mode real
+      --clinical data/interim/tcga_gbm_clinical_harmonized.parquet
+      --labels data/interim/tcga_gbm_labels.parquet
+      --expression data/raw/tcga_gbm/expression/tpm.parquet
+      --annotation data/raw/tcga_gbm/expression/gene_annotation.parquet
+      --mgmt-calls data/raw/tcga_gbm/methylation/mgmt_calls.parquet
+      --idh-calls data/raw/tcga_gbm/mutations/idh_calls.parquet
+      --mgmt-manifest data/raw/tcga_gbm/methylation/file_manifest.parquet
+      --idh-manifest data/raw/tcga_gbm/mutations/file_manifest.parquet
+      --centroids configs/subtype_centroids/verhaak840_tcga_v2train.json
+      --partition data/partitions/tcga_gbm_clinical_v2.json
+      --out data/processed/tcga_gbm_feature_store.parquet
+      --labels-out data/processed/tcga_gbm_feature_store_labels.parquet
+      --missing-out data/processed/tcga_gbm_feature_store_missing.parquet
+      --columns-out data/processed/tcga_gbm_feature_store_columns.json
+      --report data/results/tcga_gbm/feature_store_build_report.json
+    deps:
+      - data/interim/tcga_gbm_clinical_harmonized.parquet
+      - data/interim/tcga_gbm_labels.parquet
+      - data/interim/tcga_gbm_clinical_harmonized_provenance.json
+      - data/raw/tcga_gbm/expression/tpm.parquet
+      - data/raw/tcga_gbm/expression/gene_annotation.parquet
+      - data/raw/tcga_gbm/methylation/mgmt_calls.parquet
+      - data/raw/tcga_gbm/mutations/idh_calls.parquet
+      - data/raw/tcga_gbm/methylation/file_manifest.parquet
+      - data/raw/tcga_gbm/mutations/file_manifest.parquet
+      - configs/subtype_centroids/verhaak840_tcga_v2train.json
+      - configs/subtype_centroids/CHECKSUMS.json
+      - data/partitions/tcga_gbm_clinical_v2.json
+      - src/gliostrata/features
+      - src/gliostrata/profiling/centroid.py
+      - src/gliostrata/profiling/deconvolve.py
+      - src/gliostrata/profiling/verhaak.py
+      - src/gliostrata/evaluation
     outs:
       - data/processed/tcga_gbm_feature_store.parquet
+      - data/processed/tcga_gbm_feature_store_labels.parquet
+      - data/processed/tcga_gbm_feature_store_missing.parquet
+      - data/processed/tcga_gbm_feature_store_columns.json
+      - data/results/tcga_gbm/feature_store_build_report.json
 
   # --- L5 + L6: survival prediction and configuration optimization ---
   # L5 has no materialised artifact: `gliostrata optimize` calls

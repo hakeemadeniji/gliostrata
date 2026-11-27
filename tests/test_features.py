@@ -1,13 +1,54 @@
-"""Tests for L3 (feature store)."""
+"""Tests for L3 in synthetic mode and for the layout the L5 to L7 stubs consume.
+
+The contract rules themselves (ownership, reasons, views, real mode) are in
+tests/test_feature_store_contract.py.
+"""
 from __future__ import annotations
 
-from gliostrata.features.store import FEATURE_COLUMNS, feature_matrix
+import pandas as pd
+import pytest
+
+from gliostrata.features.contract import FeatureStoreError, LabelInFeatureMatrixError
+from gliostrata.features.store import (
+    FEATURE_COLUMNS,
+    build_synthetic_store,
+    feature_matrix,
+    stub_layer_frame,
+)
 
 
-class TestFeatureStore:
+@pytest.fixture
+def synthetic_store(medium_cohort):
+    from gliostrata.data.harmonize import harmonize
+    from gliostrata.profiling.states import deconvolve_states
+    from gliostrata.profiling.subtype import classify_subtypes
+    from gliostrata.profiling.tme import deconvolve_tme
+
+    cohort = harmonize(medium_cohort)
+    return build_synthetic_store(cohort, classify_subtypes(cohort),
+                                 deconvolve_states(cohort), deconvolve_tme(cohort))
+
+
+class TestSyntheticStore:
+    def test_every_patient_one_row(self, synthetic_store):
+        assert len(synthetic_store.features) == 30
+        assert synthetic_store.features["patient_id"].is_unique
+
+    def test_labelled_synthetic(self, synthetic_store):
+        assert synthetic_store.mode == "synthetic"
+        for rec in synthetic_store.column_records():
+            assert rec["source_layer"].startswith("synthetic:")
+
+    def test_outcomes_are_in_the_label_table_only(self, synthetic_store):
+        assert "vital_status" not in synthetic_store.features.columns
+        assert "vital_status" in synthetic_store.labels.columns
+
+
+class TestStubLayerFrame:
+    """The one-hot layout of the L5 to L7 stubs (conftest's feature_store)."""
+
     def test_shape(self, feature_store):
-        n_patients = 30  # from medium_cohort fixture
-        assert len(feature_store) == n_patients
+        assert len(feature_store) == 30
 
     def test_feature_columns_present(self, feature_store):
         for col in FEATURE_COLUMNS:
@@ -22,26 +63,37 @@ class TestFeatureStore:
             assert not feature_store[col].isna().any(), f"NaN in feature column: {col}"
 
     def test_one_hot_encoded_categoricals(self, feature_store):
-        # sex_male should be 0 or 1
         assert set(feature_store["sex_male"].unique()).issubset({0, 1})
-        # extent_of_resection encoded
         assert set(feature_store["extent_of_resection_STR"].unique()).issubset({0, 1})
         assert set(feature_store["extent_of_resection_GTR"].unique()).issubset({0, 1})
+
+    def test_no_outcome_label_in_the_frame(self, feature_store):
+        assert "overall_survival_months" not in feature_store.columns
+        assert "vital_status" not in feature_store.columns
 
     def test_attrs_set(self, feature_store):
         assert "feature_columns" in feature_store.attrs
         assert "version" in feature_store.attrs
 
+    def test_refuses_a_store_with_an_absent_value(self, synthetic_store):
+        features = synthetic_store.features.copy()
+        features.loc[0, "extent_of_resection"] = pd.NA
+        with pytest.raises(FeatureStoreError, match="absent values"):
+            stub_layer_frame(features)
+
 
 class TestFeatureMatrix:
-    def test_split(self, feature_store):
-        X, y_meta = feature_matrix(feature_store)
-        assert X.shape == (len(feature_store), len(FEATURE_COLUMNS))
-        assert "patient_id" in y_meta.columns
-        assert "overall_survival_months" in y_meta.columns
-        assert "vital_status" in y_meta.columns
+    def test_complete_case_matrix(self, feature_store):
+        matrix = feature_matrix(feature_store, FEATURE_COLUMNS)
+        assert matrix.shape == (len(feature_store), len(FEATURE_COLUMNS))
+        assert "patient_id" not in matrix.columns
 
-    def test_no_metadata_in_X(self, feature_store):
-        X, _ = feature_matrix(feature_store)
-        assert "patient_id" not in X.columns
-        assert "overall_survival_months" not in X.columns
+    def test_a_label_is_refused(self, synthetic_store):
+        with pytest.raises(LabelInFeatureMatrixError):
+            feature_matrix(synthetic_store, ["age", "overall_survival_months"])
+
+    def test_a_gap_is_refused(self, synthetic_store):
+        features = synthetic_store.features.copy()
+        features.loc[0, "age"] = pd.NA
+        with pytest.raises(FeatureStoreError, match="missing values"):
+            feature_matrix(features, ["age"])

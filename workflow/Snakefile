@@ -21,17 +21,24 @@ TCGA-GBM cohort or against a tiny synthetic fixture.
 Honesty notes — read these before reading the DAG as a scientific claim:
   * L1 harmonize, L2 profile, L5 survival and L6 optimize are STUBS. Each rule
     file states exactly what its layer does and does not do.
-  * L2 does not consume the L0 expression matrices, so those matrices are a
-    top-level target rather than an input edge. The DAG does not assert
-    dependencies the code does not have.
+  * With source=tcga the real L1 clinical step (harmonize_clinical) and the
+    real L2 + L3 (build_feature_store --mode real) run on the TCGA expression
+    input: single-sample subtype calls against the frozen centroid set
+    (profiling/centroid.py) and state / TME enrichment scores
+    (profiling/deconvolve.py). The stub `profile` rule still exists, does not
+    read expression, and feeds nothing. With source=synthetic
+    build_feature_store runs the L2 stubs (--mode synthetic).
+  * The L5 to L7 rules are stubs consuming a one-hot layout. On the real store
+    they stop rather than encode an absent value as a value, so with
+    source=tcga `rule all` stops at optimize: L5 to L7 have not been run on
+    real data.
   * Several real modules exist ALONGSIDE those stubs and are NOT wired into the
     CLI pipeline, so they are absent from this DAG by design, not by oversight:
         src/gliostrata/prediction/cox.py        — real Cox models; L5 still
                                                   calls prediction/survival.py
-        src/gliostrata/profiling/verhaak.py     — real Verhaak classifier; L2
-                                                  still calls profiling/subtype.py
-        src/gliostrata/profiling/deconvolve.py  — deconvolution; L2 still calls
-                                                  profiling/{states,tme}.py
+        src/gliostrata/profiling/verhaak.py     — cohort-relative Verhaak
+                                                  scoring; per-patient subtype
+                                                  features use profiling/centroid.py
         src/gliostrata/optimization/bayes_opt.py— real BO; L6 still calls
                                                   optimization/bayesian.py
         scripts/download_cgga.py                — CGGA ingest, no rule yet
@@ -60,9 +67,9 @@ include: "rules/export.smk"
 rule all:
     """Full pipeline: L0 ingest -> L7 protocols, plus the partition guardrail."""
     input:
-        # L0 — expression matrices are produced but not yet consumed by L2.
+        # L0 — expression matrices (consumed by build_feature_store when source=tcga).
         expression_targets(),
-        # L2 — profiled table is produced but not consumed by L3 (see features.smk).
+        # L2 stub — the profiled table is produced but consumed by nothing.
         PROFILED,
         # L3/L6/L7 — the chain that is actually wired end to end.
         FEATURE_STORE,
