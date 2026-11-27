@@ -125,22 +125,23 @@ null. v1 no longer verifies because the ingest filter was corrected and the coho
 11 patients (583 to 594); v2 was frozen as a new manifest rather than by overwriting v1.
 Source: manifests under `data/partitions/`; `docs/reproducibility.md` section 4.
 
-## 1.7 Software facts (measured 2026-11-26)
+## 1.7 Software facts (measured 2026-11-26; updated 2026-11-27)
 
 | Property | Value |
 | --- | --- |
 | Package | `gliostrata` 0.1.0, MIT licence, Python >= 3.10 (developed on 3.14.3) |
-| Test suite | **1042 tests in 27 modules: 1041 pass, 1 skipped, 0 failed**, with all outbound sockets blocked |
+| Test suite | **1075 tests in 31 modules: 1074 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27; 1042 in 27 modules the day before) |
 | The one skip | A Snakemake-dependent workflow test; Snakemake is an optional dependency and was not installed |
 | Real-data tests | Skip when the TCGA or CGGA files are absent; they ran here because the data are present |
 | Blocking lint (`E9,F63,F7,F82`) | Clean across `src`, `tests`, `scripts` |
-| Advisory lint (full project config) | 171 findings: 31 in `src`, 133 in `tests`, 7 in `scripts`. 167 are naming rules that flag names such as `X` and `N`, which are conventional in statistical code |
+| Advisory lint (full project config) | 170 findings: 30 in `src`, 133 in `tests`, 7 in `scripts` (2026-11-27; 171 the day before). 166 are naming rules that flag names such as `X` and `N`, which are conventional in statistical code |
 | Pipeline definition | 9 DVC stages in `dvc.yaml`; 9 Snakemake rule files under `workflow/rules/` |
-| Continuous integration | 4 jobs: lint, tests, partition-drift guardrail, Snakemake dry run with an offline fixture run |
-| Dependency floors only | No lockfile, no container image |
+| Continuous integration | 5 jobs: lint, tests from the lock file, tests on Python 3.10 from the floors, partition-drift guardrail, Snakemake dry run with an offline fixture run. The two changed jobs have not run on GitHub |
+| Dependencies | `requirements-lock.txt` (2026-11-27): 37 installed distributions, Python 3.14.3. `requirements-floor.txt`: the lowest versions pyproject accepts. No container image |
 
 The advisory lint count rose from 148 to 171 on 2026-11-26 because two new files were
 added (20 and 3 findings). They follow the naming convention of their sibling files.
+Stage R1 (2026-11-27) added none and removed one, which leaves 170.
 
 ## 1.8 State of the pre-registration
 
@@ -153,7 +154,7 @@ added (20 and 3 findings). They follow the naming convention of their sibling fi
 | Comparator model for T2's improvement row | **Placeholder.** "TO BE COMPLETED BY AUTHOR" |
 | Amendments logged | Five dated entries, all 2026-11-26. Four are marked as written after CGGA was read; one (the T1 harmonisation rule) is marked "No" |
 | Machine-readable registration state | `configs/registration.yaml`. The OSF DOI is `null` until the deposit; the read guard reads it |
-| Access ledger | `data/access_ledger.jsonl`. 7 entries; 2 are value reads, both T2 and both before deposit |
+| Access ledger | `data/access_ledger.jsonl`. 11 entries (0 to 10); 2 are value reads, both T2 and both before deposit; 2 are checksum-only accesses (6 and 7), 4 are schema or availability accesses (0, 1, 3 and 4), and 3 (8 to 10) are an observation and two notes, not accesses |
 
 Until the deposit is made the project has no pre-registration in the formal sense, and
 T1 to T5 are exploratory. Source: `docs/preregistration.md` header and section 8.

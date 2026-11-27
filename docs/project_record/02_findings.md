@@ -16,7 +16,7 @@ on CGGA.
 | 1 | A Cox survival model fitted on TCGA-GBM shows no established discrimination on CGGA: external C-index 0.5385 (interval 0.4994 to 0.5807) against a threshold of 0.65. | T2 C-index: **not met** |
 | 2 | The same model's predicted 18-month survival is less accurate than predicting the cohort average for everyone: Brier 0.2617 against a threshold of 0.25. | T2 Brier: **not met** |
 | 3 | The registered four-feature model cannot be tested on CGGA, because CGGA records no performance status (KPS). | **Not evaluable** |
-| 4 | Most of the loss comes from changing cohort, not from losing KPS: about 0.02 against about 0.11 C-index. | Internal decomposition |
+| 4 | Two descriptive steps sit between the registered model's internal C-index and its transfer: about 0.02 between the internal models, about 0.11 on moving to CGGA. Neither difference carries an interval. | Descriptive; no interval |
 | 5 | IDH and MGMT status were called from raw TCGA data for 368 and 415 of 594 patients. | Descriptive; pipeline works |
 | 6 | Excluding the 23 IDH-mutant patients moves the internal C-index by 0.0079, under the pre-specified limit of 0.01. | Sensitivity: **robust** |
 | 7 | The external cohort is 305 patients, not the ">1,000" the protocol assumed; 218 are eligible for T4 and T5. | Cohort fact |
@@ -31,7 +31,9 @@ CGGA with Harrell's C-index. Three variants were fixed, in the script and its te
 CGGA was read, and all three are reported.
 
 - **Patients.** One row per patient (CGGA reuses identifiers: 333 rows are 305 patients).
-  Complete cases on the variant's features and the outcome; nothing imputed.
+  Variants 2 and 3, in both cohorts: complete cases on the variant's features and
+  the outcome; nothing imputed. Variant 1 is fitted on TCGA only and is imputed
+  there (see below the table).
 - **Interval.** Percentile bootstrap over the evaluated CGGA patients, 1000 resamples, seed
   42, with the TCGA model held fixed.
 - **Decision rule.** Decided by variant 2, as pre-specified. Met only if the point estimate
@@ -39,11 +41,18 @@ CGGA was read, and all three are reported.
 
 | Variant | Features | TCGA fit n | Internal C-index | CGGA n (deaths) | External C-index | 95% CI | Result |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1. Committed baseline | age, sex, KPS, treatment arm | 594 | 0.6735 | not evaluable | -- | -- | Not evaluable: no KPS in CGGA |
+| 1. Committed baseline | age, sex, KPS, treatment arm | 594 passed, 592 modelled; KPS set to the median, 80, for 150 with an indicator (HR 1.57); treatment arm missing for 22 (level, HR 1.20) | 0.6735 | not evaluable | -- | -- | Not evaluable: no KPS in CGGA |
 | 2. Transferable (decides) | age, sex, treatment arm | 570 | 0.6520 | 283 (239) | **0.5385** | 0.4994 to 0.5807 | **FAIL** |
 | 3. Molecular (secondary) | age, sex, treatment arm, IDH, MGMT | 298 | 0.6606 | 241 (204) | 0.5915 | 0.5477 to 0.6341 | FAIL; not comparable with variant 2 |
 
 Internal C-index: 5-fold stratified cross-validation, pooled out-of-fold.
+
+Variant 1's TCGA fit imputes, although nothing is imputed on CGGA: 594 patients were
+passed to the fit and 592 were modelled (2 have no vital status); KPS was set to its
+TCGA median, 80, for 150 of them, with a missingness indicator that is prognostic in
+its own right (HR 1.57); the treatment arm is missing for 22 and is coded as its own
+level (HR 1.20); 491 deaths. Variants 2 and 3 impute nothing, internally or externally.
+These counts are pinned by `tests/fixtures/tcga_fit_fingerprint.json`.
 
 **What it shows.**
 - The whole 95% interval of the headline model lies below 0.65. This is not a near miss
@@ -104,9 +113,14 @@ Brier scores at the other horizons named in the pre-registration (descriptive on
 - The model scores **worse than the null model at all three horizons** (0.2617 against
   0.2481 at 18 months). Predicting the same survival probability for everyone would have
   been closer to what happened.
-- Poor ranking alone cannot produce a Brier score above the null model's. It also requires
-  the predicted probabilities to be offset from the observed survival. The direction of
-  that offset was not examined.
+- A Brier score above the null model's says that the predictions are worse than a
+  constant. It does not say which of two things makes them so. With no resolution,
+  the excess over the null model equals the squared offset (the mean predicted
+  probability less the observed survival, squared) plus the variance of the
+  predictions. Poor ranking, meaning dispersion that does not match outcomes, can
+  worsen the score on its own; so can an offset. The two cannot be told apart
+  without a calibration or resolution analysis, and neither was done. Which of them
+  dominates here is not known, nor in which direction any offset points.
 
 **A caution about the threshold itself.** With 45.7% of patients alive at 18 months, the
 uninformative score is about 0.457 x 0.543 = 0.248, just under the registered 0.25. In this
@@ -114,34 +128,41 @@ cohort a model could have passed this row while discriminating not at all. The t
 was fixed from a published range before the external cohort was read, is reported as
 registered, and is not re-stated here.
 
-**Not done.** No calibration slope or intercept, calibration plot or decision-curve
-analysis. Each would be a further read of CGGA.
+**Not done, by decision (2026-11-27).** No calibration slope or intercept, calibration
+plot or decision-curve analysis. Each would be a further read of CGGA. The decision not
+to do them for this thesis is recorded in `docs/cgga_validation.md` section 12.5:
+calibration is not a registered row, a further read would not change the T2 verdict, and
+the offset-versus-dispersion question above is named as a limitation.
 
 Source: `docs/cgga_validation.md` section 12;
 `data/results/cgga/brier18_external.json`; `scripts/validate_brier_cgga.py`.
 
-## 2.4 Finding 3 and 4: the registered model is untestable, and the loss is mostly the cohort
+## 2.4 Finding 3 and 4: the registered model is untestable, and where the gap sits
 
 **The registered model cannot be evaluated on the registered cohort.** T2 was registered
 for a four-feature model that includes KPS. CGGA publishes no performance status in any of
-its three clinical files. KPS was not imputed: a TCGA median pasted onto Chinese patients
-and scored as an observation would describe the imputation, not the model. This is a
-feature-divergence problem, not a performance result.
+its three clinical files. KPS was not imputed on CGGA: a TCGA median pasted onto Chinese
+patients and scored as an observation would describe the imputation, not the model. This
+is a feature-divergence problem, not a performance result.
 
-**Where the loss sits.** Variants 1 and 2 are both scored internally, so the result
-separates into two steps:
+**Where the gap sits. Descriptive only.** Three C-indices are on record. The two
+differences between them carry no interval: neither was bootstrapped, so nothing here
+says how much of either is sampling noise.
 
-| Step | C-index | Difference |
+| Step | C-index | Difference (no interval) |
 | --- | --- | --- |
 | Committed baseline, TCGA (4 features) | 0.6735 | |
-| Transferable model, TCGA (3 features) | 0.6520 | -0.0215 from dropping KPS |
-| Same 3-feature model, CGGA | 0.5385 | -0.1135 from changing cohort |
+| Transferable model, TCGA (3 features) | 0.6520 | -0.0215 |
+| Same 3-feature model, CGGA | 0.5385 | -0.1135 |
 
-Removing KPS costs about 0.02 internally. Moving to CGGA costs a further 0.11 with the
-features held fixed, five times as much. The explanation "the model fell short because
-CGGA has no KPS" does not fit the numbers. The first step is approximate, because the two
-internal numbers come from slightly different fit sets (592 and 570 patients); the second
-is a like-for-like comparison of one fitted model on two cohorts.
+The first contrast is not "the effect of KPS". Variant 1 against variant 2 bundles three
+differences at once: the KPS value itself; a missing-KPS indicator that is prognostic in
+its own right (HR 1.57, for 150 of the 592 modelled patients); and a different fit set,
+592 modelled patients with imputation against 570 complete cases. It is therefore not an
+estimate of what KPS is worth. The second contrast compares one fitted model on two
+cohorts. Read descriptively, the second gap (about 0.11) is about five times the first
+(about 0.02). That ordering is consistent with the shortfall lying mainly in the move
+between cohorts rather than in the loss of KPS; it is not a tested attribution.
 
 Candidate explanations for the second step, **none tested**:
 - A different population and care pathway. CGGA is a Chinese cohort with median age 52
@@ -204,6 +225,14 @@ the IDH calls existed: flag the result if the C-index moves by more than 0.01.
 
 The C-index moved by **0.0079**, below the 0.01 limit: **not flagged**. The spread across
 cross-validation folds is several times the size of the change.
+
+**Rerun with fold-wise imputation (2026-11-27).** The fits above imputed KPS with the
+median of all modelled patients, taken before the folds were drawn; the code now takes
+it from each fold's training rows. Rerun on TCGA only (`scripts/rerun_tcga_internal_cv.py`,
+record `data/results/tcga_gbm/foldwise_imputation_rerun.json`): full cohort 0.673544
+before and after, 95% CI 0.6478 to 0.6994; without the IDH-mutant patients 0.665650
+before and after, 95% CI 0.6370 to 0.6913. Every training fold's median KPS is 80, so the
+imputed values are unchanged and so are the predictions. The delta stays at 0.0079.
 
 **Subtype distribution** of the 284 TCGA expression samples, and of the 268 left after
 excluding the 16 IDH-mutant samples:

@@ -137,13 +137,35 @@ Commands and results are in `06_evidence_reports.md`, stages 1 and 2.
 | Review the uncommitted work | Every diff read; secret scan of the diff and the untracked files | Nothing to change: no credential, no patient-level file, no cache, and no change to any threshold, bound, rule or manifest | |
 | Verify before committing | Full suite; blocking lint; partition v2; registry checksum | 984 passed, 1 skipped; lint clean; v2 verified (594, 425 / 169); checksum unchanged | |
 | Commit the working tree | Three commits, in the split the future plan suggested | Code, tests and packaging; documentation; this record | `0c20999`, `10cfd93`, `8f79b33` |
-| Check commit 28 on its own | Throwaway worktree; `test_workflow.py` and `test_cli.py` | 78 passed, 1 skipped; worktree removed | |
+| Check commit 28 on its own | Throwaway worktree; `test_workflow.py` and `test_cli.py` | 78 passed, 1 skipped; worktree removed. The package code it ran was the main checkout's, not the commit's (corrected in stage R1) | |
 | Checksum the CGGA files | PowerShell `Get-FileHash`; file bytes only | **CGGA access: checksum only.** Four files hashed; nothing deserialised | |
 | Read discipline | Access ledger; read guard; registration state; CLI command; 31 tests | 7 ledger entries, 2 of them value reads. A value read is refused until the registration is deposited and the partition sealed | `324a09b` |
 | CI partition guardrail | `ACTIVE_MANIFESTS` replaces "every manifest but one is superseded" | Run locally in three scenarios; a listed manifest that does not exist stops the job | `324a09b` |
 | Full suite with sockets blocked | Python-level socket entry points replaced before pytest | 1015 passed, 1 skipped; 0 blocked connection attempts | |
 | Documentation | Stale numbers corrected (lint count, test counts); a broken README sentence repaired; T1 findings recorded (section 5.1.1 of the future plan) | `f3c2a4b` |
-| Real-data slice, L0 to L3 | `scripts/build_tcga_feature_store.py` on the TCGA inputs; no network, no CGGA, no outcome read | 155 of 594 patients in the store; every exclusion counted. Found: resection extent absent for the whole cohort; KPS absent for 64 of the 283 with expression; cohort placeholder columns would shadow the L2 outputs | The commit after `f3c2a4b` |
+| Real-data slice, L0 to L3 | `scripts/build_tcga_feature_store.py` on the TCGA inputs; no network, no CGGA, no outcome value used | 155 of 594 patients in the store; every exclusion counted. Found: resection extent absent for the whole cohort; KPS absent for 64 of the 283 with expression; cohort placeholder columns would shadow the L2 outputs | The commit after `f3c2a4b` |
+
+## Phase J. Close the conditions of the independent review (2026-11-27; stage R1)
+
+An independent review of commit `b83f9f7` returned "accept with conditions": 0 blockers,
+6 major findings and 7 minor ones. This stage closes them. Commands and results are in
+`06_evidence_reports.md`, stage R1. TCGA only: no CGGA value was read, hashed or
+downloaded, and the only model fitting was the fold-wise imputation rerun.
+
+| Task | Method | Outcome | Commit |
+| --- | --- | --- | --- |
+| Identify the unexplained CGGA access | File metadata only; then the agent's own session log, the access times of files across the repository, and editor and agent logs | It was the review agent's own workspace-wide text search at the start of the stage 1 review: two path-regex queries, 30 seconds, no result. Five extracted text files were scanned for path strings; nothing was deserialised or returned. Ledger entries 8 (observation), 9 (identification) and 10 (times of day; a correction to entry 6) | First commit of stage R1 |
+| Prevent recurrence | `.clineignore`, `.rgignore`, `.clinerules`; a rule in `docs/reproducibility.md` | Both CGGA directories are excluded from workspace-wide tools. Removal of the plain-text copies is deferred, with its reason (`05_future_plan.md`, section 5.5) | Same |
+| Harden the read guard | A scoring-rule registry (`configs/scoring_rules.yaml`); input checksums recomputed at read time; notes in the ledger | Free text no longer opens the partition gate. 11 more tests | Same |
+| Brier explanation and C-index contrasts | `docs/cgga_validation.md`, `02_findings.md` and the pre-registration rewritten | Two possible causes, offset and dispersion, that the data on record cannot tell apart; contrasts labelled descriptive, with no interval | Documentation commit |
+| KPS imputation disclosure | The counts stated wherever variant 1's fit was shown as 594; a committed fixture pins them | 594 passed, 592 modelled, 150 imputed at 80, 22 missing treatment arm; `tests/fixtures/tcga_fit_fingerprint.json` | Same |
+| Fold-wise imputation | A design fitted per training fold (`fit_design_plan`, `apply_design_plan`); rerun on TCGA | C-index unchanged: 0.673544 and 0.665650 before and after. The three design matrices are byte-identical to before | Same |
+| Lock file, floors, CI | `requirements-lock.txt` (37 distributions); `requirements-floor.txt`; CI jobs | `test` installs from the lock file; `test-floor` is new (Python 3.10). Neither has run on GitHub | Same |
+| Provenance manifests | Schemas inspected first | They carry patient barcodes, so their sizes, row counts and checksums are committed (`data/provenance/`), not the files | Same |
+| Calibration | A decision, recorded | Not done for this thesis (`docs/cgga_validation.md`, section 12.5) | Same |
+| CI partition job | Logic moved to `scripts/ci_partition_drift.py`; 10 tests execute it | Missing, superseded, external all-test and tampered manifests | Same |
+| Isolated clean-checkout check | Fresh clone; `PYTHONPATH=<clone>/src`; `gliostrata.__file__` printed, in the shell and inside the pytest process | `gliostrata` resolved inside the clone. The first run, at `441c94a`, found a test that failed in every clean checkout (it assumed the git-ignored TCGA cohort was on disk); fixed. The second run, in a new clone at `9216e6f`: 1052 passed, 23 skipped (the real-data tests and the Snakemake test) | `9216e6f` |
+| Finish | Full suite with sockets blocked and a CGGA file-access audit hook; blocking and advisory lint | 1074 passed, 1 skipped; 0 blocked connections; no CGGA access; blocking lint clean; advisory lint 170 findings | Tag `baseline-r1` |
 
 ## Reads of the external cohort, in total
 
@@ -157,5 +179,10 @@ Dry runs before each read printed availability counts only. The CGGA expression 
 have never been read by a model: eligibility was counted from column names.
 
 `data/access_ledger.jsonl` is now the record of every access, including the three in
-this table. Its one later entry, from Phase I, is the checksum-only access. The full
-test suite reads no CGGA file.
+this table. Its later entries: a checksum-only access from Phase I (entry 6); a second
+one, after the L0 to L3 slice (entry 7); and three entries that are not accesses
+(8 to 10). Entry 8 is an observation: the review agent's workspace-wide text search
+opened five extracted CGGA text files on 2026-11-27T05:48:55Z. Entry 9 identifies it.
+It scanned them for two path strings and returned nothing; no value was used. Entry 10
+records that entries 0 to 6 have no time of day and corrects entry 6 (five files were
+hashed, not four). The full test suite reads no CGGA file.

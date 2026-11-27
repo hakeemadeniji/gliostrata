@@ -27,7 +27,7 @@ committed.
 | `threshold_table_checksum()` | `96bbcd49dcda20f8a0bc9c8b71427aaa24cf754dc6d8d7b4f7d6a2df3d2874ab`, the frozen constant |
 | `gliostrata pipeline-dry-run --n 20` | L0 to L7 ran on synthetic data; no file written |
 | secret scan of `git diff` and of the untracked files | two hits, both documentation text saying a dbGaP key belongs in `.env`. No credential, no user-specific path |
-| commit `0c20999` in a throwaway worktree: `pytest tests/test_workflow.py tests/test_cli.py` | 78 passed, 1 skipped. Worktree removed afterwards |
+| commit `0c20999` in a throwaway worktree: `pytest tests/test_workflow.py tests/test_cli.py` | 78 passed, 1 skipped. Worktree removed afterwards. **Corrected in stage R1:** the package under test was not `0c20999`'s. `gliostrata` is installed in editable mode from the main checkout, and pytest resolved it through that install, so the two test modules of `0c20999` ran against the main checkout's `src/`. Verified: those two modules at that commit. Not verified: that commit's package code in isolation. Stage R1 repeats the check with `PYTHONPATH` set to the checkout and `gliostrata.__file__` printed |
 
 **Review findings on the uncommitted work.**
 
@@ -41,6 +41,18 @@ committed.
   `docs/reproducibility.md` said 148 and "965 tests". Corrected in stage 2.
 - The README had one broken sentence (about optional dependencies), and a CI comment
   said tests read CGGA. No test does. Both corrected in stage 2.
+
+**The pre-registration had changed since `a092a16`, and this report did not say so.**
+The independent review of `b83f9f7` found the omission; recorded here on 2026-11-27.
+Since `a092a16` the document changed in commit `10cfd93`: 7 hunks, 42 lines added and
+12 removed. Three of them alter registered procedure: hunk 1 (section 2.2 item 7, the
+manifest is sealed after "the T2 evaluation (two reads)" instead of "the single T2
+read"), hunk 5 (the `cgga_external_v1` row of section 4.5, the same correction) and
+hunk 6 (section 5: CGGA read twice, and "no reads beyond the registered T1, T4 and T5"
+in place of "no further reads"). All three are disclosed in the document's own
+amendment log, in the row that hunk 7 adds ("read once" corrected to two reads). The
+other hunks record the Brier result. No threshold, no decisive bound and no decision
+rule changed.
 
 **Test counts.** 985 collected: 984 passed, 1 skipped. The skip is the
 Snakemake-optional workflow test.
@@ -132,7 +144,7 @@ the measured state.
 | `gliostrata access-ledger` | 7 entries; "Value reads of the external cohort: 2"; "Registration: NOT deposited" |
 | full suite, Python-level socket entry points replaced before pytest | 1015 passed, 1 skipped in 243 s; 0 blocked connection attempts |
 | after the documentation edits: `pytest tests/test_workflow.py tests/test_cli.py tests/test_read_guard.py` | 109 passed, 1 skipped |
-| commit `324a09b` in a throwaway worktree, the same three modules | 109 passed, 1 skipped. Worktree removed |
+| commit `324a09b` in a throwaway worktree, the same three modules | 109 passed, 1 skipped. Worktree removed. **Corrected in stage R1:** the same limitation as the stage 1 worktree check. The three test modules of `324a09b` ran against the main checkout's `src/`, not that commit's package code |
 | `ruff check --select E9,F63,F7,F82 src tests scripts` | clean |
 | `ruff check` on the three new or changed Python files | clean |
 | advisory lint, whole project | 171 findings, as before: the new files add none |
@@ -155,6 +167,15 @@ read before, and the SHA-256 of every input is given. It is cooperative: a scrip
 does not call it is not stopped. It checks that a manifest exists and is sealed, not
 that it verifies against its cohort, so `freeze-partition --verify` is still required.
 The two T2 scripts predate it and were not edited.
+
+**Tightened in stage R1 (2026-11-27).** The review of `b83f9f7` found that any
+non-empty text passed the scoring-rule gate. That path now needs a rule id from the
+committed registry `configs/scoring_rules.yaml`, registered for the analysis, naming
+a frozen scoring-set manifest whose bytes still hash to the checksum recorded beside
+it. No rule has a frozen manifest yet, so the path admits nothing. The guard also
+recomputes every input's checksum at read time and refuses a mismatch. Ledger entries
+that are observations or notes can be appended (`append_ledger_entry`); they are
+marked "not an access" and never counted as reads.
 
 **Prepared, not run: sealing the external partition.**
 
@@ -311,3 +332,160 @@ missingness is documented and its feature ranges are reported. The pipeline does
 not run end to end on real data: its own L2 is still the stub, and L4 to L7 have
 not been run on real data. Registration is not deposited either; that needs the
 OSF deposit.
+
+## Stage R1. Conditions of the independent review of `b83f9f7` (2026-11-27)
+
+**Scope.** The review returned "accept with conditions": 0 blockers, 6 major findings
+(M1 to M6) and 7 minor ones. This stage closes them or defers them with a reason. TCGA
+only: no CGGA value was read, downloaded or hashed, no `validate_*` script was run, and
+no OSF action was taken. No threshold, bound, partition, seed or analysis budget changed.
+The only model fitting was the fold-wise imputation rerun on TCGA.
+
+**Commits.** `4fd8964` (the access, the guard), `45166f0` (fold-wise imputation, the
+fit fingerprint, outcome wording), `f94c0d5` (lock file, floor job, partition-drift
+script, provenance checksums), `441c94a` (the T2 account), `9216e6f` (a test that
+failed in a clean checkout, found by R6), and the commit that adds this section, tagged
+`baseline-r1`. That last commit changes only `docs/project_record/`.
+
+### R1. The unexplained access to the held-out cohort (M5)
+
+**(a) The files.** From file-system metadata only (name, size, times; NTFS last-access
+updates are enabled on this machine, `DisableLastAccess = 2`):
+
+| File under `data/raw/cgga/_cache/extracted/` | Bytes | Last access (UTC) | Kind |
+| --- | --- | --- | --- |
+| `CGGA.mRNAseq_325.Read_Counts-genes.20220620.txt` | 47,679,555 | 05:48:55.811 | expression matrix |
+| `CGGA.mRNAseq_325_clinical.20200506.txt` | 25,090 | 05:48:55.906 | clinical |
+| `CGGA.mRNAseq_693.Read_Counts-genes.20220620.txt` | 103,559,604 | 05:48:56.050 | expression matrix |
+| `CGGA.mRNAseq_693_clinical.20200506.txt` | 52,285 | 05:48:56.485 | clinical |
+| `CGGA.mRNA_array_301_clinical.20200506.txt` | 25,020 | 05:48:56.485 | clinical |
+
+The brief named six files. The directory holds five, and no sixth file under
+`data/raw/cgga` carries an access time in that window: the five `.zip` archives beside
+them were last accessed on 2026-11-26 at their download, and the five top-level files
+(four Parquet files and `harmonisation.json`) at 2026-11-27T07:01:26Z, consistent with
+the checksum access of ledger entry 7 (recorded at 07:03:46Z). The only other entry in the tree is the `extracted`
+directory itself; its access time has since been overwritten by later listings and
+cannot show whether it was the sixth item. Re-checked from metadata during the closure of
+this stage: still five files, the same sizes and access times. No file is an annotation
+table.
+
+**(b) Ledger.** Entry 8 (`kind: observation`, recorded 2026-11-27T08:35:15Z): the paths,
+sizes and times above, "process not identified at the time of the observation", no value
+use known. Closed by a later entry, not by an edit.
+
+**(c) Investigation, from logs only.** Entry 9 (`kind: note`) names the process: the
+review agent's own workspace-wide text-search tool, called at 05:48:54Z with two
+path-regex queries at the start of the stage 1 review. It timed out after 30 s
+("Search timed out after 30000ms", 05:49:25Z) and returned nothing. Evidence: the
+agent's session log (tool call at 05:48:45Z, result at 05:49:25Z) and the access times of
+491 repository files that fall in the same path-ordered sweep from 05:48:55Z to
+05:49:25Z. The five files were scanned for two path strings; nothing was deserialised,
+interpreted or returned, and the test suite did not read them. Re-checked independently
+at the closure of this stage, from the agent's session record of that review (session
+opened 05:44:26Z): the assistant message carrying the `search_codebase` call is stamped
+05:48:45.604Z, and its tool result, stamped 05:49:25.489Z, holds the two queries
+(`cgga[^"']{0,60}\.parquet` and `raw/cgga|processed/cgga|raw\\cgga`), each with an empty
+result and "Search failed: Search timed out after 30000ms". Not identifiable from the
+logs: which of the five files were fully read and which only partly before the timeout.
+
+**(d) Recurrence.** `.clineignore` and `.rgignore` exclude both CGGA directories;
+`.clinerules` forbids workspace-wide searches. Deferred: removing the plain-text copies
+from the workspace (`05_future_plan.md`, section 5.5, with the reason); and a live check
+that the agent's search tool honours the ignore files, not run because a failing check
+would open the files again.
+
+### R2 to R5. The T2 account and the fold-wise imputation (M1, M2, minor)
+
+| Item | Where | Result |
+| --- | --- | --- |
+| R2 Brier explanation | `docs/cgga_validation.md` 12.2; `02_findings.md` | With no resolution, the excess over the null model is the squared offset plus the variance of the predictions; the two cannot be told apart without calibration or resolution analysis, and neither direction was examined |
+| R3 C-index contrasts | `02_findings.md`; `cgga_validation.md`; pre-registration 2.3 | Descriptive, no interval. Variant 1 against 2 bundles the KPS value, the missing-KPS indicator (HR 1.57) and the fit set (592 against 570 modelled) |
+| R4 KPS disclosure | every table row and paragraph that showed variant 1's fit as 594 | "594 passed, 592 modelled; KPS set to the median, 80, for 150 with an indicator (HR 1.57); treatment arm missing for 22 (level, HR 1.20)". "Nothing imputed" is scoped to variants 2 and 3. Pinned by `tests/fixtures/tcga_fit_fingerprint.json` and `tests/test_tcga_fit_fingerprint.py`. `docs/osf_final_fields.md` carries no variant-1 fit n |
+| R5 fold-wise imputation | `prediction/cox.py` (`fit_design_plan`, `apply_design_plan`) | The KPS median now comes from each fold's training rows |
+
+**R5 rerun, TCGA only** (`python scripts/rerun_tcga_internal_cv.py`; 5 folds, seed 42,
+1000 bootstrap resamples; record `data/results/tcga_gbm/foldwise_imputation_rerun.json`,
+git-ignored):
+
+| Analysis | Patients (modelled) | KPS imputed | C-index, whole-frame median (old) | C-index, training-fold median (new) | 95% CI |
+| --- | --- | --- | --- | --- | --- |
+| Variant 1, full cohort | 594 (592) | 150 | 0.673544 | 0.673544 | 0.647818 to 0.699370 |
+| Variant 1, without the 23 IDH-mutant patients | 571 (569) | 143 | 0.665650 | 0.665650 | 0.637019 to 0.691274 |
+
+Every training fold's median KPS is 80, the same as the whole-frame median, so the
+design matrices are byte-identical and the C-index does not move. Both values are kept.
+No external number depends on this path: variant 1 is never evaluated on CGGA, and
+variants 2 and 3 use `impute="drop"`.
+
+### R6. Isolated clean-checkout check (M4)
+
+The two earlier worktree checks (stage 1, commit `0c20999`; stage 2, commit `324a09b`)
+ran the test modules of those commits against the main checkout's `src/`, because
+`gliostrata` is installed in editable mode from the main checkout. Both rows above are
+reworded to what was verified.
+
+Repeated properly: a fresh `git clone` of this repository into a scratch directory,
+run with `PYTHONPATH=<clone>/src` and the same socket block and CGGA audit hook as R9.
+The data directories are git-ignored, so the clone has no TCGA data and every
+real-data test skips; that is what a clean checkout and CI see.
+
+**First run, at `441c94a`: 1 failed**, 1051 passed, 23 skipped.
+`test_the_repository_manifests_pass_with_the_ci_setting` (in
+`tests/test_ci_partition_drift.py`, added in this stage) asserted that the TCGA cohort is
+on disk. It is git-ignored, so the test would have failed in every clean checkout and in
+CI. `gliostrata` resolved inside the clone. Fixed in `9216e6f`: the test now asserts the
+line the script prints in each case.
+
+**Second run, at `9216e6f`, in a new clone** (the last commit that changes code; the
+tagged commit after it changes only this record):
+
+| Check | Result |
+| --- | --- |
+| `python -c "import gliostrata; print(gliostrata.__file__)"` | `<clone>\src\gliostrata\__init__.py` |
+| `gliostrata.__file__` read inside the pytest process after the run | `<clone>\src\gliostrata\__init__.py` |
+| every loaded `gliostrata.*` module whose file lies outside the clone | none |
+| full suite in the clone, sockets blocked | 1052 passed, 23 skipped in 217 s; 0 blocked connection attempts; 0 accesses to a CGGA path inside the clone |
+
+The 23 skips are 22 real-data tests whose inputs are git-ignored and therefore absent from a clone, and the Snakemake-optional workflow test. 1052 + 23 = 1075, the same collection as the main checkout. What this verifies: the package code and tests of `9216e6f` on their own, with no data. It does not verify the real-data tests in isolation; those ran on the main checkout (R9).
+
+### R7. Closure (M3)
+
+| Item | Status |
+| --- | --- |
+| Lock file | **Closed.** `requirements-lock.txt`: 37 distributions, Python 3.14.3 (Windows ARM64), the runtime and `dev` closure. CI's `test` job installs it, then the package with `--no-deps`. The `workflow` extra (`snakemake`, `dvc`) is not locked: it is not in the environment that produced the results |
+| Floor job | **Added, not yet run.** `test-floor`: Python 3.10, `requirements-floor.txt`. It has not run on GitHub (no network in R1) and may be red |
+| Provenance manifests | **Closed by checksum.** The three per-modality GDC file manifests carry patient barcodes, so they are patient-level linkage and are not committed. `data/provenance/file_manifest_checksums.json` records their bytes, rows and SHA-256 (expression 284 rows, methylation 450, mutations 464); `tests/test_provenance_manifests.py` checks them when the data are present |
+| Calibration | **Decided: not done for this thesis.** Not a registered row; a further read of CGGA would not change the T2 verdict; the offset-versus-dispersion question is named as a limitation (`cgga_validation.md` 12.5) |
+| CI partition-drift job | **Closed for its first step.** `scripts/ci_partition_drift.py`; `tests/test_ci_partition_drift.py` executes it against a missing, a superseded, an external all-test and a tampered manifest. **Deferred:** the second step (the shell loop around `freeze-partition --verify`) is still inline and untested |
+| Record | **Closed.** Stage 1 now cites `10cfd93` and states that the pre-registration changed since `a092a16` (hunks 1, 5 and 6 alter registered procedure, as disclosed amendments). Entries 7 onward carry a UTC time of day; entry 10 marks entries 0 to 6, value reads 1 and 2 among them, "time of day not recorded" |
+| Wording | **Closed.** "Reads no outcome" is now "uses no outcome value"; `test_outcome_values_are_carried_and_counted_but_never_used` tests `n_missing_outcome` |
+
+### R8. Guard hardening (minor)
+
+**Closed** in `4fd8964`. A scoring-rule read now needs a rule id from
+`configs/scoring_rules.yaml`, registered for the analysis, naming a frozen scoring-set
+manifest whose bytes still hash to the recorded checksum; input checksums are recomputed
+at read time. Tests: unknown rule refused, rule without a frozen manifest refused,
+altered manifest refused, free text refused, checksum mismatch refused. No rule has a
+frozen manifest yet, so that path admits nothing.
+
+### R9. Finish
+
+| Command | Result |
+| --- | --- |
+| full suite on the main checkout at `9216e6f`, Python-level socket entry points replaced and a file-access audit hook on every CGGA path | 1074 passed, 1 skipped in 261 s (and 252 s on the working tree before the commits); 0 blocked connection attempts; 0 opens, listings or stats of a path under the repository's `data/raw/cgga` or `data/processed/cgga` (126 events, all on `tmp_path` fixtures that imitate the layout) |
+| `ruff check --select E9,F63,F7,F82 src tests scripts` (blocking) | All checks passed |
+| `ruff check src tests scripts` (advisory) | **170 findings**: N803 102, N806 55, N802 7, UP037 3, N812 2, UP035 1. 171 before stage R1 |
+| `git tag -a baseline-r1` | on the commit that adds this section |
+
+**Test counts.** 1075 collected in 31 modules: 1074 passed, 1 skipped (the
+Snakemake-optional workflow test).
+
+**External reads.** None. The R1 metadata listings read names, sizes and times only;
+the ledger still counts 2 value reads, both for T2.
+
+**Left open.** The extracted plain-text CGGA copies (deferred); the live check of the
+ignore files (deferred); the `test` and `test-floor` CI jobs have not run on GitHub; the
+second partition-drift step is untested; the comparator model for T2's improvement row
+(`05_future_plan.md` 5.4); the OSF deposit and the seal of `cgga_external_v1`.

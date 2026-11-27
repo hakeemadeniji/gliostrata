@@ -18,7 +18,7 @@ The order below is a recommendation; the reasons are given so it can be judged.
 | --- | --- | --- |
 | 1 | **Done, 2026-11-26.** Review and commit the working tree, in the suggested split: code and packaging (`0c20999`); documentation (`10cfd93`); this record (`8f79b33`). | The registration records a commit hash, so the registered code must be fixed first. |
 | 2 | **Done, 2026-11-26.** The partition-drift CI job now lists its active manifests in `ACTIVE_MANIFESTS` (`ci.yml`). Add the external manifest there, in both steps, in the same commit that adds it. | The job treats every manifest other than the development one as "superseded". It would mislabel the external partition when `cgga_external_v1.json` is added. |
-| 3 | Decide the two open T2 items: the comparator model, and whether calibration slope, intercept and decision-curve analysis are run. See section 5.4. | Both change what the registration must say. |
+| 3 | Name the comparator model for T2's improvement row (section 5.4). The other open T2 item, whether to run calibration slope, intercept and decision-curve analysis, was decided on 2026-11-27: not done for this thesis. | The comparator changes what the registration must say. |
 | 4 | Write the eligibility table, then seal the external partition (commands below). | T4 and T5 cannot start without it. The pre-registration places the seal after the T2 evaluation and before any T4 or T5 computation. |
 | 5 | Commit the manifest and update the `cgga_external_v1` row in pre-registration section 4.5. | The registration must name the sealed partition. |
 | 6 | Re-paste all four OSF fields from `docs/osf_final_fields.md`; upload the attachments; fill in the DOI, date, authors and commit hash in the pre-registration header; deposit. | The text on the OSF form predates the latest corrections. |
@@ -125,7 +125,7 @@ this section is registered.
 | L4 simulation | Synthetic curves | PhysiCell wrapper; NSC chemotaxis and payload kinetics; calibration against PDX and tracking data | Not in the pipeline at all. |
 | L6 optimiser | Ranked enumeration (in the CLI); GP / expected-improvement (not wired) | Wire the GP optimiser; BoTorch acquisition | T4's registered budget assumes the GP optimiser: 12 initial design points and 48 iterations. |
 | L7 handoff | JSON protocol documents | Convert to a word-processor document; make it bench-executable | |
-| Infrastructure | CI with 4 jobs; DVC and Snakemake definitions | Lockfile and container image; initialise DVC and configure a remote; pin the GDC data release; a release DOI | Derived data exist on one machine only. |
+| Infrastructure | CI with 5 jobs; lock file (`requirements-lock.txt`, 2026-11-27); DVC and Snakemake definitions | Container image; initialise DVC and configure a remote; pin the GDC data release; a release DOI | Derived data exist on one machine only. |
 
 **A strategic point for L5.** Three routes were listed for the project lead when T2
 failed; none has been chosen:
@@ -147,7 +147,7 @@ None of these has been made. Each changes something a document currently says.
 | --- | --- | --- |
 | Status of T2 after two failed rows | Report as failed, with the registered fallback; or amend the registered feature set | `docs/cgga_validation.md` section 6.3 |
 | Comparator model for T2's improvement row | Name a 2024 model with re-runnable code or weights, or accept NOT EVALUABLE | `docs/preregistration.md` section 2.2 item 2 |
-| Calibration slope, intercept and decision-curve analysis | Run them as a further, disclosed read with the rules fixed first; or report them as not done | Pre-registration section 7 |
+| Calibration slope, intercept and decision-curve analysis | **Decided 2026-11-27: not done for this thesis.** Not a registered row; a further read would not change the T2 verdict; the offset-versus-dispersion question is named as a limitation | `docs/cgga_validation.md` section 12.5 |
 | Whether the two pre-seal reads count as the registered reads | The reads happened without a sealed partition, which the procedure requires | `docs/cgga_validation.md` section 11 |
 | Evaluation unit | One row per patient (305) was used, not every row (333) | Same |
 | KPS | The committed model cannot be validated on CGGA under any analysis | Same |
@@ -172,9 +172,12 @@ them.
   2026-11-26.** `configs/registration.yaml` (OSF DOI `null` until the deposit) and
   `data/access_ledger.jsonl` (every access to CGGA, back-filled with its source).
   `evaluation/read_guard.py` refuses a value read until the registration is deposited,
-  the partition is sealed or the scoring set fixed by rule, and the analysis has not
-  been read. It is a discipline, not a sandbox: a script has to call it. The two T2
-  scripts predate it and do not.
+  the partition is sealed or a registered rule names a frozen scoring-set manifest
+  whose checksum still matches, every input's checksum is the one on disk, and the
+  analysis has not been read. Since 2026-11-27 the rule must be an id from
+  `configs/scoring_rules.yaml`, not free text, and a rule whose manifest is not yet
+  frozen refuses every read. It is a discipline, not a sandbox: a script has to call
+  it. The two T2 scripts predate it and do not.
 - **Eligibility table not committed.** `data/processed/**` is git-ignored.
 - **Result files not committed.** `data/results/**` is git-ignored.
   Their SHA-256 checksums as of 2026-11-26 are recorded in `06_evidence_reports.md`.
@@ -182,8 +185,39 @@ them.
   not imported.
 - **A deferred consolidation.** `prediction/cox.py` carries its own bootstrap routine with
   a note to consolidate it; changing it would alter random streams.
-- **Advisory lint backlog.** 171 findings, mostly naming rules.
-- **No lockfile or container.** Two clean installs a month apart can resolve differently.
+- **Advisory lint backlog.** 170 findings on 2026-11-27 (171 the day before), mostly
+  naming rules. Stage R1 added none.
+- **No container image.** The lock file exists since 2026-11-27: `requirements-lock.txt`
+  pins the 37 installed distributions of the runtime and `dev` closure (Python 3.14.3),
+  and CI's `test` job installs from it. There is still no image, and the `workflow`
+  extra (`snakemake`, `dvc`) is not locked, because it is not in the environment that
+  produced the results.
+- **Deferred from stage R1: the extracted plain-text copies of the CGGA files are still
+  in the workspace.** `data/raw/cgga/_cache/extracted/` holds five plain-text files next
+  to the five `.zip` archives they came from: two expression matrices (47.7 MB and
+  103.6 MB) and three clinical tables. They are what a workspace-wide text search
+  opened on 2026-11-27T05:48:55Z (ledger entries 8 and 9; `06_evidence_reports.md`,
+  stage R1). The intended state is: keep the compressed source, extract into a
+  temporary directory only inside a guarded read, and delete it afterwards. It was not
+  done in R1 for two reasons. It deletes files under `data/raw/cgga`, and R1 was allowed
+  to touch that tree by name, size and time only. And it changes
+  `scripts/download_cgga.py` (`extract_text_member` keeps the extraction as an audit
+  trail), a change that cannot be validated without a CGGA read. Interim protection:
+  `.clineignore` and `.rgignore` exclude both CGGA directories from workspace-wide
+  tools, and `.clinerules` forbids workspace-wide searches in this repository.
+- **Deferred from stage R1: not verified that the agent's search tool honours the
+  ignore files.** The installed tool's file walk was inspected in its bundle and could
+  not be determined; a live test was not run because a failing test would have opened
+  the held-out files again. The rule in `.clinerules` is the control that does not
+  depend on it.
+- **Deferred from stage R1: the new CI jobs have not run on GitHub.** `test` now
+  installs `requirements-lock.txt`; `test-floor` is new (Python 3.10,
+  `requirements-floor.txt`). Neither was executed, because R1 used no network. The
+  floor job tests a claim that had never been tested and may be red.
+- **Deferred from stage R1: the second partition-drift step** (the shell loop that
+  calls `gliostrata freeze-partition --verify`) is still inline in `ci.yml` and
+  untested. The first step's logic is now `scripts/ci_partition_drift.py`, and
+  `tests/test_ci_partition_drift.py` runs it.
 - **DVC is not initialised.** `.dvc/` does not exist and no remote is configured.
 - **The GDC is not pinned to a data release.** A re-run queries today's GDC.
 - **Nothing in L2 is validated against a published reference.**

@@ -49,7 +49,7 @@ repository before.
 7. T1, T3, T4 and T5 have **not been run**. T3's input data have not been obtained.
 8. The supporting analyses are solid: the IDH sensitivity analysis passed its
    pre-specified criterion, and the molecular calling and subtyping ran on real data.
-9. The test suite is 1042 tests: 1041 pass and 1 is skipped. It passes with all network
+9. The test suite is 1075 tests: 1074 pass and 1 is skipped. It passes with all network
    sockets blocked.
 10. The pre-registration is **drafted but not deposited** on the OSF. The work that was
     uncommitted when this was written is committed (section 4, last table).

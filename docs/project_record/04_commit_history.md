@@ -103,5 +103,21 @@ ruff settings), `optimization/bayesian.py` (dead line removed) and
 The three commits contain the working tree exactly as the audit left it: every diff
 was read before committing, and nothing in it was changed. Commit 28 was checked on
 its own in a throwaway worktree (`test_workflow.py` and `test_cli.py`: 78 passed,
-1 skipped), so the history can be bisected. Later commits are listed in
-`06_evidence_reports.md`.
+1 skipped), so the history can be bisected. The package code that run imported was
+the main checkout's, not commit 28's; the check of a commit in isolation was first
+done properly in stage R1 (`06_evidence_reports.md`). Later commits are listed
+below and in `06_evidence_reports.md`.
+
+## Commits made after the record's first three stages (2026-11-26 and 2026-11-27)
+
+| # | Hash | Commit message | Files |
+| --- | --- | --- | --- |
+| 31 | `324a09b` | Add read discipline for the held-out cohort: access ledger, read guard, registration state | `data/access_ledger.jsonl`, `configs/registration.yaml`, `evaluation/read_guard.py`, `cli.py`, `tests/test_read_guard.py`, `.github/workflows/ci.yml`, `Makefile` |
+| 32 | `f3c2a4b` | Reconcile the documentation with the measured state and record the stage evidence | `README.md`, `CHANGELOG.md`, `docs/cgga_validation.md`, `docs/reproducibility.md`, `docs/roadmap.md`, and this record |
+| 33 | `b83f9f7` | Add the real-data slice L0 to L3 on TCGA and record what it found | `scripts/build_tcga_feature_store.py`, `tests/test_build_tcga_feature_store.py`, `data/access_ledger.jsonl` (entry 7), `README.md`, `CHANGELOG.md`, `docs/roadmap.md`, `docs/reproducibility.md`, and this record |
+| 34 | `4fd8964` | Record the unexplained CGGA access and harden the read guard | `.clineignore`, `.rgignore`, `.clinerules`, `configs/scoring_rules.yaml`, `data/access_ledger.jsonl` (entries 8 to 10), `cli.py`, `evaluation/read_guard.py`, `tests/test_read_guard.py` |
+| 35 | `45166f0` | Impute KPS inside each cross-validation fold and pin the TCGA fits | `prediction/cox.py`, `scripts/rerun_tcga_internal_cv.py`, `scripts/build_tcga_feature_store.py`, `tests/fixtures/tcga_fit_fingerprint.json`, `tests/test_rerun_tcga_internal_cv.py`, `tests/test_tcga_fit_fingerprint.py`, `tests/test_build_tcga_feature_store.py` |
+| 36 | `f94c0d5` | Lock the environment, add a floor CI job and test the partition-drift job | `.github/workflows/ci.yml`, `requirements-lock.txt`, `requirements-floor.txt`, `scripts/ci_partition_drift.py`, `data/provenance/file_manifest_checksums.json`, `tests/test_ci_partition_drift.py`, `tests/test_provenance_manifests.py`, `tests/test_workflow.py`, `Makefile` |
+| 37 | `441c94a` | Correct the T2 account: KPS imputation, the Brier excess and the C-index contrasts | `README.md`, `CHANGELOG.md`, `docs/cgga_validation.md`, `docs/preregistration.md`, `docs/mgmt_idh_calling.md`, `docs/reproducibility.md`, `docs/roadmap.md` |
+| 38 | `9216e6f` | Let the partition-drift test pass in a clean checkout | `tests/test_ci_partition_drift.py` |
+| 39 | tagged `baseline-r1` | Record stage R1: the review conditions closed or deferred | this record only |
