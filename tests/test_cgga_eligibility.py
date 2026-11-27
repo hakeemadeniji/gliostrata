@@ -123,7 +123,7 @@ def test_dry_run_writes_nothing_and_the_real_run_writes_identifiers(tmp_path, co
         columns[pid] = [1, 2]
     pd.DataFrame(columns).to_parquet(counts_path, index=False)
     common = ["--cohort", str(cohort_path), "--counts", str(counts_path),
-              "--out", str(out_path)]
+              "--out", str(out_path), "--ledger", str(tmp_path / "ledger.jsonl")]
 
     # The schema-only reader saw the column names; it needs no expression value.
     assert elig.expression_sample_ids(counts_path) == EXPR_IDS
@@ -146,3 +146,78 @@ def test_dry_run_writes_nothing_and_the_real_run_writes_identifiers(tmp_path, co
     written = pd.read_parquet(out_path)
     assert list(written.columns) == ["patient_id", "cgga_dataset"]
     assert list(written["patient_id"]) == ["P1", "P2"]
+
+
+# --- read discipline and sealing ------------------------------------------------------------
+def _write_inputs(tmp_path, cohort):
+    cohort_path = tmp_path / "cohort.parquet"
+    counts_path = tmp_path / "counts.parquet"
+    cohort.to_parquet(cohort_path, index=False)
+    columns = {"gene_name": ["A", "B"]}
+    for pid in sorted(p for p in EXPR_IDS if p != "gene_name"):
+        columns[pid] = [1, 2]
+    pd.DataFrame(columns).to_parquet(counts_path, index=False)
+    return cohort_path, counts_path
+
+
+def test_every_run_is_recorded_in_the_ledger_before_reading(tmp_path, cohort):
+    import json
+
+    from gliostrata.evaluation.read_guard import hash_inputs
+
+    cohort_path, counts_path = _write_inputs(tmp_path, cohort)
+    ledger = tmp_path / "ledger.jsonl"
+    elig.main(["--cohort", str(cohort_path), "--counts", str(counts_path),
+               "--out", str(tmp_path / "e.parquet"), "--ledger", str(ledger), "--dry-run"])
+    entries = [json.loads(line) for line in ledger.read_text(encoding="utf-8").splitlines()]
+    assert len(entries) == 1
+    e = entries[0]
+    assert (e["cohort"], e["kind"], e["analysis"]) == (
+        "cgga", "availability", "external-partition-eligibility")
+    assert e["inputs"] == hash_inputs([cohort_path, counts_path])
+    assert "Dry run" in e["purpose"] and "never an expression value" in e["purpose"]
+    assert "T" in e["recorded_at"]  # a time of day, not a date only
+
+
+def test_only_the_columns_the_rule_needs_are_read(tmp_path, cohort):
+    cohort_path, _ = _write_inputs(tmp_path, cohort)
+    frame = elig.read_cohort_columns(cohort_path)
+    assert set(frame.columns) == set(elig.COHORT_COLUMNS)
+    assert "age" not in frame.columns
+
+
+def test_seal_freezes_an_all_test_partition_and_verifies_it(tmp_path, cohort, capsys):
+    import json
+
+    from gliostrata.evaluation.partitions import read_manifest
+
+    cohort_path, counts_path = _write_inputs(tmp_path, cohort)
+    ledger = tmp_path / "ledger.jsonl"
+    manifest = tmp_path / "partitions" / "ext.json"
+    out = tmp_path / "e.parquet"
+    args = ["--cohort", str(cohort_path), "--counts", str(counts_path), "--out", str(out),
+            "--ledger", str(ledger), "--seal", str(manifest), "--name", "ext_v1"]
+    elig.main(args)
+    m = read_manifest(manifest)
+    assert m.sealed and m.partition_name == "ext_v1"
+    assert sorted(m.test_ids) == ["P1", "P2"] and list(m.train_ids) == []
+    assert m.seed == elig.DEFAULT_SEED and m.test_fraction == 1.0
+    assert "ledger entry 0" in m.notes
+    printed = capsys.readouterr().out
+    assert "Sealed ext_v1: 2 test, 0 train" in printed and "verified" in printed
+    entry = json.loads(ledger.read_text(encoding="utf-8").splitlines()[0])
+    assert "all-test partition" in entry["purpose"]
+
+    # A manifest is never overwritten, and the refusal comes before any access.
+    with pytest.raises(SystemExit, match="never overwritten"):
+        elig.main(args)
+    assert len(ledger.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_seal_cannot_be_combined_with_a_dry_run(tmp_path, cohort):
+    cohort_path, counts_path = _write_inputs(tmp_path, cohort)
+    with pytest.raises(SystemExit):
+        elig.main(["--cohort", str(cohort_path), "--counts", str(counts_path),
+                   "--ledger", str(tmp_path / "l.jsonl"), "--dry-run",
+                   "--seal", str(tmp_path / "m.json")])
+    assert not (tmp_path / "l.jsonl").exists()

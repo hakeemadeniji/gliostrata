@@ -20,13 +20,28 @@ The counting rule is the ingest's own (``expression_overlap`` in
 scripts/download_cgga.py), reused rather than re-implemented, so the two cannot
 drift apart.
 
+Read discipline
+---------------
+Every run, the dry run included, is an access to the held-out cohort. Before
+any CGGA file is opened, the run declares itself to the read guard
+(``gliostrata.evaluation.read_guard.record_access``) as an ``availability``
+access, with the SHA-256 of both inputs, and is appended to the access ledger.
+The guard admits an availability access before the deposit; it is recorded all
+the same, because the number of looks at the external cohort is itself a
+registration commitment. Only the four columns the rule needs are read from the
+cohort file.
+
 Usage
 -----
     python scripts/cgga_external_eligibility.py --dry-run   # counts only
     python scripts/cgga_external_eligibility.py             # writes the table
+    python scripts/cgga_external_eligibility.py --seal data/partitions/cgga_external_v1.json
 
-The real run does not seal anything. Sealing is a separate, deliberate step
-that refuses to overwrite a sealed manifest:
+``--seal`` writes the table, then freezes it as the all-test partition
+``cgga_external_v1`` (every eligible patient held out; the CLI's defaults:
+seed 20251126, test fraction 1.0) and verifies the manifest against the table,
+all under the one ledger entry. It refuses to overwrite a manifest. The
+equivalent separate step, which does not record an access, is
 
     gliostrata freeze-partition --input data/processed/cgga/cgga_external_eligible.parquet --manifest data/partitions/cgga_external_v1.json --name cgga_external_v1 --all-test
 """
@@ -44,6 +59,14 @@ import pandas as pd
 DEFAULT_COHORT = Path("data/raw/cgga/clinical_cohort.parquet")
 DEFAULT_COUNTS = Path("data/raw/cgga/counts.parquet")
 DEFAULT_OUT = Path("data/processed/cgga/cgga_external_eligible.parquet")
+DEFAULT_LEDGER = Path("data/access_ledger.jsonl")
+DEFAULT_PARTITION_NAME = "cgga_external_v1"
+#: The freeze-partition CLI's default seed. With every patient held out the seed
+#: changes no assignment; it is recorded in the manifest all the same.
+DEFAULT_SEED = 20251126
+ANALYSIS = "external-partition-eligibility"
+#: The cohort columns the eligibility rule needs. Nothing else is read.
+COHORT_COLUMNS = ("patient_id", "cgga_dataset", "overall_survival_months", "vital_status")
 
 #: Columns of the table that gets sealed: identifiers and a batch label only.
 OUTPUT_COLUMNS = ("patient_id", "cgga_dataset")
@@ -71,6 +94,84 @@ def expression_sample_ids(counts_path) -> frozenset[str]:
     import pyarrow.parquet as pq
 
     return frozenset(str(c) for c in pq.ParquetFile(counts_path).schema_arrow.names)
+
+
+def read_cohort_columns(cohort_path) -> pd.DataFrame:
+    """Only the columns the rule needs (those present), never the whole file."""
+    import pyarrow.parquet as pq
+
+    present = set(pq.ParquetFile(cohort_path).schema_arrow.names)
+    return pd.read_parquet(cohort_path, columns=[c for c in COHORT_COLUMNS if c in present])
+
+
+def declare_access(cohort_path, counts_path, ledger_path, *, dry_run: bool,
+                   seal: str | None) -> dict:
+    """Record the access in the ledger through the read guard, before reading."""
+    from gliostrata.evaluation.read_guard import (
+        AVAILABILITY,
+        Access,
+        hash_inputs,
+        record_access,
+    )
+
+    if dry_run:
+        action = "Dry run: counts only, nothing written."
+    elif seal:
+        action = ("Write the identifiers-only eligibility table, then freeze it as the "
+                  f"all-test partition at {Path(seal).as_posix()} and verify the manifest.")
+    else:
+        action = "Write the identifiers-only eligibility table; nothing is sealed."
+    access = Access(
+        cohort="cgga",
+        kind=AVAILABILITY,
+        analysis=ANALYSIS,
+        purpose=(
+            "Eligibility for the sealed external partition by the registered rule "
+            "(pre-registration section 2.2 item 7): an RNA-seq profile, a survival "
+            "outcome and a usable identifier. Read: patient_id, cgga_dataset, and "
+            "overall_survival_months and vital_status for presence only, from the "
+            "cohort file; the column names of counts.parquet (Parquet schema), never "
+            f"an expression value. Counts printed, no value. {action} Nothing fitted "
+            "or scored."
+        ),
+        script="scripts/cgga_external_eligibility.py",
+        inputs=hash_inputs([cohort_path, counts_path]),
+    )
+    return record_access(access, ledger_path=ledger_path)
+
+
+def seal_partition(table: pd.DataFrame, table_path: Path, manifest_path: Path,
+                   name: str, *, ledger_seq: int) -> None:
+    """Freeze the all-test partition from the written table and verify it."""
+    from gliostrata.evaluation.partitions import (
+        freeze_partition,
+        read_manifest,
+        verify_partition,
+    )
+
+    _, manifest, written = freeze_partition(
+        table,
+        cohort_source=table_path,
+        manifest_path=manifest_path,
+        partition_name=name,
+        seed=DEFAULT_SEED,
+        test_fraction=1.0,
+        seal=True,
+        notes=("CGGA external partition, all-test: every patient eligible under "
+               "pre-registration section 2.2 item 7 is held out. Primary external test "
+               "for T2 (already evaluated before this seal, section 2.3), T4 and T5; not "
+               "the scoring set of either T1 row (section 4.5). Written by "
+               "scripts/cgga_external_eligibility.py --seal; access ledger entry "
+               f"{ledger_seq}."),
+    )
+    report = verify_partition(read_manifest(written), table, cohort_source=table_path)
+    if not report.ok:
+        raise SystemExit(f"verification failed after sealing:\n{report.describe()}")
+    digest = hashlib.sha256(Path(written).read_bytes()).hexdigest()
+    print(f"\nSealed {name}: {len(manifest.test_ids)} test, {len(manifest.train_ids)} "
+          f"train -> {written}")
+    print(f"  manifest sha256 : {digest}")
+    print("  verified        : the table reproduces the manifest")
 
 
 def eligible_patients(cohort: pd.DataFrame, expr_ids) -> tuple[pd.DataFrame, dict]:
@@ -176,9 +277,26 @@ def main(argv: list[str] | None = None) -> None:
                         help="Where the eligible table is written (identifiers only).")
     parser.add_argument("--dry-run", action="store_true",
                         help="Report the counts only; write nothing.")
+    parser.add_argument("--ledger", default=str(DEFAULT_LEDGER), type=Path,
+                        help="Access ledger the run is recorded in.")
+    parser.add_argument("--seal", default=None, type=Path, metavar="MANIFEST",
+                        help="After writing the table, freeze it as the all-test "
+                             "partition at MANIFEST and verify it.")
+    parser.add_argument("--name", default=DEFAULT_PARTITION_NAME,
+                        help="Partition name for --seal.")
     args = parser.parse_args(argv)
+    if args.dry_run and args.seal:
+        parser.error("--seal writes a manifest; it cannot be combined with --dry-run")
+    if args.seal and Path(args.seal).exists():
+        raise SystemExit(f"{args.seal} exists; a manifest is never overwritten here "
+                         "(docs/preregistration.md section 4.4). Nothing was read.")
 
-    cohort = pd.read_parquet(args.cohort)
+    entry = declare_access(args.cohort, args.counts, args.ledger, dry_run=args.dry_run,
+                           seal=str(args.seal) if args.seal else None)
+    print(f"Access recorded: ledger entry {entry['seq']} ({entry['recorded_at']}), "
+          f"kind {entry['kind']}.\n")
+
+    cohort = read_cohort_columns(args.cohort)
     expr_ids = expression_sample_ids(args.counts)
     out, report = eligible_patients(cohort, expr_ids)
     print_report(report)
@@ -195,10 +313,13 @@ def main(argv: list[str] | None = None) -> None:
     print(f"\nWrote {len(out)} patients -> {args.out}")
     print(f"  columns : {list(out.columns)}")
     print(f"  sha256  : {digest}")
-    print("\nNothing is sealed by this script. Sealing is a separate step and refuses to "
-          "overwrite a sealed manifest:")
-    print("  gliostrata freeze-partition --input <file above> --manifest "
-          "data/partitions/cgga_external_v1.json --name cgga_external_v1 --all-test")
+    if not args.seal:
+        print("\nNothing is sealed. Re-run with --seal, or use the separate step, which "
+              "refuses to overwrite a sealed manifest:")
+        print("  gliostrata freeze-partition --input <file above> --manifest "
+              "data/partitions/cgga_external_v1.json --name cgga_external_v1 --all-test")
+        return
+    seal_partition(out, args.out, args.seal, args.name, ledger_seq=entry["seq"])
 
 
 if __name__ == "__main__":
