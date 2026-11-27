@@ -320,11 +320,13 @@ Found in stage 3b (2026-11-27), not fixed:
   joins the attachments.
 - **The atlas inputs carry no stated licence.** NCBI places no restriction on use or
   distribution of GEO data (submitters may claim rights); 3CA states no terms and
-  publishes datasets with the original authors' permission. Recommended, not yet done:
-  keep both files out of any release (download and verify by checksum instead), cite
-  Neftel et al. 2019 and Gavish et al. 2023, and ask 3CA (3CA@weizmann.ac.il) to confirm
-  reuse and whether the Neftel malignant flags and state scores are the original
-  authors' annotations.
+  publishes datasets with the original authors' permission. Decided 2026-11-27: keep
+  both files out of any release (download and verify by checksum instead) and cite
+  Neftel et al. 2019 and Gavish et al. 2023. Asking 3CA (3CA@weizmann.ac.il) for written
+  confirmation is **optional**: needed only if a committee, journal or institution asks
+  for explicit permission, or before redistributing the files or anything derived from
+  them. It would also settle whether the Neftel malignant flags and state scores are the
+  original authors' annotations, which the record discloses as not established.
 - **`scripts/prepare_subtype_reference.py` needs `openpyxl` and `pyreadr`**, which are in
   neither `pyproject.toml` nor the lock file, to rebuild the published-label table and the gene map from the
   downloads. The committed centroid sets and gene map do not need it.

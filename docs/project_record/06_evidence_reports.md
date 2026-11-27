@@ -1014,8 +1014,12 @@ download), the Human Cell Atlas index (file listing).
    or distribution of the data, while submitters may claim rights; 3CA states no terms and
    publishes datasets with the original authors' permission. Both files are used for
    analysis only and are not redistributed (`data/provenance/neftel2019_sources.json`,
-   "terms"). A written confirmation from 3CA has been recommended to the project lead and
-   not yet sought.
+   "terms"). Decided 2026-11-27: a written confirmation from 3CA is optional, not
+   required. It would be needed only if a committee, journal or institution asks for
+   explicit permission, or before redistributing the files or anything derived from
+   them; it would also settle whether the malignant flags and state scores are the
+   original authors' annotations, which the record already discloses as not
+   established.
 4. The store's state and TME scores remain cohort-relative over the 283 profiled
    patients. The secondary above shows the cohort-independent option also recovers
    simulated proportions (0.854); no decision has been taken.
