@@ -19,7 +19,7 @@ Status as of 2026-11-26. Three statuses are used:
 | L2 | `profiling/verhaak.py` | Implemented, not wired | Signature-based subtype scoring from bulk expression |
 | L2 | `profiling/deconvolve.py` | Implemented, not wired | Marker-based state and TME scoring from bulk expression |
 | L2 | `profiling/{subtype,states,tme}.py` | Stub | Synthetic calls; this is what `gliostrata profile` runs |
-| L3 | `features/store.py` | Working | Assembles feature store from L2 outputs (synthetic OK) |
+| L3 | `features/store.py` | Working | Assembles the feature store. First built from real data by `scripts/build_tcga_feature_store.py` (155 of 594 TCGA patients, every exclusion counted) |
 | L4 | `simulation/tumor.py`, `simulation/nsc.py` | Stub | PhysiCell wrapper and chemotaxis solver TODO; synthetic curves provided |
 | L5 | `prediction/cox.py` | Implemented, not wired | Fitted Cox-PH. External C-index and Brier score on CGGA miss the T2 thresholds (`docs/cgga_validation.md`) |
 | L5 | `prediction/survival.py` | Stub | Synthetic hazard model; this is what the CLI uses |
@@ -39,7 +39,10 @@ Status as of 2026-11-26. Three statuses are used:
 4. **L2 state deconvolution** — `CIBERSORTx` (web tool) → import results.
    `profiling/deconvolve.py` is the marker-based alternative; the CIBERSORTx
    signature-matrix builder is not implemented.
-5. **L3 feature store** — working; it still consumes the stub L2 outputs.
+5. **L3 feature store** — working. `scripts/build_tcga_feature_store.py` runs L0 to L3 on the real TCGA
+   inputs through the expression-based L2 modules (155 of 594 patients, every
+   exclusion reported). The CLI and the workflow still use the stub L2; wiring
+   them to this path is open.
 6. **L5 survival model** — implemented as a hand-written Cox-PH
    (`prediction/cox.py`, Breslow partial likelihood). DeepSurv is open.
 7. **L4 simulation** — install PhysiCell, wrap with `pyMCDS`.
@@ -49,7 +52,7 @@ Status as of 2026-11-26. Three statuses are used:
 
 ## What the tests cover
 
-1016 tests in 26 modules: 1015 pass and 1 is skipped without the optional dependencies. They
+1042 tests in 27 modules: 1041 pass and 1 is skipped without the optional dependencies. They
 pass without network access and without heavy dependencies (scanpy, lifelines,
 botorch and PhysiCell are not required). Tests that read the real TCGA
 data skip when it is absent; no test reads CGGA; one workflow test skips when Snakemake is not

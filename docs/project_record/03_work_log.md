@@ -142,7 +142,8 @@ Commands and results are in `06_evidence_reports.md`, stages 1 and 2.
 | Read discipline | Access ledger; read guard; registration state; CLI command; 31 tests | 7 ledger entries, 2 of them value reads. A value read is refused until the registration is deposited and the partition sealed | `324a09b` |
 | CI partition guardrail | `ACTIVE_MANIFESTS` replaces "every manifest but one is superseded" | Run locally in three scenarios; a listed manifest that does not exist stops the job | `324a09b` |
 | Full suite with sockets blocked | Python-level socket entry points replaced before pytest | 1015 passed, 1 skipped; 0 blocked connection attempts | |
-| Documentation | Stale numbers corrected (lint count, test counts); a broken README sentence repaired; T1 findings recorded (section 5.1.1 of the future plan) | Committed after `324a09b` | |
+| Documentation | Stale numbers corrected (lint count, test counts); a broken README sentence repaired; T1 findings recorded (section 5.1.1 of the future plan) | `f3c2a4b` |
+| Real-data slice, L0 to L3 | `scripts/build_tcga_feature_store.py` on the TCGA inputs; no network, no CGGA, no outcome read | 155 of 594 patients in the store; every exclusion counted. Found: resection extent absent for the whole cohort; KPS absent for 64 of the 283 with expression; cohort placeholder columns would shadow the L2 outputs | The commit after `f3c2a4b` |
 
 ## Reads of the external cohort, in total
 

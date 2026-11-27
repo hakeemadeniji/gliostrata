@@ -117,7 +117,7 @@ the measured state.
 **Changed files.** Commit `324a09b`: `data/access_ledger.jsonl`,
 `configs/registration.yaml`, `src/gliostrata/evaluation/read_guard.py`,
 `src/gliostrata/cli.py`, `tests/test_read_guard.py`, `.github/workflows/ci.yml`,
-`Makefile`. The documentation is in the commit after this report: `README.md`,
+`Makefile`. The documentation is in commit `f3c2a4b` (the 32nd): `README.md`,
 `CHANGELOG.md`, `docs/cgga_validation.md`, `docs/reproducibility.md`,
 `docs/roadmap.md` and this record.
 
@@ -195,3 +195,119 @@ named seal.
 **Is the next gate satisfied?** In part. Read discipline is in place and enforced for
 any new script. Registration is not: it needs the OSF deposit, which is a human action.
 Until then the permitted work is TCGA-only or explicitly synthetic.
+
+---
+
+## Stage 3, first deliverable. Real-data slice, L0 to L3 (2026-11-26)
+
+**Scope.** Run layers L0 to L3 on the real development cohort (TCGA), so that the
+first three layers are shown to work on real data. TCGA only: no CGGA value, no
+network connection, no outcome used, no model fitted.
+
+**Changed files.** One commit, the one after `f3c2a4b`:
+`scripts/build_tcga_feature_store.py`, `tests/test_build_tcga_feature_store.py`,
+`data/access_ledger.jsonl` (entry 7) and the documentation (`README.md`,
+`CHANGELOG.md`, `docs/roadmap.md`, `docs/reproducibility.md` and this record). No
+module under `src/` changed: the L2 and L3 code ran as committed.
+
+**What the script does.** It loads the clinical cohort, the gene x sample TPM
+matrix, its annotation and the joined MGMT / IDH calls. It calls `classify_verhaak`,
+`deconvolve_states_expression` and `deconvolve_tme_expression`, each with its
+defaults, on the cohort patients that have an expression sample. It assembles the
+store with `build_feature_store` and writes the store and a report: the counts,
+every exclusion by reason, the range of each feature, and the SHA-256 of every
+input. A path containing "cgga" is refused before anything is opened.
+
+**Commands and results.**
+
+| Command | Result |
+| --- | --- |
+| `python scripts/build_tcga_feature_store.py` (default policies) | Stops: "64 patient(s) have no kps". Nothing is written |
+| `python scripts/build_tcga_feature_store.py --missing-demographic drop` | 155 patients; store and report written. Repeated after the last code change: same store, same SHA-256 |
+| `pytest tests/test_build_tcga_feature_store.py` | 26 passed |
+| full suite, sockets blocked | 1041 passed, 1 skipped in 225 s; 0 blocked connection attempts |
+| after the last code change: the new module with `test_cli`, `test_workflow` and `test_features` | 112 passed, 1 skipped |
+| `ruff check --select E9,F63,F7,F82` on the two new files | clean |
+| `ruff check` on the two new files | clean. The project's advisory count stays at 171 |
+| the 26 checksums of the stage 1 table, recomputed from the files | 26 of 26 match |
+
+**Test counts.** 1042 collected in 27 modules: 1041 passed, 1 skipped.
+
+**Result on the real cohort.**
+
+| Step | Patients |
+| --- | --- |
+| Cohort (L0) | 594 |
+| With an expression sample. This is the scoring set | 283 |
+| Of those, with a KPS | 219 |
+| Of those, with both a MGMT and an IDH call. This is the store | 155 |
+
+Of the 283, 54 have no MGMT call, 36 no IDH call and 78 at least one of the two.
+None lacks age or sex. In the store, 46 are MGMT-methylated and 11 are IDH-mutant.
+No patient lacks a vital status; 3 lack a treatment arm. Subtype labels, which are
+a within-cohort ranking: Classical 46, Mesenchymal 44, Proneural 40, Neural 25. The
+median of each patient's highest subtype probability is 0.48. Age runs from 21 to
+89 (median 61) and KPS from 40 to 100 (median 80). State and TME values lie in
+[0, 1] and sum to 1. The two resection features are 0 for everyone.
+
+**Artifacts of this stage.** Both are git-ignored.
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `data/processed/tcga_gbm/feature_store.parquet` | 34,492 | `6cb446e8f3ce50672c7e39f5924fa1746a5740f49edafdbc49f2e12fbf1e219c` |
+| `data/results/tcga_gbm/feature_store_report.json` | 5,342 | `a9d23c650748cbb3b551344f862010f3051b47ba6d07195ffc0a12027ec188fb` |
+
+The 26 files of the stage 1 table are unchanged.
+
+**External reads.** No CGGA value was read. The checksum check hashed the bytes of
+five files under `data/raw/cgga` (ledger entry 7, dated 2026-11-27 in UTC):
+clinical_cohort, clinical_raw, counts, gene_annotation and harmonisation.json.
+Nothing was deserialised. The ledger still counts 2 value reads, both for T2.
+
+**Correction to stage 1.** Entry 6 and the stage 1 report say four CGGA files were
+hashed. The hash list of that day holds five: `harmonisation.json` was hashed as
+well and is in the stage 1 table. It holds ingest facts and no patient value. The
+ledger is append-only and entry 6 was not edited; this note is the correction.
+
+**Findings.** Four facts of the real data that the synthetic data never showed.
+They are decisions for the lead (`05_future_plan.md` section 5.4), not things this
+stage decided.
+
+1. Resection extent is absent for all 594 patients in the TCGA clinical table. The
+   L3 code encodes an absent value as 0 in both one-hot columns, which reads as
+   "biopsy" for everyone. The script keeps the patients and reports the two features
+   as constant (`not_measured_in_source`, `constant_features`).
+2. KPS is missing for 152 of the 594 patients, 64 of them among the 283 with
+   expression. The default policy stops; the run above used `drop`. Which policy the
+   model should use is open.
+3. The harmonised cohort carries all-null placeholder columns under the names of
+   the L2 outputs and of the molecular calls. `build_feature_store` keeps the
+   cohort's column when a name collides, so on this cohort it would return null
+   state, TME and subtype values. The script removes all-null placeholders and
+   refuses a cohort column that carries values under such a name. L3 itself is
+   unchanged.
+4. Subtype probabilities depend on the scoring set. A test in the new module shows
+   that the same patient gets different probabilities when other patients leave the
+   set. The scoring set is therefore recorded: the 283 cohort patients with
+   expression. One expression sample lies outside the cohort and is not scored.
+
+**What this is not.** The values are measured, not validated: the subtype label is
+a within-cohort ranking, the state and TME values are normalised marker-enrichment
+scores, and nothing here addresses T1. L4 to L7 were not run on real data. The CLI
+and the Snakemake workflow still run the stub L2; the slice is a script and is not
+wired into them.
+
+**Unresolved issues.** Those of stage 2, and:
+
+1. The five decisions added to `05_future_plan.md` section 5.4: resection extent,
+   missing KPS, absent molecular calls, the scoring set, and whether L3 should
+   itself refuse a shadowing cohort column.
+2. The slice is not wired into the CLI, the workflow or DVC.
+3. The store covers 155 of 594 patients. Whether that is a usable development
+   cohort for L5 is not assessed here.
+
+**Is the next gate satisfied?** In part. The feature store has real values, its
+missingness is documented and its feature ranges are reported. The pipeline does
+not run end to end on real data: its own L2 is still the stub, and L4 to L7 have
+not been run on real data. Registration is not deposited either; that needs the
+OSF deposit.

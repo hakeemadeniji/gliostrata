@@ -29,14 +29,14 @@ different stages, stated per layer:
 | L0 — Ingestion | `scripts/download_tcga_*.py`, `scripts/download_cgga.py` | **Working** — real GDC and CGGA downloads. `gliostrata ingest` itself only implements `--source synthetic`. |
 | L1 — Harmonization | `gliostrata.data.harmonize`, `gliostrata.data.qc` | Stub — schema normalisation and QC rows; no batch correction. |
 | L2 — Tumor profiling | `gliostrata.profiling.verhaak`, `gliostrata.profiling.deconvolve` | **Implemented** from bulk expression, **not wired into the pipeline**. What `gliostrata profile` runs (`subtype`, `states`, `tme`) is a stub. |
-| L3 — Feature store | `gliostrata.features.store` | **Working** |
+| L3 — Feature store | `gliostrata.features.store` | **Working**. First built from real data by `scripts/build_tcga_feature_store.py`: 155 of 594 TCGA patients, every exclusion counted (`docs/project_record/06_evidence_reports.md`, stage 3). |
 | L4 — Simulation | `gliostrata.simulation.tumor`, `nsc` | Stub (synthetic curves) |
 | L5 — Outcome prediction | `gliostrata.prediction.cox` | **Fitted Cox-PH model**, not wired into the pipeline. Neither its external C-index nor its Brier score on CGGA met the registered T2 thresholds (`docs/cgga_validation.md`). `gliostrata.prediction.survival`, which the CLI uses, is a stub. |
 | L6 — Optimizer | `gliostrata.optimization.config_space`, `bayesian` | **Working** (ranked enumeration). `optimization.bayes_opt` adds a Gaussian-process optimizer; the BoTorch backend is TODO. |
 | L7 — Wet-lab handoff | `gliostrata.handoff.protocol` | **Working** (JSON protocol generator) |
 | — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification, access ledger and read guard |
 
-The test suite has 1016 tests in 26 modules: 1015 pass and 1 is skipped (it needs Snakemake, an
+The test suite has 1042 tests in 27 modules: 1041 pass and 1 is skipped (it needs Snakemake, an
 optional dependency). It passes with all outbound sockets blocked. Tests that need the real
 TCGA data skip when it is absent, and no test reads CGGA. Heavy optional dependencies
 (scanpy, lifelines, botorch, PhysiCell) are NOT required.
@@ -178,6 +178,7 @@ gliostrata/
 │   ├── download_tcga_{clinical,expression,mutations,methylation}.py   ← L0, network
 │   ├── download_cgga.py           ← L0: external validation cohort, network
 │   ├── join_molecular_calls.py    ← join IDH / MGMT calls onto the cohort
+│   ├── build_tcga_feature_store.py  ← L0 to L3 on the real TCGA inputs (155 of 594 patients)
 │   ├── export_cibersortx.py       ← CIBERSORTx mixture file
 │   ├── validate_cox_cgga.py       ← T2 external validation (C-index)
 │   ├── validate_brier_cgga.py     ← T2 external validation (Brier score)
@@ -185,7 +186,7 @@ gliostrata/
 │   ├── cgga_external_eligibility.py  ← patients eligible for the sealed external partition
 │   ├── generate_synthetic_data.py
 │   └── run_full_pipeline.py
-├── tests/                         ← 26 test modules, 1016 tests
+├── tests/                         ← 27 test modules, 1042 tests
 ├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds; registration.yaml the registration state)
 ├── workflow/                      ← Snakemake workflow (Snakefile + rules/)
 ├── data/partitions/               ← sealed partition manifests (in git)

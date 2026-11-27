@@ -34,7 +34,9 @@ repository before.
 1. GlioStrata is a pre-registered, computational framework that aims to recommend a
    stem-cell-delivered therapeutic configuration per glioblastoma patient.
 2. The code runs end to end on synthetic data. Real public-cohort ingestion (L0) works
-   for TCGA-GBM and CGGA. Several scientific modules exist but are not wired into the
+   for TCGA-GBM and CGGA. Layers L0 to L3 have also been run on the real TCGA data as a
+   standalone script, `scripts/build_tcga_feature_store.py` (155 of 594 patients).
+   Several scientific modules exist but are not wired into the
    pipeline; others are stubs.
 3. Two development cohorts are sealed: 594 TCGA-GBM patients (425 train / 169 test).
 4. CGGA, the external cohort, holds 305 unique glioblastoma patients, of whom 218 are
@@ -47,7 +49,7 @@ repository before.
 7. T1, T3, T4 and T5 have **not been run**. T3's input data have not been obtained.
 8. The supporting analyses are solid: the IDH sensitivity analysis passed its
    pre-specified criterion, and the molecular calling and subtyping ran on real data.
-9. The test suite is 1016 tests: 1015 pass and 1 is skipped. It passes with all network
+9. The test suite is 1042 tests: 1041 pass and 1 is skipped. It passes with all network
    sockets blocked.
 10. The pre-registration is **drafted but not deposited** on the OSF. The work that was
     uncommitted when this was written is committed (section 4, last table).

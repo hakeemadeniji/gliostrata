@@ -38,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `configs/registration.yaml`: the machine-readable registration state. The OSF
   DOI is `null` until the deposit; a test keeps this file and the
   pre-registration header in agreement.
+- L3 from real data: `scripts/build_tcga_feature_store.py` runs L0 to L3 on the
+  TCGA-GBM inputs on disk (155 of 594 patients; every exclusion is counted and
+  reported, with the SHA-256 of each input). TCGA only: it reads no CGGA file and
+  fits no model. It found that resection extent is absent for the whole cohort and
+  that the harmonised cohort's placeholder columns would shadow the L2 outputs in
+  `features/store.py`.
 
 - L6: Gaussian-process / expected-improvement optimizer
   (`optimization/bayes_opt.py`).

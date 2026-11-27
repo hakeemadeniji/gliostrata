@@ -154,6 +154,11 @@ None of these has been made. Each changes something a document currently says.
 | MGMT-STP27 | The published assay's coefficients are unverified; a two-probe score is used and labelled as such | `docs/mgmt_idh_calling.md` section 3.1 |
 | Attribution of the T1 harmonisation rule | The decision memo attributes it to Verhaak et al. (2010); the pre-registration records it as a project choice | `docs/osf_final_fields.md`, notes |
 | Download of the CGGA microarray matrix | Manual download; name, size and checksum to be sent back | T1 prerequisite |
+| Resection extent | Absent for all 594 patients in the TCGA clinical table, so both resection features are constant. Find a source for it, or remove the feature from the model and say so | `06_evidence_reports.md`, stage 3 |
+| KPS missing for 64 of the 283 patients with expression | Complete cases only (the 155-patient store), or median with an indicator, which `prediction/cox.py` already implements. The choice changes the cohort | Same |
+| No MGMT or IDH call for 78 of the 283 | Exclude the patient (the slice's default), or record 0 with that stated. A missingness indicator needs a change to the feature store | Same |
+| Scoring set for the subtype, state and TME calls | The 283 cohort patients with expression. The values depend on this set and would differ under any other | Same |
+| Placeholder columns in the harmonised cohort | `features/store.py` lets a cohort column shadow an L2 output of the same name. The slice removes all-null placeholders and refuses a column with values. Whether L3 itself should refuse is open | Same |
 
 ## 5.5 Known gaps, found and not fixed
 
@@ -182,7 +187,10 @@ them.
 - **DVC is not initialised.** `.dvc/` does not exist and no remote is configured.
 - **The GDC is not pinned to a data release.** A re-run queries today's GDC.
 - **Nothing in L2 is validated against a published reference.**
-- **No end-to-end run on the real cohort has been recorded.**
+- **No end-to-end run on the real cohort has been recorded.** Partly closed on 2026-11-26:
+  L0 to L3 runs on TCGA as a standalone script (`scripts/build_tcga_feature_store.py`,
+  155 of 594 patients). L4 to L7 do not run on real data, and the pipeline's own L2 is
+  still the stub.
 
 ## 5.6 Milestones and publication plan, as stated in the protocol
 

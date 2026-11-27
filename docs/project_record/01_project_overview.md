@@ -130,7 +130,7 @@ Source: manifests under `data/partitions/`; `docs/reproducibility.md` section 4.
 | Property | Value |
 | --- | --- |
 | Package | `gliostrata` 0.1.0, MIT licence, Python >= 3.10 (developed on 3.14.3) |
-| Test suite | **1016 tests in 26 modules: 1015 pass, 1 skipped, 0 failed**, with all outbound sockets blocked |
+| Test suite | **1042 tests in 27 modules: 1041 pass, 1 skipped, 0 failed**, with all outbound sockets blocked |
 | The one skip | A Snakemake-dependent workflow test; Snakemake is an optional dependency and was not installed |
 | Real-data tests | Skip when the TCGA or CGGA files are absent; they ran here because the data are present |
 | Blocking lint (`E9,F63,F7,F82`) | Clean across `src`, `tests`, `scripts` |

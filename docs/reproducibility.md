@@ -287,7 +287,7 @@ re-freeze it.
 Verified, not assumed. The suite was re-run with `socket.socket.connect`,
 `connect_ex`, `create_connection` and `getaddrinfo` all patched to raise. The
 results were **identical** to the normal run — no test attempted a connection.
-Re-verified 2026-11-26 on the full suite (1016 tests: 1015 passed, 1 skipped; the
+Re-verified 2026-11-26 on the full suite (1042 tests: 1041 passed, 1 skipped; the
 Python-level socket entry points replaced before pytest started) with zero blocked
 connection attempts.
 Specifically:
@@ -378,7 +378,7 @@ writes the predictions out.
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite: 1016 tests, 1015 passing and 1 skipped, with all outbound sockets blocked.
+2. The test suite: 1042 tests, 1041 passing and 1 skipped, with all outbound sockets blocked.
 3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
    methylation calls (real GDC API code with cohort filtering, barcode parsing and
    a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does
@@ -388,3 +388,8 @@ To be fair to the scaffold, the following are real and verified:
    change (§4), which is the only way to know a guardrail works.
 5. The Snakemake DAG and the DVC stage graph, both machine-validated, and
    tested against the code so they cannot silently rot (`tests/test_workflow.py`).
+6. **The TCGA feature store, L0 to L3** — `python scripts/build_tcga_feature_store.py
+   --missing-demographic drop` rebuilds it from the files on disk: 155 patients, a
+   report of every exclusion and of each feature's range, and the SHA-256 of every
+   input (`docs/project_record/06_evidence_reports.md`, stage 3). The values are
+   measured; they are not validated.
