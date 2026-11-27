@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — the sealed external partition (2026-11-27)
+- `data/partitions/cgga_external_v1.json`: all-test, 218 CGGA patients eligible by the
+  registered rule, sealed after the T2 evaluation and before any T4 or T5 computation. It
+  records the SHA-256 of the git-ignored eligibility table. CI's partition-drift job lists
+  it in `ACTIVE_MANIFESTS`.
+- `scripts/cgga_external_eligibility.py` records every run in the access ledger through
+  the read guard before opening a CGGA file, reads only the four columns the rule needs,
+  and has `--seal`. The seal was one availability access (ledger entry 11).
+- Pre-registration section 4.5 names the sealed partition (one dated amendment); section
+  5, `docs/osf_final_fields.md` and `docs/cgga_validation.md` updated to match.
+
 ### Added — T1 state-deconvolution row (2026-11-27; run before deposit)
 - `docs/t1_deconvolution_spec.md`: the mixture-generation specification, committed
   before the run with `scripts/t1_deconvolution_mixtures.py`, its 13 tests and

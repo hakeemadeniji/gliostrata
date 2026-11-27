@@ -128,4 +128,7 @@ below and in `06_evidence_reports.md`.
 | 44 | `5dadf9b` | Align the T1 scoring rule's wording with pre-registration item 9(d) | `configs/scoring_rules.yaml`, `CHANGELOG.md`, this record |
 | 45 | `f5b9fe6` | Fix the T1 deconvolution mixture specification before any run | `docs/t1_deconvolution_spec.md`, `scripts/t1_deconvolution_mixtures.py`, `tests/test_t1_deconvolution.py`, `data/provenance/neftel2019_sources.json` |
 | 46 | `3bf0094` | Record T1's state-deconvolution row, run before deposit | this record, `CHANGELOG.md`, `docs/reproducibility.md` |
-| 47 | the commit after `3bf0094` | Record T1's deconvolution result in the pre-registration and bring section 5 and the OSF text up to date | `docs/preregistration.md` (sections 2.4, 5, 8), `docs/osf_final_fields.md`, `data/provenance/neftel2019_sources.json`, `CHANGELOG.md`, this record |
+| 47 | `947cae8` | Record T1's deconvolution result in the pre-registration and bring section 5 and the OSF text up to date | `docs/preregistration.md` (sections 2.4, 5, 8), `docs/osf_final_fields.md`, `data/provenance/neftel2019_sources.json`, `CHANGELOG.md`, this record |
+| 48 | `1398cc0` | Mark the 3CA confirmation email as optional | this record, `data/provenance/neftel2019_sources.json` |
+| 49 | `99dc69d` | Route the CGGA eligibility step through the read guard and add --seal | `scripts/cgga_external_eligibility.py`, `tests/test_cgga_eligibility.py` |
+| 50 | the commit after `99dc69d` | Seal the external partition cgga_external_v1 | `data/partitions/cgga_external_v1.json`, `data/access_ledger.jsonl` (entry 11), `.github/workflows/ci.yml`, `tests/test_ci_partition_drift.py`, `docs/preregistration.md`, `docs/osf_final_fields.md`, `docs/cgga_validation.md`, `CHANGELOG.md`, this record |

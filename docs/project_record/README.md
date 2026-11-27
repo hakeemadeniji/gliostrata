@@ -41,7 +41,8 @@ repository before.
    are stubs.
 3. Two development cohorts are sealed: 594 TCGA-GBM patients (425 train / 169 test).
 4. CGGA, the external cohort, holds 305 unique glioblastoma patients, of whom 218 are
-   eligible for the sealed external partition. That partition is **not yet sealed**.
+   eligible for the sealed external partition. That partition, `cgga_external_v1`, was
+   **sealed on 2026-11-27** (218 patients, all-test).
 5. Of the eleven registered thresholds, **three have been evaluated**. T2's two were not met:
    T2's external C-index (0.5385 against a threshold of 0.65) and T2's Brier score at
    18 months (0.2617 against 0.25).
@@ -53,7 +54,7 @@ repository before.
    not been obtained.
 8. The supporting analyses are solid: the IDH sensitivity analysis passed its
    pre-specified criterion, and the molecular calling and subtyping ran on real data.
-9. The test suite is 1126 tests: 1125 pass and 1 is skipped. It passes with all network
+9. The test suite is 1130 tests: 1129 pass and 1 is skipped. It passes with all network
    sockets blocked.
 10. The pre-registration is **drafted but not deposited** on the OSF. The work that was
     uncommitted when this was written is committed (section 4, last table).

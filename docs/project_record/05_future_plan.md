@@ -19,8 +19,8 @@ The order below is a recommendation; the reasons are given so it can be judged.
 | 1 | **Done, 2026-11-26.** Review and commit the working tree, in the suggested split: code and packaging (`0c20999`); documentation (`10cfd93`); this record (`8f79b33`). | The registration records a commit hash, so the registered code must be fixed first. |
 | 2 | **Done, 2026-11-26.** The partition-drift CI job now lists its active manifests in `ACTIVE_MANIFESTS` (`ci.yml`). Add the external manifest there, in both steps, in the same commit that adds it. | The job treats every manifest other than the development one as "superseded". It would mislabel the external partition when `cgga_external_v1.json` is added. |
 | 3 | Name the comparator model for T2's improvement row (section 5.4). The other open T2 item, whether to run calibration slope, intercept and decision-curve analysis, was decided on 2026-11-27: not done for this thesis. | The comparator changes what the registration must say. |
-| 4 | Write the eligibility table, then seal the external partition (commands below). | T4 and T5 cannot start without it. The pre-registration places the seal after the T2 evaluation and before any T4 or T5 computation. |
-| 5 | Commit the manifest and update the `cgga_external_v1` row in pre-registration section 4.5. | The registration must name the sealed partition. |
+| 4 | **Done, 2026-11-27.** `python scripts/cgga_external_eligibility.py --seal data/partitions/cgga_external_v1.json`, routed through the read guard (ledger entry 11, an availability access): 218 eligible patients written to an identifiers-only table and sealed as an all-test partition, then verified. | T4 and T5 cannot start without it. The pre-registration places the seal after the T2 evaluation and before any T4 or T5 computation. |
+| 5 | **Done, 2026-11-27.** The manifest is committed with CI's `ACTIVE_MANIFESTS` (both steps) in the same commit; the `cgga_external_v1` row of pre-registration section 4.5 gives n, split, seed, seal date and both checksums, as a dated amendment. | The registration must name the sealed partition. |
 | 6 | Re-paste all four OSF fields from `docs/osf_final_fields.md`; upload the attachments; fill in the DOI, date, authors and commit hash in the pre-registration header; deposit. | The text on the OSF form predates the latest corrections. |
 | 7 | Record the deposit in this folder and in `CHANGELOG.md`. | So the record stays true. |
 
@@ -36,9 +36,9 @@ gliostrata freeze-partition --input data/processed/cgga/cgga_external_eligible.p
     --manifest data/partitions/cgga_external_v1.json --verify
 ```
 
-**A gap to close alongside step 5.** `data/processed/**` is git-ignored, so the eligibility
-table will not be committed; only the manifest will. Either un-ignore that one file or
-commit its checksum.
+**A gap to close alongside step 5. Closed 2026-11-27.** `data/processed/**` is git-ignored,
+so the eligibility table is not committed. The committed manifest records its SHA-256
+(`cohort_sha256`, `43da219d...`) and every patient id it holds, which fixes the table's content.
 
 **A gap to close alongside step 6.** The result files (`data/results/cgga/*.json`,
 `data/results/tcga_gbm/idh_sensitivity_*.json`) are git-ignored, yet the pre-registration
@@ -274,13 +274,11 @@ Found in stage 3b (2026-11-27), not fixed:
   has run there. Snakemake is not installed; the `harmonize_clinical` and `build_feature_store` rules were
   checked only through the tests and by running the same `gliostrata` commands by hand. CI's
   `workflow-dry-run` job will be their first run.
-- **`cgga_external_v1` is still blocked** (Part A item 1). The real eligibility step has
-  not been run; `scripts/cgga_external_eligibility.py` does not call
-  `read_guard.record_access`, so running it as it stands would be an unledgered access;
-  and its output under `data/processed/**` is git-ignored, so it must be checksummed in
-  the commit that adds the manifest. The guard itself would admit the step: it is an
-  `availability` access, and only a `values` access is subject to the deposit and seal
-  gates. A script must still call it.
+- **Resolved 2026-11-27: `cgga_external_v1` is sealed** (Part A item 1). The eligibility
+  script now records its access through the read guard before opening any CGGA file
+  and reads only the four columns the rule needs; it was run once with `--seal`
+  (ledger entry 11). 218 patients, all-test; manifest and table checksums are in
+  pre-registration section 4.5.
 - **Corrected on 2026-11-27, after stage 3b: `configs/scoring_rules.yaml` said
   "per-gene z-scored vector"** for the T1 rule, while pre-registration 2.2 item 9(d) says
   each sample is z-scored across its genes. The registry now uses 9(d)'s wording. Its

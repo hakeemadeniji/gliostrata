@@ -26,7 +26,7 @@ Eligibility. Cases are excluded, in this fixed order, if (1) the primary diagnos
 histology other than glioblastoma; a missing, "Unknown" or "Not Reported" diagnosis is
 retained because enrolment in TCGA-GBM establishes the disease; (2) age, sex, survival time
 and vital status are all missing; (3) overall survival is <= 0 months. Result: 594 patients.
-Development split. Two sealed manifests exist. The one in force is tcga_gbm_clinical_v2:
+Development split. Two sealed development manifests exist. The one in force is tcga_gbm_clinical_v2:
 425 train / 169 test by a hash of (seed, patient_id), seed 20251126. The earlier
 tcga_gbm_clinical_v1 (583 patients) is retained unmodified as the historical record.
 
@@ -45,7 +45,10 @@ Counted on 2026-11-26 from identifiers only (the expression matrix's column name
 its values): 225 patients have an expression column, 218 of them also have a survival time
 and vital status, so 218 patients are eligible (133 in mRNAseq_693, 85 in mRNAseq_325).
 Every eligible patient is held out; the external cohort has no training split. The manifest
-will be sealed after the T2 evaluation (two reads) and before any T4 or T5 computation.
+was sealed on 2026-11-27, after the T2 evaluation (two reads) and before any T4 or T5
+computation: cgga_external_v1, 218 patients, all-test, re-counted by the same rule at the
+seal (133 in mRNAseq_693, 85 in mRNAseq_325). The seal read identifiers and the presence of
+outcomes only and is recorded in the access ledger.
 
 DATA STILL TO BE OBTAINED
 - Microarray expression for the 108 CGGA patients who carry a reference Verhaak subtype
@@ -142,10 +145,10 @@ T4 (optimizer versus random search; NOT RUN)
 
 T5 (end-to-end internal consistency; NOT RUN)
   All 218 eligible held-out patients in the sealed external partition (counted on
-  2026-11-26 from identifiers; fixed by the seal).
+  2026-11-26 from identifiers; fixed by the seal of 2026-11-27).
 
-The T4 and T5 partition is sealed after the T2 evaluation (two external reads) and before
-any T4 or T5 computation. No cohort is equalised across conditions by construction.
+The T4 and T5 partition was sealed on 2026-11-27, after the T2 evaluation (two external
+reads) and before any T4 or T5 computation. No cohort is equalised across conditions by construction.
 ```
 
 ## Sample size rationale
@@ -261,7 +264,8 @@ STOPPING RULES
 
 - Attachments for "Data collection procedures - File upload": `docs/preregistration.md`
   (re-upload: it has changed since the first upload), `src/gliostrata/evaluation/thresholds.py`,
-  both development partition manifests, `docs/cgga_validation.md`, and
+  both development partition manifests, the external manifest
+  `data/partitions/cgga_external_v1.json`, `docs/cgga_validation.md`, and
   `docs/t1_deconvolution_spec.md`.
 - The two-sided bounds above differ from the decision memo's figures, which were
   one-sided. The pre-registration carries the two-sided bounds.
@@ -281,5 +285,8 @@ STOPPING RULES
   and stopping rules" discloses it as pilot-phase item (c). Upload
   `docs/t1_deconvolution_spec.md` with the other attachments. The pre-registration
   records the result in section 2.4.
+- Revised on 2026-11-27 after cgga_external_v1 was sealed: "Data collection
+  procedures" and "Sample size" say it is sealed. Upload `data/partitions/cgga_external_v1.json`
+  with the two development manifests.
 - Still open: the comparator model in section 2.2 item 2 of the pre-registration is
   "TO BE COMPLETED BY AUTHOR"; rule 8 governs what happens if it cannot be run.

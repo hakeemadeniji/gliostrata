@@ -200,6 +200,14 @@ in `06_evidence_reports.md`, stage 3b.
 | Record | This record, the changelog, reproducibility | Pre-registration section 5 and the OSF text noted as out of date, not edited | `3bf0094` |
 | Bring the registration up to date (at the project lead's request) | Pre-registration section 2.4 (the result) and section 5; two dated amendments; the OSF fields; the sources' terms checked (NCBI policies, 3CA methods and contact pages, Europe PMC) | No threshold, bound, metric or rule changed; licence recommendation made to the lead | The commit after `3bf0094` |
 
+## Phase M. Sealing the external partition (2026-11-27)
+
+| Task | Method | Outcome | Commit |
+| --- | --- | --- | --- |
+| Guard the eligibility step | `record_access` before any CGGA file is opened; four columns read; `--seal`; 12 tests on synthetic data and a temporary ledger | Committed before the access | `99dc69d` |
+| The access, once | `python scripts/cgga_external_eligibility.py --seal data/partitions/cgga_external_v1.json` | Ledger entry 11 (availability); 218 eligible; sealed all-test and verified | The commit after `99dc69d` |
+| Register it | Pre-registration 4.5 and 5, one dated amendment; OSF text; CI's active manifests; this record | | Same |
+
 ## Reads of the external cohort, in total
 
 | # | When | What was read | What was computed |

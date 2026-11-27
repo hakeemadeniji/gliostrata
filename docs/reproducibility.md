@@ -416,7 +416,7 @@ writes the predictions out.
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite: 1126 tests, 1125 passing and 1 skipped, with all outbound sockets blocked.
+2. The test suite: 1130 tests, 1129 passing and 1 skipped, with all outbound sockets blocked.
 3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
    methylation calls (real GDC API code with cohort filtering, barcode parsing and
    a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does

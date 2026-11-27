@@ -1023,3 +1023,74 @@ download), the Human Cell Atlas index (file listing).
 4. The store's state and TME scores remain cohort-relative over the 283 profiled
    patients. The secondary above shows the cohort-independent option also recovers
    simulated proportions (0.854); no decision has been taken.
+
+## Sealing the external partition `cgga_external_v1` (2026-11-27)
+
+**Scope.** Future-plan steps 4 and 5: the eligibility step of pre-registration section
+2.2 item 7, then the all-test seal. One access to CGGA, of kind `availability`: identifiers,
+the batch label, the presence of a survival time and vital status, and the column names of
+the expression matrix. No value was inspected, nothing was fitted or scored, and no
+threshold, bound, rule or seed changed.
+
+**Commits.** `99dc69d` (the eligibility script routed through the read guard, `--seal`, 12
+tests), committed before the access; then the commit that adds the manifest, CI's active
+manifests, the pre-registration row and this record.
+
+**What changed in the script, and why.** Stage 3b (Part A item 1) found that
+`scripts/cgga_external_eligibility.py` read the CGGA cohort without recording the access,
+and read every column of the cohort file. It now declares the access to
+`read_guard.record_access` with the SHA-256 of both inputs before opening either, and reads
+only `patient_id`, `cgga_dataset`, `overall_survival_months` and `vital_status`.
+`--seal` writes the table, freezes it with `freeze_partition` (all-test: seed 20251126,
+test fraction 1.0, the CLI's defaults) and verifies it, under the one ledger entry; it
+refuses an existing manifest before any access. The tests use a temporary ledger.
+
+**The access.** `python scripts/cgga_external_eligibility.py --seal
+data/partitions/cgga_external_v1.json`, once. Ledger entry 11, recorded at
+2026-11-27T12:24:00Z, kind `availability`, analysis `external-partition-eligibility`,
+before deposit. Its input checksums equal those of the earlier entries:
+`clinical_cohort.parquet` `34bf6666…7a7940`, `counts.parquet` `2189b07c…b0b4`.
+
+| Count | Value |
+| --- | --- |
+| Cohort rows / unique patients | 333 / 305 |
+| RNA-seq rows / microarray rows | 225 / 108 |
+| Patients with an expression column | 225 |
+| Patients with survival time and vital status | 297 |
+| Both | 218 |
+| RNA-seq rows with expression but no survival | 7 |
+| **Eligible patients** | **218** (133 mRNAseq_693, 85 mRNAseq_325); no duplicate collapsed |
+
+The count equals the dry run of 2026-11-26 (ledger entry 3) and the number registered in
+advance.
+
+**The seal.**
+
+| File | Content | SHA-256 |
+| --- | --- | --- |
+| `data/processed/cgga/cgga_external_eligible.parquet` (git-ignored) | 218 rows; `patient_id`, `cgga_dataset` only | `43da219d917870d9d169f20a6d0a474bc59f27fe78e6ddfc6a84cb1fd25ebfad` |
+| `data/partitions/cgga_external_v1.json` (committed) | sealed; 0 train / 218 test; seed 20251126; test fraction 1.0; records the table's SHA-256 and every id | `040ba322d77f1f2cc205993d26c2aab63f28de4c86a8f2cc6bd3c056e8c3829e` |
+
+Verified in the same run: the table reproduces the manifest. CI's partition-drift job lists
+the manifest in `ACTIVE_MANIFESTS` (both steps); `scripts/ci_partition_drift.py` re-derives
+all 218 assignments from `(seed, patient_id)` without the table, and
+`tests/test_ci_partition_drift.py` asserts it.
+
+**Registration.** Pre-registration section 4.5 now gives the row's n, split, seed, seal
+date and both checksums, and section 5 says the partition is sealed; one dated amendment,
+marked as written after CGGA had been read (for T2). `docs/osf_final_fields.md` matches,
+and the manifest joins its attachments. `docs/cgga_validation.md` section 6.2 gains a dated
+note: T2 was not recomputed on the sealed partition.
+
+**What this is not.** Not a read of values: T4 and T5 have not been run. Not a re-run of T2.
+
+**Tests and lint.** Full suite, sockets blocked and the CGGA file-access audit hook: 1129 passed, 1 skipped (1130 collected in 35 modules); 0 blocked connection attempts; no test opened a CGGA path. The partition-drift test runs `scripts/ci_partition_drift.py` in a subprocess, which checks whether the eligibility table exists (a file-system check that reads nothing). Blocking lint clean; advisory lint 166, unchanged.
+
+**Open issues.**
+
+1. T2's two reads predate the seal and used the ingested cohort as a whole; that deviation
+   stands, disclosed in section 2.3 of the pre-registration.
+2. CI's second partition-drift step would verify the external manifest only where the
+   CGGA table is present, which it never is in CI; a local run of that step reads CGGA
+   identifiers and should be recorded in the ledger.
+3. T4 and T5 still need a real simulator and response surface (future plan 5.2).

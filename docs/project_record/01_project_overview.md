@@ -157,7 +157,7 @@ verification step re-derives every assignment.
 | --- | --- | --- | --- | --- | --- |
 | `tcga_gbm_clinical_v2` | TCGA-GBM | 594 | 425 / 169 | 20251126 | **Current** development split. Verifies against the live cohort. |
 | `tcga_gbm_clinical_v1` | TCGA-GBM | 583 | 419 / 164 | 20251126 | Superseded. Kept unmodified as the historical record; does not verify against the current cohort. |
-| `cgga_external_v1` | CGGA | up to 218 | all test | to be set | **Not created.** |
+| `cgga_external_v1` | CGGA | 218 | 0 / 218 (all test) | 20251126 | **Sealed 2026-11-27.** External partition for T2 (evaluated before the seal), T4 and T5. The eligibility step was an availability access (ledger entry 11) |
 
 Both TCGA partitions are unstratified, because the cohort's subtype column is entirely
 null. v1 no longer verifies because the ingest filter was corrected and the cohort grew by
@@ -169,7 +169,7 @@ Source: manifests under `data/partitions/`; `docs/reproducibility.md` section 4.
 | Property | Value |
 | --- | --- |
 | Package | `gliostrata` 0.1.0, MIT licence, Python >= 3.10 (developed on 3.14.3) |
-| Test suite | **1126 tests in 35 modules: 1125 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27, after T1's deconvolution row; 1113 in 34 modules after stage 3b; 1075 in 31 modules at `baseline-r1`) |
+| Test suite | **1130 tests in 35 modules: 1129 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27, after the external seal; 1126 after T1's deconvolution row; 1113 in 34 modules after stage 3b; 1075 in 31 modules at `baseline-r1`) |
 | The one skip | A Snakemake-dependent workflow test; Snakemake is an optional dependency and was not installed |
 | Real-data tests | Skip when the TCGA or CGGA files are absent; they ran here because the data are present |
 | Blocking lint (`E9,F63,F7,F82`) | Clean across `src`, `tests`, `scripts` |
@@ -193,7 +193,7 @@ Stage R1 (2026-11-27) added none and removed one, which leaves 170. Stage 3b add
 | Comparator model for T2's improvement row | **Placeholder.** "TO BE COMPLETED BY AUTHOR" |
 | Amendments logged | Ten dated entries: five of 2026-11-26 and five of 2026-11-27 (stage R1, wording and the fold-wise rerun; the T1 scoring sets in sections 3.3 and 4.5; T1's deconvolution result in a new section 2.4; section 5 brought up to date). Four of the 2026-11-26 entries are marked as written after CGGA was read; the T1 harmonisation rule and the first three 2026-11-27 entries are marked "No" (no data read for them); the last two are marked "Yes", written after T1's deconvolution row was run |
 | Machine-readable registration state | `configs/registration.yaml`. The OSF DOI is `null` until the deposit; the read guard reads it |
-| Access ledger | `data/access_ledger.jsonl`. 11 entries (0 to 10); 2 are value reads, both T2 and both before deposit; 2 are checksum-only accesses (6 and 7), 4 are schema or availability accesses (0, 1, 3 and 4), and 3 (8 to 10) are an observation and two notes, not accesses |
+| Access ledger | `data/access_ledger.jsonl`. 12 entries (0 to 11); 2 are value reads, both T2 and both before deposit; 2 are checksum-only accesses (6 and 7); 5 are schema or availability accesses (0, 1, 3, 4 and 11, the last the eligibility step of the external seal on 2026-11-27); and 3 (8 to 10) are an observation and two notes, not accesses |
 
 Until the deposit is made the project has no pre-registration in the formal sense, and
 T1 to T5 are exploratory. Source: `docs/preregistration.md` header and section 8.

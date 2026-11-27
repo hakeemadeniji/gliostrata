@@ -288,7 +288,9 @@ to do them for this thesis (section 12.5).
 The pre-registration says final T2 numbers are reported on a **frozen external test
 partition**, `cgga_external_v1`. It does not exist: `docs/preregistration.md` section 4.5
 lists it as not yet created. This evaluation used the ingested CGGA cohort as instructed,
-without a sealed manifest.
+without a sealed manifest. (Note, 2026-11-27: `cgga_external_v1` has since been sealed,
+218 patients, all-test, after both T2 reads; the T2 numbers here were not recomputed on
+it.)
 
 In substance CGGA had now been read. A second read followed the same day, for T2's Brier
 row, which is itself a registered threshold (section 12). Any CGGA analysis beyond the
