@@ -53,7 +53,9 @@ PATIENTS WHO DO NOT ENTER THE STORE, AND WHY
 
 WHAT THIS SCRIPT DOES NOT DO
     It reads no CGGA file and opens no network connection; a path containing
-    "cgga" is refused. It fits no model and reads no outcome. It modifies
+    "cgga" is refused. It fits no model and uses no outcome value: the
+    outcome columns are carried into the store and their gaps counted
+    (``n_missing_outcome``), and nothing else is done with them. It modifies
     nothing under data/raw.
 
 Usage:

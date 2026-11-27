@@ -390,3 +390,49 @@ def test_main_prints_the_counts_in_ascii(script, tmp_path, capsys):
     assert "extent_of_resection" in out
     assert "Nothing here is validated" in out
     assert (tmp_path / "store.parquet").is_file()
+
+
+# --- 6. the outcome is carried and counted, never used ------------------------
+def test_outcome_values_are_carried_and_counted_but_never_used(script):
+    """``n_missing_outcome`` reports the gaps; no outcome value reaches a feature.
+
+    The script says it uses no outcome value. That is checkable: a patient whose
+    outcome is missing is not excluded, and permuting every outcome value leaves
+    the feature columns of the store exactly as they were.
+    """
+    cohort, expression, annotation, joined = _inputs()
+    store, r = script.build(cohort, expression, annotation, joined)
+    assert {"overall_survival_months", "vital_status"} <= set(store.columns)
+    assert set(r["n_missing_outcome"]) == {
+        c for c in script.OUTCOME_COLUMNS if c in store.columns
+    }
+    for col, count in r["n_missing_outcome"].items():
+        assert count == int(store[col].isna().sum())
+
+    # A gap in the outcome is counted, not a reason to exclude the patient.
+    gapped = cohort.copy()
+    gapped.loc[0, "vital_status"] = np.nan
+    gapped.loc[1, "overall_survival_months"] = np.nan
+    gapped["treatment_arm"] = "ChemoRadiation"
+    gapped.loc[7, "treatment_arm"] = None
+    store_g, rg = script.build(gapped, expression, annotation, joined)
+    assert _ids(store_g) == _ids(store)
+    assert rg["n_missing_outcome"] == {
+        "overall_survival_months": 1,
+        "vital_status": 1,
+        "treatment_arm": 1,
+    }
+
+    # Permuting every outcome value changes no feature.
+    rng = np.random.default_rng(99)
+    permuted = gapped.copy()
+    for col in ("overall_survival_months", "vital_status"):
+        permuted[col] = rng.permutation(permuted[col].to_numpy(dtype=float))
+    store_p, rp = script.build(permuted, expression, annotation, joined)
+    pd.testing.assert_frame_equal(
+        store_g[list(FEATURE_COLUMNS)], store_p[list(FEATURE_COLUMNS)]
+    )
+    # The count follows the store, wherever the permuted gap has landed.
+    assert rp["n_missing_outcome"] == {
+        c: int(store_p[c].isna().sum()) for c in script.OUTCOME_COLUMNS if c in store_p.columns
+    }

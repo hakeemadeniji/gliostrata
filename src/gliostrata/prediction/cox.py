@@ -40,6 +40,15 @@ median and a companion binary ``<feature>_missing`` column is added, so
 Categorical features get an explicit ``missing`` level. Every imputation is
 recorded in the returned :class:`DesignReport`.
 
+"Training-fold" is enforced, not assumed. A design is fitted on training rows
+(:func:`fit_design_plan`: medians, indicator columns, categorical levels,
+reference levels) and applied to whichever rows are being encoded
+(:func:`apply_design_plan`). Cross-validation fits one design per fold
+(:func:`cross_validate_cohort_cox`), so a validation fold is never encoded
+with a value of its own. Before 2026-11-27 the median was computed on the
+whole cohort before the folds were drawn, which is not what the paragraph
+above said.
+
 Note on future consolidation
 ----------------------------
 `bootstrap_ci` and friends in `gliostrata.utils.stats` are being hardened
@@ -61,10 +70,14 @@ from sklearn.model_selection import StratifiedKFold
 __all__ = [
     "CoxPHModel",
     "DesignReport",
+    "DesignPlan",
     "build_design_matrix",
+    "fit_design_plan",
+    "apply_design_plan",
     "concordance_index",
     "brier_score_ipcw",
     "cross_validate_cox",
+    "cross_validate_cohort_cox",
     "fit_clinical_baseline",
     "DEFAULT_CLINICAL_FEATURES",
 ]
@@ -135,38 +148,78 @@ def build_design_matrix(
     contribute to a likelihood either way -- and the count is reported.
     Missing *features* are handled by `impute` and never dropped silently.
 
+    The frame is both the training set and the frame being encoded: the
+    medians, indicator columns, categorical levels and reference levels are
+    fitted on its rows (:func:`fit_design_plan`) and applied to the same rows
+    (:func:`apply_design_plan`). To encode one set of rows with a design fitted
+    on another, as cross-validation must, use those two functions or
+    :func:`cross_validate_cohort_cox`.
+
     `event` is 1 for a death and 0 for a right-censored observation.
     """
-    n_input = len(df)
-    work = df.copy()
-
-    # --- outcome: required. Missing event status is unusable, and reported.
-    outcome_ok = work[time_col].notna() & work[event_col].notna()
-    dropped_outcome = int((~outcome_ok).sum())
-    work = work.loc[outcome_ok].reset_index(drop=True)
-
-    time = work[time_col].to_numpy(dtype=float)
-    event = work[event_col].to_numpy(dtype=float)
-    if not np.all(np.isin(event, (0.0, 1.0))):
-        raise ValueError(f"{event_col} must be 0 (censored/alive) or 1 (death)")
-    event = event.astype(int)
-    time = np.maximum(time, min_time)  # guard against exact-zero follow-up
-
-    report = DesignReport(
-        n_input=n_input,
-        n_used=len(work),
-        dropped_missing_outcome=dropped_outcome,
-        impute_strategy=impute,
+    outcome_ok = df[time_col].notna() & df[event_col].notna()
+    plan = fit_design_plan(
+        df.loc[outcome_ok],
+        features,
+        impute=impute,
+        reference_levels=reference_levels,
+    )
+    return apply_design_plan(
+        df, plan, time_col=time_col, event_col=event_col, min_time=min_time
     )
 
-    cols: list[np.ndarray] = []
-    names: list[str] = []
+
+@dataclass(frozen=True)
+class DesignPlan:
+    """What a set of training rows fixes about the design matrix.
+
+    Fitted on training rows only (:func:`fit_design_plan`) and applied to any
+    rows (:func:`apply_design_plan`), so that a validation fold is encoded with
+    the training fold's medians, missingness indicators, levels and reference
+    levels, and with nothing of its own.
+    """
+
+    features: tuple[str, ...]
+    numeric: tuple[str, ...]
+    medians: dict[str, float]
+    indicator_for: tuple[str, ...]
+    categorical_levels: dict[str, tuple[str, ...]]
+    reference_levels: dict[str, str]
+    feature_names: tuple[str, ...]
+    impute_strategy: str
+
+
+def fit_design_plan(
+    df: pd.DataFrame,
+    features: Sequence[str] = DEFAULT_CLINICAL_FEATURES,
+    *,
+    impute: ImputeStrategy = "median_indicator",
+    reference_levels: dict[str, str] | None = None,
+) -> DesignPlan:
+    """Fix the design on the rows of ``df``: the training rows.
+
+    Every statistic is taken over these rows only: each numeric feature's
+    median, whether it carries a missingness indicator column, each categorical
+    feature's levels and reference level, and the resulting column order.
+
+    Raises
+    ------
+    ValueError
+        If a feature is absent from the frame, is entirely missing in it, or
+        has a reference level that does not occur in it.
+    """
     refs = reference_levels or {}
+    numeric: list[str] = []
+    medians: dict[str, float] = {}
+    indicator_for: list[str] = []
+    levels_by_feature: dict[str, tuple[str, ...]] = {}
+    references: dict[str, str] = {}
+    names: list[str] = []
 
     for feat in features:
-        if feat not in work.columns:
+        if feat not in df.columns:
             raise ValueError(f"feature {feat!r} not in dataframe")
-        series = work[feat]
+        series = df[feat]
         if series.isna().all():
             # e.g. the molecular columns, which are not ingested yet.
             raise ValueError(
@@ -176,42 +229,111 @@ def build_design_matrix(
 
         if _is_numeric(series):
             values = series.to_numpy(dtype=float)
-            n_missing = int(np.isnan(values).sum())
-            report.n_imputed[feat] = n_missing
-            if n_missing:
-                if impute == "drop":
-                    raise ValueError(
-                        "impute='drop' requires pre-filtered data; "
-                        f"{feat} has {n_missing} missing values"
-                    )
-                fill = float(np.nanmedian(values))
-                report.imputed_values[feat] = fill
-                values = np.where(np.isnan(values), fill, values)
-                if impute == "median_indicator":
-                    cols.append(series.isna().to_numpy(dtype=float))
-                    names.append(f"{feat}_missing")
-            cols.append(values)
+            numeric.append(feat)
+            medians[feat] = float(np.nanmedian(values))
+            if np.isnan(values).any() and impute == "median_indicator":
+                indicator_for.append(feat)
+                names.append(f"{feat}_missing")
             names.append(feat)
         else:
             raw = series.astype("object").where(series.notna(), "missing")
-            levels = sorted({str(v) for v in raw})
+            levels = tuple(sorted({str(v) for v in raw}))
             ref = refs.get(feat)
             if ref is None:
                 # Most frequent level is the reference, so HRs read naturally.
                 ref = str(raw.astype(str).value_counts().idxmax())
             if ref not in levels:
                 raise ValueError(f"reference level {ref!r} not present for {feat}")
-            report.categorical_levels[feat] = levels
+            levels_by_feature[feat] = levels
+            references[feat] = ref
+            names.extend(f"{feat}_{lvl}" for lvl in levels if lvl != ref)
+
+    return DesignPlan(
+        features=tuple(features),
+        numeric=tuple(numeric),
+        medians=medians,
+        indicator_for=tuple(indicator_for),
+        categorical_levels=levels_by_feature,
+        reference_levels=references,
+        feature_names=tuple(names),
+        impute_strategy=impute,
+    )
+
+
+def apply_design_plan(
+    df: pd.DataFrame,
+    plan: DesignPlan,
+    *,
+    time_col: str = "overall_survival_months",
+    event_col: str = "vital_status",
+    min_time: float = 1e-8,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, DesignReport]:
+    """Encode ``df`` with a design fitted on another set of rows.
+
+    A missing numeric value is filled with the training median, whether or not
+    the rows being encoded had any. A missingness indicator column exists only
+    where the training rows had one. A categorical value the training rows
+    never saw, ``missing`` included, is encoded as the reference level. The
+    column order is the plan's, so the matrix suits a model fitted on the
+    training rows.
+
+    Patients with a missing outcome (time or event) are dropped and counted.
+    ``event`` is 1 for a death and 0 for a right-censored observation.
+    """
+    outcome_ok = df[time_col].notna() & df[event_col].notna()
+    dropped_outcome = int((~outcome_ok).sum())
+    work = df.loc[outcome_ok].reset_index(drop=True)
+
+    time = work[time_col].to_numpy(dtype=float)
+    event = work[event_col].to_numpy(dtype=float)
+    if not np.all(np.isin(event, (0.0, 1.0))):
+        raise ValueError(f"{event_col} must be 0 (censored/alive) or 1 (death)")
+    event = event.astype(int)
+    time = np.maximum(time, min_time)  # guard against exact-zero follow-up
+
+    report = DesignReport(
+        n_input=len(df),
+        n_used=len(work),
+        dropped_missing_outcome=dropped_outcome,
+        impute_strategy=plan.impute_strategy,
+    )
+    cols: list[np.ndarray] = [np.zeros(len(work)) for _ in plan.feature_names]
+
+    for feat in plan.features:
+        series = work[feat]
+        if feat in plan.numeric:
+            values = series.to_numpy(dtype=float)
+            n_missing = int(np.isnan(values).sum())
+            report.n_imputed[feat] = n_missing
+            if n_missing:
+                if plan.impute_strategy == "drop":
+                    raise ValueError(
+                        "impute='drop' requires pre-filtered data; "
+                        f"{feat} has {n_missing} missing values"
+                    )
+                fill = plan.medians[feat]
+                report.imputed_values[feat] = fill
+                values = np.where(np.isnan(values), fill, values)
+            if feat in plan.indicator_for:
+                cols[plan.feature_names.index(f"{feat}_missing")] = series.isna().to_numpy(
+                    dtype=float
+                )
+            cols[plan.feature_names.index(feat)] = values
+        else:
+            raw = series.astype("object").where(series.notna(), "missing").astype(str)
+            levels = plan.categorical_levels[feat]
+            report.categorical_levels[feat] = list(levels)
             report.n_imputed[feat] = int(series.isna().sum())
             for lvl in levels:
-                if lvl == ref:
+                if lvl == plan.reference_levels[feat]:
                     continue
-                cols.append((raw.astype(str) == lvl).to_numpy(dtype=float))
-                names.append(f"{feat}_{lvl}")
+                cols[plan.feature_names.index(f"{feat}_{lvl}")] = (
+                    (raw == lvl).to_numpy(dtype=float)
+                )
 
-    X = np.column_stack(cols) if cols else np.zeros((len(work), 0))
-    report.feature_names = names
-    return X, time, event, report
+    x = np.column_stack(cols) if cols else np.zeros((len(work), 0))
+    report.feature_names = list(plan.feature_names)
+    return x, time, event, report
 
 
 # --------------------------------------------------------------------------
@@ -714,6 +836,32 @@ def cross_validate_cox(
         except ValueError:  # pragma: no cover
             pass
 
+    return _pooled_cv_result(
+        time,
+        event,
+        oof_risk,
+        oof_surv,
+        fold_c,
+        horizon=horizon,
+        n_boot=n_boot,
+        seed=seed,
+        n_splits=n_splits,
+    )
+
+
+def _pooled_cv_result(
+    time: np.ndarray,
+    event: np.ndarray,
+    oof_risk: np.ndarray,
+    oof_surv: np.ndarray,
+    fold_c: list[float],
+    *,
+    horizon: float,
+    n_boot: int,
+    seed: int,
+    n_splits: int,
+) -> CVResult:
+    """Score pooled out-of-fold predictions once, with percentile bootstrap CIs."""
     c = concordance_index(time, event, oof_risk)
     c_ci = _bootstrap_ci(
         lambda idx: concordance_index(time[idx], event[idx], oof_risk[idx]),
@@ -744,6 +892,88 @@ def cross_validate_cox(
     )
 
 
+def cross_validate_cohort_cox(
+    frame: pd.DataFrame,
+    features: Sequence[str] = DEFAULT_CLINICAL_FEATURES,
+    *,
+    impute: ImputeStrategy = "median_indicator",
+    reference_levels: dict[str, str] | None = None,
+    time_col: str = "overall_survival_months",
+    event_col: str = "vital_status",
+    n_splits: int = 5,
+    seed: int = 42,
+    horizon: float = 18.0,
+    n_boot: int = 1000,
+    model_kwargs: dict | None = None,
+) -> tuple[CVResult, list[DesignReport]]:
+    """Stratified k-fold CV in which each fold's design is fitted on its training rows.
+
+    The folds are those :func:`cross_validate_cox` draws on the same patients
+    (stratified on event status, same seed), and the pooled out-of-fold scores
+    are computed the same way. What differs is where the encoding comes from:
+    each training fold fixes its own medians, indicator columns, categorical
+    levels and reference levels (:func:`fit_design_plan`), and its validation
+    fold is encoded with those and nothing of its own. When nothing has to be
+    imputed the two functions give identical predictions.
+
+    Returns
+    -------
+    (CVResult, reports)
+        ``reports`` holds, per fold, the :class:`DesignReport` of the validation
+        fold. Its ``imputed_values`` are the training fold's medians.
+    """
+    outcome_ok = frame[time_col].notna() & frame[event_col].notna()
+    rows = frame.loc[outcome_ok].reset_index(drop=True)
+    # The outcome arrays are exactly those build_design_matrix would return.
+    _, time, event, _ = apply_design_plan(
+        frame,
+        fit_design_plan(rows, features, impute=impute, reference_levels=reference_levels),
+        time_col=time_col,
+        event_col=event_col,
+    )
+
+    kwargs = model_kwargs or {}
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    oof_risk = np.full(len(time), np.nan)
+    oof_surv = np.full(len(time), np.nan)
+    fold_c: list[float] = []
+    fold_reports: list[DesignReport] = []
+
+    for train_idx, test_idx in skf.split(np.zeros(len(time)), event):
+        train_rows = rows.iloc[train_idx]
+        plan = fit_design_plan(
+            train_rows, features, impute=impute, reference_levels=reference_levels
+        )
+        x_train, time_train, event_train, _ = apply_design_plan(
+            train_rows, plan, time_col=time_col, event_col=event_col
+        )
+        x_test, time_test, event_test, report = apply_design_plan(
+            rows.iloc[test_idx], plan, time_col=time_col, event_col=event_col
+        )
+        m = CoxPHModel(**kwargs).fit(x_train, time_train, event_train)
+        r = m.predict_log_hazard(x_test)
+        oof_risk[test_idx] = r
+        oof_surv[test_idx] = m.predict_survival_function(x_test, horizon)[:, 0]
+        try:
+            fold_c.append(concordance_index(time_test, event_test, r))
+        except ValueError:  # pragma: no cover
+            pass
+        fold_reports.append(report)
+
+    cv = _pooled_cv_result(
+        time,
+        event,
+        oof_risk,
+        oof_surv,
+        fold_c,
+        horizon=horizon,
+        n_boot=n_boot,
+        seed=seed,
+        n_splits=n_splits,
+    )
+    return cv, fold_reports
+
+
 def fit_clinical_baseline(
     cohort: pd.DataFrame,
     *,
@@ -760,20 +990,24 @@ def fit_clinical_baseline(
     Returns the full-data model (for coefficients / survival curves), the
     cross-validated metrics (for honest performance), and the design report
     (for the missingness audit trail).
+
+    Each cross-validation fold is encoded with a design fitted on that fold's
+    training rows (:func:`cross_validate_cohort_cox`): the imputation medians,
+    the missingness indicators and the categorical levels come from the
+    training fold, never from the cohort as a whole. The returned model and
+    report are the full-data fit, in which every modelled patient is training.
     """
-    X, time, event, report = build_design_matrix(
-        cohort, features, impute=impute
-    )
-    cv = cross_validate_cox(
-        X,
-        time,
-        event,
+    cv, _ = cross_validate_cohort_cox(
+        cohort,
+        features,
+        impute=impute,
         n_splits=n_splits,
         seed=seed,
         horizon=horizon,
         n_boot=n_boot,
         model_kwargs=model_kwargs,
     )
+    X, time, event, report = build_design_matrix(cohort, features, impute=impute)
     model = CoxPHModel(**(model_kwargs or {})).fit(
         X, time, event, feature_names=report.feature_names
     )

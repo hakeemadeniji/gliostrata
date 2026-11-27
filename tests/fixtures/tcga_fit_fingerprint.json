@@ -1,0 +1,112 @@
+{
+  "what": "Pinned facts of the committed TCGA-GBM fits of scripts/validate_cox_cgga.py. Variant 1 is the committed baseline (age, sex, kps, treatment_arm) with median-indicator imputation; it is the model T2 was registered against and is never evaluated on CGGA. Variants 2 and 3 are complete-case fits (impute='drop').",
+  "pinned_on": "2026-11-27, Python 3.14.3, after the fold-wise imputation change; the design matrices are byte-identical to those before it",
+  "inputs": {
+    "cohort": {
+      "path": "data/raw/tcga_gbm/clinical_cohort.parquet",
+      "sha256": "a7f77418dc90ffbb327773de699965901324be6127cabf2ef745a12a07aa4bda"
+    },
+    "joined": {
+      "path": "data/processed/tcga_gbm/molecular_calls_joined.parquet",
+      "sha256": "5961d17c70b1f0fc727582e7e8b31bb9fe75eaa33533e9d7e64482983e91c77f"
+    }
+  },
+  "variant_1_baseline_committed": {
+    "features": ["age", "sex", "kps", "treatment_arm"],
+    "impute": "median_indicator",
+    "n_passed": 594,
+    "n_modelled": 592,
+    "n_dropped_missing_outcome": 2,
+    "n_events": 491,
+    "n_kps_imputed": 150,
+    "kps_imputation_value": 80.0,
+    "kps_missing_indicator_hr": 1.569077,
+    "n_treatment_arm_missing": 22,
+    "treatment_arm_missing_level_hr": 1.201657,
+    "n_missing_other_features": {"age": 0, "sex": 0},
+    "feature_names": [
+      "age",
+      "sex_F",
+      "kps_missing",
+      "kps",
+      "treatment_arm_MonoTherapy",
+      "treatment_arm_NoAdjuvant",
+      "treatment_arm_missing"
+    ],
+    "categorical_levels": {
+      "sex": ["F", "M"],
+      "treatment_arm": ["ChemoRadiation", "MonoTherapy", "NoAdjuvant", "missing"]
+    },
+    "hazard_ratios": {
+      "age": 1.029858,
+      "kps": 0.981827,
+      "kps_missing": 1.569077,
+      "sex_F": 0.748859,
+      "treatment_arm_MonoTherapy": 1.497229,
+      "treatment_arm_NoAdjuvant": 0.641229,
+      "treatment_arm_missing": 1.201657
+    },
+    "shape": [592, 7],
+    "X_sha256": "f9c3603a2786d4e200d33086334257a91bf7a7c7339fa43492cdecf9eca447b8",
+    "time_sha256": "fbf36b6eff8d4c606d00189798e7c5bade85d5a79c93c9cf7233ebf5e80b9579",
+    "event_sha256": "c19eba6f8a6aba6fff8af54df35e801eb45740529e1638c0c9ccccefe5494d7b"
+  },
+  "variant_2_transferable": {
+    "features": ["age", "sex", "treatment_arm"],
+    "impute": "drop",
+    "n_fit": 570,
+    "n_modelled": 570,
+    "n_events": 472,
+    "n_missing": {"age": 0, "sex": 0, "treatment_arm": 0},
+    "feature_names": [
+      "age",
+      "sex_F",
+      "treatment_arm_MonoTherapy",
+      "treatment_arm_NoAdjuvant"
+    ],
+    "categorical_levels": {
+      "sex": ["F", "M"],
+      "treatment_arm": ["ChemoRadiation", "MonoTherapy", "NoAdjuvant"]
+    },
+    "hazard_ratios": {
+      "age": 1.03262,
+      "sex_F": 0.81362,
+      "treatment_arm_MonoTherapy": 1.532981,
+      "treatment_arm_NoAdjuvant": 0.583641
+    },
+    "shape": [570, 4],
+    "X_sha256": "c15a381cd1cd763507e9207f400bf62ef0ad46c2f84e1124f77ea3daa000976e",
+    "time_sha256": "56006d6d39dc246eb482bb4fbd66221c63943d67163de4e1a28afa6a469506df",
+    "event_sha256": "b0c1fed431accca9bd92d20d4b3674e434858aad8df18dbc98323229afc530d0"
+  },
+  "variant_3_molecular": {
+    "features": ["age", "sex", "treatment_arm", "idh_mutated", "mgmt_methylated"],
+    "impute": "drop",
+    "n_fit": 298,
+    "n_modelled": 298,
+    "n_events": 220,
+    "n_missing": {"age": 0, "sex": 0, "treatment_arm": 0, "idh_mutated": 0, "mgmt_methylated": 0},
+    "feature_names": [
+      "age",
+      "sex_F",
+      "treatment_arm_MonoTherapy",
+      "idh_mutated",
+      "mgmt_methylated"
+    ],
+    "categorical_levels": {
+      "sex": ["F", "M"],
+      "treatment_arm": ["ChemoRadiation", "MonoTherapy"]
+    },
+    "hazard_ratios": {
+      "age": 1.031388,
+      "sex_F": 0.534218,
+      "treatment_arm_MonoTherapy": 1.620555,
+      "idh_mutated": 0.502459,
+      "mgmt_methylated": 0.82919
+    },
+    "shape": [298, 5],
+    "X_sha256": "25978d70902b3712cc24ba1a6b1c26b4e309e663260ea80d64416f4085e865b6",
+    "time_sha256": "0fe8677dac22c5e33934e022692633503a2b097a4c6e54781fc8c6e2097e6a89",
+    "event_sha256": "739ef8d2b6e85ad57f0dfde97bbb72c5f1351109a298aa2c24f9445956749fb8"
+  }
+}
