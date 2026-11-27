@@ -38,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `configs/registration.yaml`: the machine-readable registration state. The OSF
   DOI is `null` until the deposit; a test keeps this file and the
   pre-registration header in agreement.
-- L3 from real data: `scripts/build_tcga_feature_store.py` runs L0 to L3 on the
+- L3 from real data (superseded in stage 3b, below: the script is now a thin wrapper
+  over `gliostrata build-feature-store --mode real`, and the store keeps all 594
+  patients): `scripts/build_tcga_feature_store.py` runs L0 to L3 on the
   TCGA-GBM inputs on disk (155 of 594 patients; every exclusion is counted and
   reported, with the SHA-256 of each input). TCGA only: it reads no CGGA file and
   fits no model. It found that resection extent is absent for the whole cohort and
@@ -102,6 +104,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `data/provenance/file_manifest_checksums.json`: sizes, row counts and SHA-256 of
   the per-modality GDC file manifests, which carry patient barcodes and are so
   not committed.
+
+### Added — stage 3b: the feature-store contract and the subtype classifier (2026-11-27)
+- `gliostrata harmonize-clinical` (`data/clinical.py`): the L1 TCGA clinical table with
+  an explicit owned-column list, written to `data/interim/tcga_gbm_clinical_harmonized.parquet`,
+  and a separate label table (`data/interim/tcga_gbm_labels.parquet`). It raises on an L2
+  or molecular column name that carries a value and on an unknown column; every missing
+  value is traced to the raw GDC record for its reason code; nothing is imputed. It also
+  writes a provenance sidecar, `data/interim/tcga_gbm_clinical_harmonized_provenance.json`,
+  with the SHA-256 of its inputs and outputs; real mode stops without a matching one.
+- `gliostrata build-feature-store --mode real|synthetic` (`features/build.py`,
+  `features/contract.py`, `features/views.py`): one command for L2 and L3. The store
+  holds every cohort patient, one row each, and never filters. It is four files: the
+  features, the labels (outcomes are labels, never features), a missing-value reason
+  table, and a column-metadata JSON (role, source layer, source file SHA-256, class).
+  Model-ready populations are named views (`profiling`, `transferable_model`,
+  `molecular_model`), each with its flow counts and per-split counts for
+  `tcga_gbm_clinical_v2`. Synthetic mode stays the default and is labelled.
+- `profiling/centroid.py`: single-sample subtype assignment, nearest centroid (Pearson)
+  over the published Verhaak 2010 840-gene signature (831 genes resolved), each sample's
+  log2(TPM+1) z-scored across its own genes. Two frozen centroid sets with checksums in
+  `configs/subtype_centroids/`: `verhaak840_tcga_v2train` (the store's per-patient
+  subtype) and `verhaak840_tcga_all` (reserved for T1). Training labels: Brennan et al.
+  2013; sources and checksums in `data/provenance/subtype_reference_sources.json`.
+- `scripts/prepare_subtype_reference.py`, `scripts/build_subtype_centroids.py`,
+  `scripts/subtype_scoring_set_dependence.py`, `scripts/compare_subtype_labels.py`.
+- `.gitattributes`: the centroid JSON files are byte-exact (no line-ending conversion),
+  so their checksums hold on any checkout.
+- Tests: `tests/test_feature_store_contract.py`, `tests/test_centroid.py`,
+  `tests/test_subtype_scripts.py`.
+
+### Changed — stage 3b (2026-11-27)
+- `build_feature_store` takes each input by explicit name and raises on a column
+  supplied by more than one input, a null-only column that shadows a computed feature,
+  a column its input does not own (an outcome label among them), a stub or
+  cohort-relative subtype input in real mode, and a missing value without a reason.
+  The stage 3 script's placeholder-dropping workaround is removed.
+- Absent never becomes a value: missing resection is `not_available_in_cohort`, never
+  "biopsy"; a missing molecular call is no call, never 0; call status has three states
+  (called, not tested, tested but not callable); the continuous MGMT score and the
+  threshold used are kept; KPS is never imputed in the store. `treatment_arm` is a
+  feature, not an outcome.
+- Real mode accepts only the centroid set `verhaak840_tcga_v2train`. A sample with no
+  finite centroid correlation gets no subtype (`scoring_failed`). A patient sequenced
+  only on a non-primary sample is `tested_not_callable` (from the GDC file manifests; one
+  IDH case).
+- The per-patient subtype is the single-sample call; the cohort-relative
+  `subtype_prob_*` columns leave the real store. `optimize` and `generate-protocol`
+  refuse the real store rather than encode an absent value as a value.
+- `scripts/build_tcga_feature_store.py` is a thin wrapper over
+  `gliostrata build-feature-store --mode real`. The DVC stage `build_feature_store` and
+  the Snakemake rule (with `source=tcga`) run real mode with the expression input,
+  its annotation and the two molecular file manifests; a new `harmonize_clinical` stage and rule precede them.
 
 ### Fixed
 - `test_argmax_matches_input_subtype` computed an argmax and asserted nothing

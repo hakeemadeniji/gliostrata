@@ -8,7 +8,9 @@ honest status report on that goal. It is deliberately written so that the
 **Summary in one line:** the *plumbing* is reproducible end to end today; the
 *science* is not, because the pipeline's L1, L2, L5 and L6 steps are stubs. Real
 implementations of L2 (subtype and state/TME scoring), L5 (a fitted Cox model) and
-L6 (a GP optimizer) exist as modules and are not wired into the pipeline (§6).
+L6 (a GP optimizer) exist as modules (§6). Since stage 3b (2026-11-27) the real L2 and
+L3 run on TCGA through one CLI command, `gliostrata build-feature-store --mode real`;
+the stub `gliostrata profile` and L5 to L7 do not consume its output.
 
 ---
 
@@ -49,7 +51,7 @@ extra), which are not in it, still resolve. CI's `test` job installs it exactly
 | L0 | `.test/interim/fixture_synthetic_cohort.parquet` |
 | L1 | `.test/interim/fixture_harmonized.parquet` |
 | L2 | `.test/processed/fixture_profiled.parquet` |
-| L3 | `.test/processed/fixture_feature_store.parquet` |
+| L3 | `.test/processed/fixture_feature_store.parquet`, with `_labels.parquet`, `_missing.parquet` and `_columns.json` beside it (all labelled synthetic), and `.test/results/fixture/feature_store_build_report.json` |
 | L6 | `.test/results/fixture/configs/ranked_configurations.parquet` |
 | L7 | `.test/results/fixture/protocols/protocol_*.json` (12 files) |
 | — | `.test/results/fixture/pipeline_complete.txt` |
@@ -357,23 +359,29 @@ yet in the pipeline.** The DAG runs green.
 | **L6** optimize | `gliostrata.optimization.bayesian` | Ranked enumeration of configurations. | Bayesian optimization against a validated response surface. |
 | **L7** handoff | `gliostrata.handoff.protocol` | Structurally complete JSON documents templated from the above. | Bench-executable protocols. |
 
-Implemented, but not called by the pipeline: `profiling/verhaak.py` (subtype
-scoring) and `profiling/deconvolve.py` (state and TME scoring) read the expression
-matrix; `prediction/cox.py` is a fitted Cox model; `optimization/bayes_opt.py` is a
-Gaussian-process optimizer. Each has its own tests and is reached through
-standalone scripts, not through `gliostrata profile` / `optimize`. See
-`docs/roadmap.md`.
+Implemented, and called only through `gliostrata build-feature-store --mode real`
+(TCGA): `profiling/centroid.py` (single-sample subtype, the per-patient feature) and
+`profiling/deconvolve.py` (state and TME scoring) read the expression matrix.
+`profiling/verhaak.py` (cohort-relative subtype scoring) is used for descriptive
+distributions only. Not called by the pipeline: `prediction/cox.py`, a fitted Cox
+model, and `optimization/bayes_opt.py`, a Gaussian-process optimizer, reached through
+standalone scripts. `gliostrata profile` is still the stub, and `optimize` and
+`generate-protocol` refuse the real store, because they would encode an absent value
+as a value. See `docs/roadmap.md`.
 
-**The single most important consequence:** the L0 expression ingest is real and
-fully implemented, and it produces `counts.parquet` and `tpm.parquet` — and
-**nothing downstream in the pipeline reads them.** Every subtype call,
-cell-state fraction and TME fraction in this pipeline today is computed from
-clinical covariates. They are not measurements.
+**The single most important consequence:** on the synthetic path, every subtype
+call, cell-state fraction and TME fraction is computed from clinical covariates by
+the stubs; they are not measurements. On TCGA, `build-feature-store --mode real`
+reads `tpm.parquet` and its annotation, and the values it writes are measured, not
+validated: the subtype is a nearest-centroid assignment, and the state and TME values
+are cohort-relative marker-enrichment scores, not cell proportions.
 
-This is why `workflow/rules/profile.smk` declares `HARMONIZED` as its only
-input and lists the expression matrices as a top-level target instead of an
-input edge: an input edge would make the DAG assert a data dependency the code
-does not have. The DAG is a map of the code, not of the intent.
+This is why `workflow/rules/profile.smk` (the stub) declares `HARMONIZED` as its
+only input, while `build_feature_store` with `source=tcga` takes `tpm.parquet` and
+its annotation as inputs and writes their SHA-256 into its report. The DAG is a map of
+the code, not of the intent. Neither Snakemake rule had been run on the development
+machine at stage 3b (Snakemake is not installed there); CI's `workflow-dry-run` job is
+their first run.
 
 Likewise there is no L4 in the pipeline at all, and L5 has no materialised
 artifact — `gliostrata optimize` calls `predict_survival` internally and never
@@ -389,20 +397,23 @@ writes the predictions out.
 - **No DVC remote.** Every derived artifact exists on one machine. §3.
 - **No GDC data-release pinning.** §1.2.
 - **No Zenodo DOI**, and nothing to mint one for yet.
-- **No end-to-end run on the real cohort recorded anywhere.** `data/manual/`
-  holds a synthetic run's output; `data/interim/tcga_gbm_harmonized.parquet` is
-  the only real-cohort derived artifact present, and it is gitignored and
-  untracked.
-- **Nothing in L2 is validated against a published reference.** Until L2 reads
-  expression and reproduces Verhaak/Neftel calls on a benchmark cohort, there
-  is no external check on the pipeline's central claim.
+- **No end-to-end run on the real cohort recorded anywhere.** L0 to L3 have run on
+  TCGA (`build-feature-store --mode real`); L4 to L7 have not, and `dvc repro` on
+  real data still stops at the stub `profile` stage. Every real-cohort derived
+  artifact is git-ignored and untracked; their checksums are in
+  `docs/project_record/06_evidence_reports.md`.
+- **Nothing in L2 is validated against a published reference.** The single-sample
+  subtype agrees with the published TCGA labels for 56 of 76 v2-test patients
+  (0.737), a descriptive check on the cohort its centroids came from, not a
+  validation. The state and TME scores have no ground truth here. T1 has not been
+  run.
 
 ### What *is* genuinely reproducible today
 
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite: 1075 tests, 1074 passing and 1 skipped, with all outbound sockets blocked.
+2. The test suite: 1113 tests, 1112 passing and 1 skipped, with all outbound sockets blocked.
 3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
    methylation calls (real GDC API code with cohort filtering, barcode parsing and
    a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does
@@ -412,11 +423,15 @@ To be fair to the scaffold, the following are real and verified:
    change (§4), which is the only way to know a guardrail works.
 5. The Snakemake DAG and the DVC stage graph, both machine-validated, and
    tested against the code so they cannot silently rot (`tests/test_workflow.py`).
-6. **The TCGA feature store, L0 to L3** — `python scripts/build_tcga_feature_store.py
-   --missing-demographic drop` rebuilds it from the files on disk: 155 patients, a
-   report of every exclusion and of each feature's range, and the SHA-256 of every
-   input (`docs/project_record/06_evidence_reports.md`, stage 3). The values are
-   measured; they are not validated.
+6. **The TCGA feature store, L1 to L3** — `gliostrata harmonize-clinical`, then
+   `gliostrata build-feature-store --mode real`, rebuild it from the files on disk:
+   all 594 patients, one row each; a label table; a reason code for every missing
+   value; the column metadata; and a report of the three views (profiling 283,
+   transferable model 570, molecular model 298) with per-split flow counts and the
+   SHA-256 of every input. A repeat run is byte-identical
+   (`docs/project_record/06_evidence_reports.md`, stage 3b).
+   `scripts/build_tcga_feature_store.py` is a thin wrapper over the second command.
+   The values are measured; they are not validated.
 
 ---
 

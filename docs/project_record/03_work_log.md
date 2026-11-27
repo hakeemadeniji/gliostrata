@@ -167,6 +167,27 @@ downloaded, and the only model fitting was the fold-wise imputation rerun.
 | Isolated clean-checkout check | Fresh clone; `PYTHONPATH=<clone>/src`; `gliostrata.__file__` printed, in the shell and inside the pytest process | `gliostrata` resolved inside the clone. The first run, at `441c94a`, found a test that failed in every clean checkout (it assumed the git-ignored TCGA cohort was on disk); fixed. The second run, in a new clone at `9216e6f`: 1052 passed, 23 skipped (the real-data tests and the Snakemake test) | `9216e6f` |
 | Finish | Full suite with sockets blocked and a CGGA file-access audit hook; blocking and advisory lint | 1074 passed, 1 skipped; 0 blocked connections; no CGGA access; blocking lint clean; advisory lint 170 findings | Tag `baseline-r1` |
 
+## Phase K. The feature-store contract and the subtype classifier (2026-11-27; stage 3b)
+
+TCGA only: no CGGA value was read, downloaded or hashed, no model was fitted on an outcome,
+and the pre-registration was not edited. Population rules were fixed from availability
+counts. Work ran as three parallel workstreams (a read-only reconciliation, the subtype
+classifier, the feature store), then an independent evaluation. Commands and results are
+in `06_evidence_reports.md`, stage 3b.
+
+| Task | Method | Outcome | Commit |
+| --- | --- | --- | --- |
+| Reconcile what is closed (Part A) | Read-only: code, committed docs, the ledger, the TCGA raw files; live GDC queries for the KPS and resection trace | One page, eight items. `cgga_external_v1` not created; pre-registration 4.5 wrong about T1; every missing KPS absent at source; resection absent at source; the 284th sample's case is empty; the v2 test split was in every internal training fold | `45fdc2d`, `2e19939` |
+| Decisions D1 to D6 | Entered as decided, with reasons | `05_future_plan.md` section 5.4.1, including the scoring-set decision for the v2 split | The record commit |
+| Scoring-set dependence of the subtype (D6a) | `scripts/subtype_scoring_set_dependence.py`; seed 20261127, 20 random halvings | Cohort-relative: 2 to 18 of 283 calls change; 5 to 7 of the 45 v2-test store patients change when scored alone. Single-sample: 0 in every experiment | `45fdc2d` |
+| Single-sample classifier (D6b) | `profiling/centroid.py`; published Verhaak 840-gene signature, 831 resolved; log2(TPM+1) z-scored within each sample; Pearson nearest centroid | Two frozen sets with checksums: `verhaak840_tcga_v2train` (170 training patients) and `verhaak840_tcga_all` (246) | `45fdc2d` |
+| Published labels (D6c) | Brennan 2013 labels from the GDC publication page; Verhaak 2010 and Ceccarelli 2016 as cross-checks | Agreement on the v2 test split: single-sample 56 of 76 (0.737), cohort-relative 43 of 76 (0.566). Descriptive | `45fdc2d` |
+| Clinical harmonisation (D5) | `gliostrata harmonize-clinical`; owned columns; reasons traced to the raw GDC record | 594 patients; a separate label table; nothing imputed | `2e19939` |
+| Feature store and views (D1 to D4, C1 to C5) | `gliostrata build-feature-store --mode real`; DVC stage and Snakemake rule; the stage 3 script made a thin wrapper | 594 patients in the store; views 283, 570 and 298 with per-split counts; repeat run byte-identical | `2e19939` |
+| Deconvolution report (C6) | The default state and TME scoring on the 283 | No numerical failure; AC poorly identified; cohort-relative (6 of 50 highest states change when scored alone). Not validation | |
+| Neftel atlas (Part D) | File listing of `data/`; public sources looked up | Not on disk. Stopped; nothing downloaded | |
+| Verify | Full suite with sockets blocked; blocking and advisory lint | 1113 tests: 1112 passed, 1 skipped; 0 blocked connections; no CGGA access. Blocking lint clean; advisory lint 166 | |
+
 ## Reads of the external cohort, in total
 
 | # | When | What was read | What was computed |

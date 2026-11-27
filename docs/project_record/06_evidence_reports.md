@@ -489,3 +489,409 @@ the ledger still counts 2 value reads, both for T2.
 ignore files (deferred); the `test` and `test-floor` CI jobs have not run on GitHub; the
 second partition-drift step is untested; the comparator model for T2's improvement row
 (`05_future_plan.md` 5.4); the OSF deposit and the seal of `cgga_external_v1`.
+
+## Stage 3b. The feature-store contract and the subtype classifier (2026-11-27)
+
+**Scope.** Turn the stage 3 slice into a pipeline stage with an honest feature-store
+contract, and replace the per-patient subtype with a single-sample classifier. TCGA only:
+no CGGA value was read, downloaded or hashed, nothing under `data/raw/cgga` or
+`data/processed/cgga` was opened, no OSF action was taken, and
+`docs/preregistration.md` was not edited. No survival model was fitted. No registered
+threshold, partition, seed or analysis budget changed. Population rules were fixed from
+availability counts, never by comparing outcomes. Started from `baseline-r1` (`cff12c2`).
+
+**Commits.** `45fdc2d` (the single-sample classifier and its frozen centroid sets), `2e19939`
+(the feature-store contract, the CLI command, DVC and Snakemake), and the commit after it
+(this record and the user-facing docs).
+
+### Part A. What is closed (one page)
+
+| # | Item | Answer | Evidence |
+| --- | --- | --- | --- |
+| 1 | `cgga_external_v1`: sealed? manifest? eligibility table? | **NOT DONE.** Not sealed; no manifest (`data/partitions/` holds the two TCGA manifests only); the eligibility table is neither written nor checksummed (only the dry run, ledger entry 3: 218 eligible). Blocks: the real step has not been run (future plan 5.1, item 4); `scripts/cgga_external_eligibility.py` does not call `record_access`, so running it as it stands would be an unledgered access; its output is under the git-ignored `data/processed/**` and must be checksummed in the commit that adds the manifest. **The guard permits it:** the step is an `availability` access, and `check_access` applies the deposit, seal and rule gates to `values` accesses only. A script must still call it | `scripts/cgga_external_eligibility.py:86-117,181-193`; `evaluation/read_guard.py:76-79,334-335`; `configs/registration.yaml:12-14` |
+| 2 | Pre-registration 4.5 on T1's test partition | It says of `cgga_external_v1`: "Primary external test for T1, T2, T4 and T5". **Wrong for T1.** T1's subtype row is scored on the 108 labelled CGGA microarray patients (2.2 item 9a), and only 28 of them have the RNA-seq the partition requires (item 7); T1's deconvolution row reads no cohort (item 10). Section 3.3 carries the same error. Proposed corrected text: `05_future_plan.md` section 5.5. Not applied: this stage may not edit the pre-registration | `docs/preregistration.md:520,199-204,186-190,225-233,388-389` |
+| 3 | The T1 rule as registered | **Threshold:** subtyping accuracy >= 0.88 on the lower bound of an exact Clopper-Pearson 95% interval; NOT EVALUABLE below 30 labelled patients. **Scoring set:** the 108 CGGA microarray patients with a reference label. **Harmonisation (9d):** "each sample's expression vector is z-scored across genes (for that sample alone, mean 0 and variance 1 over its genes), and the RNA-seq-trained classifier is applied to the z-scored vector". **The 108 labels:** CGGA's own `TCGA_subtypes` column, present only in the `mRNA_array_301` clinical file and carried verbatim by `map_subtype` (333 rows less 225 null). How CGGA derived it is not documented in the repository (UNVERIFIED). `profiling/verhaak.py` differs from the rule in nine ways, listed below | `evaluation/thresholds.py:171-180`; `configs/default.yaml:33`; `docs/preregistration.md:196-224`; `scripts/download_cgga.py:18-19,439-453`; `docs/cgga_ingestion.md:42,81,112` |
+| 4 | Every missing KPS, traced to the raw GDC records | **All absent at source; none lost in harmonisation.** Of the 592 modelled, 150 missing: 147 with no KPS in any follow-up and 3 carrying only "Unknown". Of the 283 with expression, 64: 63 and 1. Of the 594, 152: 149 and 3. Lost by numeric coercion: 0. A live GDC API check (data release 46.0, 2026-08-10) of every follow-up of all 152 found no numeric KPS; 18 of them have an ECOG value, a different instrument, not converted. Code path of the imputation: `fit_clinical_baseline` defaults to `median_indicator`; `fit_design_plan` takes `np.nanmedian` of the training rows and adds `kps_missing`, inside each fold; the record states 150, median 80, HR 1.57 | `scripts/download_tcga_clinical.py:35-36,79-88,303`; `prediction/cox.py:37-38,141,233-236,940-951`; `tests/fixtures/tcga_fit_fingerprint.json` |
+| 5 | (merged into item 4 by the addendum) | | |
+| 6 | Resection | **Absent at source.** The raw clinical file's columns: `case_id`, `submitter_id`, `vital_status_raw`, `age_at_index_raw`, `sex_at_birth_raw`, `days_to_death`, `primary_diagnosis`, `tumor_grade`, `ajcc_stage`, `age_at_diagnosis_raw`, `treatment_types`, `treatment_outcomes`, `days_to_follow_up`, `kps_raw`, `smoking_status`. None is a resection field; the ingest requests none and sets `extent_of_resection` to null by construction. In the live GDC, `diagnoses.residual_disease`, `treatments.residual_disease`, `pathology_details.residual_tumor` and `residual_tumor_measurement`, `circumferential_resection_margin` and `follow_ups.procedures_performed` hold no value for any of the 594. 136 patients have a "Surgery, NOS" treatment record (39 in the raw file), which gives no extent. Legacy BCR biotab files: UNVERIFIED | `scripts/download_tcga_clinical.py:22-38,305-306` |
+| 7 | 284 expression samples, 283 cohort patients | One sample, `TCGA-28-2510-01A` (primary tumour), belongs to a case whose GDC record is empty: no age, sex, survival, vital status, diagnosis or treatment. The cohort filter drops it as `no_usable_data`. The other 283 map one to one; all 284 are primary tumour, and no patient is duplicated | `scripts/download_tcga_clinical.py:239-245` |
+| 8 | The v2 test split (169) | **Reserved for** internal held-out evaluation, for model-selection discipline; "**Not** a pre-registered external test"; tuning uses "**only** the development cohort's training split". **Every reported internal number had the 169 in its training folds:** no script reads `train_ids` or `test_ids`. Affected: the three T2 fits (including the TCGA fits scored on CGGA) and their internal C-indices, the IDH sensitivity runs (594 and 571), the fold-wise rerun of stage R1, and the joint subtype scoring of the 283. The pre-registration discloses this for T2 only. Per split (train / test): cohort 425 / 169; modelled 423 / 169; variant 2 fit 405 / 165; with expression 201 / 82; stage 3 store 110 / 45 | `docs/preregistration.md:518-519,390-393,565-573`; `scripts/validate_cox_cgga.py:200-214,238`; `scripts/idh_sensitivity_cox.py:120,164` |
+
+**How `profiling/verhaak.py` differs from the registered T1 rule.**
+
+1. It is unsupervised signature scoring (`subtype_is_supervised = False`), not "the
+   RNA-seq-trained classifier"; the protocol's random forest + 1D-CNN is not implemented.
+2. It scores 85 hand-curated genes (Classical 20, Mesenchymal 23, Proneural 22,
+   Neural 20), not the published 840-gene signature.
+3. It scores by ssGSEA rank enrichment, not by a centroid or classifier on a z-scored
+   vector.
+4. It standardises each signature score across the samples supplied before the softmax,
+   so a label depends on the rest of the batch. The rule z-scores each sample across its
+   own genes.
+5. Duplicate gene symbols are collapsed by their mean across the samples supplied, a
+   second dependence on the batch.
+6. It applies no log or z transform before ssGSEA. Its `zmean` option z-scores each gene
+   across samples, the opposite axis to the rule.
+7. Neural is described as a contamination axis but still competes in the argmax.
+8. IDH1 is deliberately not scored.
+9. It outputs softmax probabilities "calibrated to nothing", which the rule does not
+   register.
+
+The new single-sample classifier (below) follows rule 9(d) for its transform. It is
+still not the protocol's supervised ensemble.
+
+### Part B. Decisions
+
+D1 to D6, and the scoring-set decision for the v2 split, are entered as decided on
+2026-11-27, each with its reason, in `05_future_plan.md` section 5.4.1.
+
+### The subtype classifier (D6)
+
+**Sources** (retrieved 2026-11-27; URLs, bytes and SHA-256 in
+`data/provenance/subtype_reference_sources.json`; the files are git-ignored under
+`data/external/`):
+
+| File | Source | SHA-256 | Used for |
+| --- | --- | --- | --- |
+| `TCGA_unified_CORE_ClaNC840.txt` | Verhaak et al. 2010, GDC publication page `gbm_exp` | `c69b92fe…b86d` | The 840-gene signature |
+| `ClaNC840_centroids.xls` | Same page | `2791462d…9260` | Provenance only; the published microarray centroids are not used |
+| `exp2008_202SampleList.txt` | Same page | `9b553d64…a298` | Reference only |
+| `Molecular_subtype_classification.xlsx` | Brennan et al. 2013, GDC publication page `gbm_2013` (Table S7) | `964cbead…4a00` | Training and reference labels (`Cluster`) |
+| `TableS1.PatientData.20151020.v3.xlsx` | Ceccarelli et al. 2016, GDC publication page `lgggbm_2016` | `84e1b493…fa29` | Cross-check only |
+| `HGNChelper_0.8.16.tar.gz` and its member `hgnc.table.rda` | CRAN | `91d4c90b…93e9`, `b2a912df…2373` | Retired-symbol resolution |
+
+**Where the labels come from.** Verhaak 2010's labels come from consensus
+average-linkage hierarchical clustering of 202 samples on 1,740 genes; its 173 "core"
+samples are those with positive silhouette width. Brennan 2013 keeps those labels for the
+202 samples of the 2010 paper and assigns the others with a single-sample GSEA
+classifier; each sample is flagged with which. The Brennan labels are therefore mixed:
+partly joint clustering, partly a classifier. Cross-checks: Ceccarelli 2016's "Original
+Subtype" agrees with Brennan on all 524 patients labelled in both; Verhaak's core labels
+agree with Brennan on 155 of 173 (16 of the 18 disagreements are Proneural to G-CIMP).
+G-CIMP, "NA" and unlabelled patients are excluded from training and from agreement.
+The methods were read from the papers' PMC pages, not their PDFs or supplementary
+methods.
+
+**The signature.** 831 of the 840 genes are used: 737 match the annotation directly, 94
+through a unique HGNC previous symbol, 2 are ambiguous and excluded (EDG1, HNRPA3), and
+7 have no current symbol (RP11-35N6.1, LOC81691, LOC55565, LOC201229, MGC72080,
+CSGlcA-T, MGC2752). MATR3 maps to two Ensembl ids; the one with the higher mean
+log2(TPM+1) over the v2 training patients was frozen
+(`configs/subtype_centroids/clanc840_genes.json`, SHA-256 `4e67bbb8…0a75ab`).
+
+**Scaling, and where one sample still depends on others.** Per sample: x =
+log2(TPM + 1) over the frozen genes; z = (x − mean(x)) / sd(x), with the mean and the
+population sd over that sample's genes only (rule 9(d)). The call is the centroid with
+the highest Pearson correlation; a centroid is the mean transformed vector of the
+training patients of its class. One sample's call depends on other samples only through
+the frozen centroids (which training patients, with which labels) and, if an input
+lacks some frozen genes, through the gene intersection. It does not depend on any other
+sample in its batch. Verhaak's own normalisation standardised each gene across patients
+within a platform, a batch quantity, and is not used. Because Pearson correlation is
+invariant to the per-sample z-score, the transform does not change the call; it is kept
+so the stored vector is the registered one.
+
+**Scoring population and the two centroid sets.** 283 cohort patients with expression
+(201 v2-train, 82 v2-test); 246 of them carry one of the four labels (170 train, 76
+test); 17 G-CIMP, 17 with no label, 3 labelled "NA".
+
+| Set | Use | Training patients (CL / MES / PN / NL) | SHA-256 |
+| --- | --- | --- | --- |
+| `verhaak840_tcga_v2train` | The store's per-patient subtype; any internal evaluation on the v2 test split | 170 (41 / 59 / 36 / 34) | `fc08cdec34dc58d84c067f8507358b0c48f7acd7f02f6c18a35973dcf4abfbd9` |
+| `verhaak840_tcga_all` | Reserved for T1 | 246 (64 / 82 / 48 / 52) | `c2b65d8ff0be2708bc8086e909f04a16a299823109186d674837c4d46f159bf7` |
+
+`configs/subtype_centroids/CHECKSUMS.json` (SHA-256 `f95b15b7…6b41f`) records both;
+`load_centroid_set` refuses a file whose bytes do not match. Rebuilt twice: byte-identical.
+
+**(a) Scoring-set dependence** (`data/results/tcga_gbm/subtype_scoring_set_dependence.json`;
+seed 20261127, new to this analysis and not registered; 20 random halvings into 141 and
+142). Calls changed against joint scoring of the 283:
+
+| Experiment | Calls compared | Cohort-relative | Single-sample |
+| --- | --- | --- | --- |
+| Random halves | 283 | mean 9.15, min 2, max 18 | 0 in every repetition |
+| The 16 IDH-mutant samples removed | 267 | 10 | 0 |
+| The 155 stage-3 store patients scored alone | 155 | 8 | 0 |
+| The 45 v2-test store patients scored alone, against the 283-joint calls | 45 | 7 | 0 |
+| The same 45, against the 155-joint calls | 45 | 5 | 0 |
+
+The availability rule reproduced the stage 3 store exactly: 155 patients, 110 train and 45
+test.
+
+**(c) Agreement with the published labels** (Brennan 2013; descriptive, not validation;
+exact 95% intervals; `data/results/tcga_gbm/subtype_label_comparison.json`):
+
+| Mode | Patients | Agree | Rate | 95% CI |
+| --- | --- | --- | --- | --- |
+| Cohort-relative, 283 scored jointly | all 246 labelled | 154 | 0.626 | 0.562 to 0.687 |
+| Cohort-relative | v2-test 76 | 43 | 0.566 | 0.447 to 0.679 |
+| **Single-sample, v2-train centroids, on the v2 test split** | v2-test 76 | 56 | **0.737** | 0.623 to 0.831 |
+| Single-sample, v2-train centroids (resubstitution) | v2-train 170 | 141 | 0.829 | 0.764 to 0.883 |
+| Single-sample, all-TCGA centroids (resubstitution) | all 246 | 199 | 0.809 | 0.754 to 0.856 |
+| Variant: three classes, without Neural, v2-train centroids | v2-test 58 | 46 | 0.793 | 0.667 to 0.888 |
+
+By label provenance, on the v2 test split with the single-sample classifier: 10 of 11
+agree on Verhaak 2010 clustering labels and 46 of 65 on Brennan ssGSEA labels.
+
+Confusion matrices (rows: published label; columns: call, in the order Classical /
+Mesenchymal / Proneural / Neural):
+
+| Published label | Cohort-relative, all 283 | Single-sample v2-train, v2-test only | Single-sample all-TCGA, resubstitution |
+| --- | --- | --- | --- |
+| Classical | 50 / 4 / 4 / 6 | 19 / 2 / 1 / 1 | 55 / 5 / 1 / 3 |
+| Mesenchymal | 12 / 58 / 4 / 8 | 3 / 17 / 2 / 1 | 6 / 68 / 2 / 6 |
+| Proneural | 4 / 3 / 28 / 13 | 1 / 0 / 9 / 2 | 3 / 0 / 43 / 2 |
+| Neural | 14 / 9 / 11 / 18 | 5 / 1 / 1 / 11 | 12 / 1 / 6 / 33 |
+| G-CIMP (not in agreement) | 0 / 0 / 16 / 1 | 0 / 0 / 3 / 0 | 0 / 0 / 17 / 0 |
+
+Calls by IDH status, all 283 (Classical / Mesenchymal / Proneural / Neural):
+
+| Mode | IDH-mutant (16) | IDH-wild-type (231) | No IDH call (36) |
+| --- | --- | --- | --- |
+| Cohort-relative | 0 / 1 / 14 / 1 | 78 / 70 / 42 / 41 | 9 / 11 / 10 / 6 |
+| Single-sample, v2-train centroids | 0 / 1 / 15 / 0 | 74 / 66 / 50 / 41 | 13 / 13 / 7 / 3 |
+| Single-sample, all-TCGA centroids | 0 / 1 / 15 / 0 | 75 / 66 / 50 / 40 | 10 / 14 / 7 / 5 |
+
+**(d) and (e).** Per-patient output uses the single-sample mode, fixed on principle by
+decision D6(d), not by which mode agreed better; the cohort-relative mode is labelled and
+kept for descriptive cohort distributions only. Limits used: the two candidates; one
+variant (three classes, without Neural, re-estimated on the 136 v2-train patients of
+those classes, evaluated on the 58 v2-test patients so labelled; not frozen, not used
+anywhere; its 18 Neural-labelled test patients went 8 to Classical, 5 to Mesenchymal and
+5 to Proneural); 0 tuning rounds; TCGA labels only.
+
+### The build (D1 to D5; Part C items 1 to 5)
+
+**Design.**
+
+- `gliostrata harmonize-clinical` (`data/clinical.py`) writes the L1 clinical table
+  (`data/interim/tcga_gbm_clinical_harmonized.parquet`: `age`, `sex`, `kps`,
+  `treatment_arm`, `extent_of_resection`) and a separate label table
+  (`data/interim/tcga_gbm_labels.parquet`: `overall_survival_months`, `vital_status`).
+  An L2 or molecular name that is null throughout is not carried; one that holds a value
+  stops it, and so does any column it does not know. Each missing value is traced to
+  `clinical_raw.parquet` for its reason. Nothing is imputed. A provenance sidecar beside
+  its outputs records the SHA-256 of its inputs. `vital_status` in the label table is a
+  nullable integer, not a float.
+- `gliostrata build-feature-store --mode real|synthetic` (`features/build.py`). Real mode
+  runs the single-sample subtype against `verhaak840_tcga_v2train`, the default state
+  and TME scoring, and the molecular calls from `mgmt_calls.parquet` and
+  `idh_calls.parquet`, with the methylation and mutation GDC file manifests
+  (`--mgmt-manifest`, `--idh-manifest`) used to tell a patient never assayed from one
+  assayed only on a non-primary sample (`tested_not_callable`). It reads the L1
+  provenance sidecar. It stops before writing on a stub L2 output, a missing centroid
+  set, a centroid set other than `verhaak840_tcga_v2train`, a missing or mismatched L1
+  provenance sidecar, a missing input or any path containing "cgga". A sample the classifier cannot score gets no subtype, with reason
+  `scoring_failed`, never a default class (no TCGA sample is such a case). Synthetic mode is the default and
+  every file it writes says so. `scripts/build_tcga_feature_store.py` is a thin wrapper
+  over real mode.
+- `build_feature_store` (`features/store.py`) takes each input by keyword (`clinical`,
+  `labels`, `subtypes`, `states`, `tme`, `molecular`, `expression_samples`) and raises,
+  in order, on a null-only column that shadows a computed feature, a column supplied by
+  more than one input, a stub or non-single-sample subtype input in real mode, a column
+  its input does not own (an outcome label among them), and a missing value without a
+  reason. The stage 3 placeholder-dropping workaround is removed.
+- The store is four files: the features; the labels; a missing-value table, one row per
+  missing cell (`patient_id`, `column`, `reason`); and a column-metadata JSON (role,
+  source layer, source input, source files with SHA-256, class, dtype, missing count).
+  Roles: id, feature, status, label. Classes: `measured`, `derived_from_measurement`,
+  `clinical_record`, `not_available`. Reason codes: `not_recorded_at_source`,
+  `recorded_unknown_at_source`, `lost_in_harmonisation`, `missing_in_source_table`,
+  `not_available_in_cohort`, `no_expression_sample`, `scoring_failed`, `not_tested`,
+  `tested_not_callable`. `feature_matrix` refuses a label or reason column.
+- Missing resection is `not_available_in_cohort`, never "biopsy". Calls are nullable,
+  never 0; call status is `called`, `not_tested` or `tested_not_callable`; the
+  continuous MGMT score and its threshold (0.35) are columns. KPS is never imputed and
+  no view requires it. `treatment_arm` is a feature.
+- The real store carries `subtype`, `subtype_corr_*` and `subtype_n_genes_used`; the
+  cohort-relative `subtype_prob_*` and the resection one-hot columns are not in it.
+  `optimize` and `generate-protocol` refuse the real store, because their stub layout
+  would turn an absent value into a value.
+- DVC: a new `harmonize_clinical` stage; `build_feature_store` runs real mode with the
+  expression matrix, its annotation, the call tables, the centroid set and the partition
+  as deps, together with `profiling/verhaak.py`, `evaluation/` and the two molecular file
+  manifests. Snakemake: a new `harmonize_clinical` rule; `build_feature_store` takes its
+  mode from `source` and writes every input's SHA-256 to the report. Neither Snakemake
+  rule has run on this machine (Snakemake is not installed).
+
+**Flow of the three views** (`data/results/tcga_gbm/feature_store_build_report.json`;
+partition `tcga_gbm_clinical_v2`, 425 train / 169 test; no store patient outside it).
+Steps are sequential; "missing" counts every store patient lacking the requirement,
+"excluded" those still in the view at that step.
+
+| View | Step | Excluded | Missing | Remaining | Train | Test |
+| --- | --- | --- | --- | --- | --- | --- |
+| all | store | 0 | 0 | 594 | 425 | 169 |
+| `profiling` | expression sample | 311 | 311 | **283** | 201 | 82 |
+| `transferable_model` | age; sex | 0 | 0 | 594 | 425 | 169 |
+| | treatment arm | 23 | 23 | 571 | 406 | 165 |
+| | survival time | 0 | 0 | 571 | 406 | 165 |
+| | vital status | 1 | 2 | **570** | 405 | 165 |
+| `molecular_model` | the transferable steps | | | 570 | 405 | 165 |
+| | IDH called | 219 | 226 | 351 | 250 | 101 |
+| | MGMT called | 53 | 179 | **298** | 214 | 84 |
+
+The transferable and molecular views give 570 and 298, the fit sets of T2 variants 2 and
+3 pinned in `tests/fixtures/tcga_fit_fingerprint.json`; no rule was tuned to match, and a
+test asserts it.
+
+**Missing values in the real store** (5,577 rows in the missing-value table: 5,575 in the
+features and 2 in the labels):
+
+| Column | Reason | Patients |
+| --- | --- | --- |
+| `kps` | `not_recorded_at_source` | 149 |
+| `kps` | `recorded_unknown_at_source` ("Unknown") | 3 |
+| `treatment_arm` | `not_recorded_at_source` (raw `[]`) | 23 |
+| `extent_of_resection` | `not_available_in_cohort` | 594 |
+| `vital_status` (label) | `recorded_unknown_at_source` ("Not Reported") | 2 |
+| `mgmt_score`, `mgmt_threshold`, `mgmt_methylated` | `not_tested` | 179 each |
+| `idh_mutated` | `not_tested` | 225 |
+| `idh_mutated` | `tested_not_callable` (sequenced on a recurrent sample only; the call table calls the primary tumour) | 1 |
+| every subtype, state and TME column | `no_expression_sample` | 311 each |
+
+Call status: MGMT 415 called, 179 not tested, 0 tested but not callable; IDH
+368 called, 225 not tested, 1 tested but not callable (its only sequenced sample is a
+recurrence, so no primary-tumour call is admissible; seen in the mutation file manifest). Among the called, 128 are MGMT-methylated and 23 IDH-mutant. Subtype in the store:
+Classical 87, Mesenchymal 80, Proneural 72, Neural 44; every profiled patient was scored
+on 831 genes. The MGMT and IDH tables have 7 and 5 rows outside the cohort; no cohort
+patient is absent from either.
+
+**Outputs and checksums.** The build was run twice from `harmonize-clinical` on; every
+file was byte-identical across the two runs. All are git-ignored. The stage 3 files
+(`data/processed/tcga_gbm/feature_store.parquet` and its report) are left untouched.
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `data/interim/tcga_gbm_clinical_harmonized.parquet` | 12,712 | `184784b78efd6cfe62ea8e20e46f223e950f217bdc59123cab3fe01dfa065184` |
+| `data/interim/tcga_gbm_labels.parquet` | 10,854 | `35726554454014b88d022e8f819ad74b825049fd28ea7c0c157da0ed18036d44` |
+| `data/interim/tcga_gbm_clinical_harmonized_provenance.json` | 850 | `3e95866ea7ee805f381303baade7f3d8a74427c8c12c41f172b1a5ada5be8713` |
+| `data/processed/tcga_gbm_feature_store.parquet` | 55,655 | `017f05e9878ce165443f32a3ef64b5b5d0726cc3cdd99cd0e448d6089d7d5d88` |
+| `data/processed/tcga_gbm_feature_store_labels.parquet` | 9,472 | `1cd1301c843580503c6333c58318dc010071d54a3bbe5cec62df9d2f45c0c0e0` |
+| `data/processed/tcga_gbm_feature_store_missing.parquet` | 13,133 | `2429f97e066035db21e7e7f48549b8a19d748fb35709af5f93ce6fb9f4290d3f` |
+| `data/processed/tcga_gbm_feature_store_columns.json` | 33,049 | `1a6d1914e3df5154e9cae4fd10a359053f40ef2e195055a60bf69cb76bbc005c` |
+| `data/results/tcga_gbm/feature_store_build_report.json` | 20,674 | `008294ca0b02838a1a615386f1539e0f1d3f94907dbe75ffceaf152d6643f210` |
+| `data/results/tcga_gbm/subtype_scoring_set_dependence.json` | 2,637 | `1a6efc501d9d08123902832e848ce0a00f54262617a2545acba779f405be33b0` |
+| `data/results/tcga_gbm/subtype_label_comparison.json` | 7,315 | `42f47314188755283605fd60c8aadf31015e94caae401ba2da766d3d82020fe0` |
+
+Inputs (from the build report): `tpm.parquet` `6f4cdfcf…eebe31`, `gene_annotation.parquet`
+`40843412…a34960`, `mgmt_calls.parquet` `be464959…e909d`, `idh_calls.parquet`
+`d8a5ea4d…59fc4`, the methylation file manifest `f3c1809c…94f90`, the mutation file
+manifest `a41acbf0…3d91f` (both also in `data/provenance/file_manifest_checksums.json`),
+the L1 clinical and label tables (checksums above), the centroid set `fc08cdec…bfbd9`,
+the partition `17adb31d…55c16`.
+Software: Python 3.14.3, pandas 3.0.1, numpy 2.4.3, pyarrow 24.0.0.
+
+### Deconvolution (Part C item 6; descriptive, not validation)
+
+The default state and TME scoring (`deconvolve.py`: ssGSEA, then `softmax_z`) on the 283
+profiled patients: 60,660 genes, no non-finite value, no all-zero sample, every marker
+gene found (NPC 15, OPC 14, AC 16, MES 14; immune 15, stromal 14, endothelial 14). The
+store holds the same values.
+
+| Column | Min | Q1 | Median | Q3 | Max | Mean |
+| --- | --- | --- | --- | --- | --- | --- |
+| `state_npc` | 0.0069 | 0.1317 | 0.2399 | 0.3458 | 0.8657 | 0.2469 |
+| `state_opc` | 0.0032 | 0.1421 | 0.2334 | 0.3343 | 0.5703 | 0.2397 |
+| `state_ac` | 0.000004 | 0.1524 | 0.2345 | 0.3045 | 0.6527 | 0.2383 |
+| `state_mes` | 0.0009 | 0.1203 | 0.2285 | 0.3913 | 0.9267 | 0.2751 |
+| `tme_immune` | 0.0104 | 0.2063 | 0.3048 | 0.4508 | 0.9570 | 0.3357 |
+| `tme_stromal` | 0.0238 | 0.2226 | 0.3100 | 0.4066 | 0.8697 | 0.3249 |
+| `tme_endothelial` | 0.0157 | 0.1944 | 0.3223 | 0.4577 | 0.8928 | 0.3394 |
+
+Highest state per patient: MES 99, NPC 68, OPC 67, AC 49. Highest compartment:
+endothelial 109, immune 93, stromal 81.
+
+**Samples it fails on.** None numerically: no missing row, no row that does not sum to
+1, no all-zero or all-equal row. Its known weaknesses: it is not a proportion estimate by
+construction (no reference profile, no mixing model); AC is poorly identified, because
+GFAP is saturated in GBM (`deconvolve.py:230-238`); and it is **cohort-relative**: the
+default `softmax_z` standardises each signature across the samples scored
+(`deconvolve.py:336-339`), on top of the duplicate-symbol collapse. Scoring the first 50
+of the 283 alone, against the same 50 among all 283, moves a state fraction by up to
+0.0744 and changes the highest state of 6 of the 50. The store's values include the 82
+v2-test patients in their scoring set. No decision covers this (`05_future_plan.md`,
+section 5.5).
+
+### Part D. The Neftel 2019 atlas
+
+**Not on disk.** No file or directory under `data/` (the CGGA directories not entered)
+matches GSE131928, Neftel, SCP393, Smart-seq2 or 10x. **Stopped here; nothing was
+downloaded, and no mixture specification was written.**
+
+Public sources (looked up 2026-11-27; file listings and sizes only):
+
+- **GEO GSE131928** (Neftel et al., Cell 178:835, 2019; PubMed 31327527): processed data
+  only. `GSE131928_RAW.tar`, 669,112,320 bytes, holding the Smart-seq2 TPM matrix
+  (310,775,398 bytes) and the 10x TPM matrix (358,334,116 bytes); and an 828 KB xlsx
+  mapping cells to tumour and to adult or paediatric. 24,131 cells from 28 patients.
+- **Broad Single Cell Portal SCP393:** the Smart-seq2 logTPM matrix (310,775,383 bytes),
+  `IDHwt.GBM.Metadata.SS2.txt` (510,445), `IDHwt.GBM.MetaModules.tsv` (1,344), a
+  cell-state hierarchy file (141,494) and the 10x matrices (97,109,268 and 6,664,807).
+- **UNVERIFIED:** whether any file carries an explicit per-cell state label. If none does,
+  the state must be derived from the meta-module scores, and the mixture specification
+  must say how.
+- **Licence:** GEO attaches no licence to the series; the NCBI disclaimer page could not
+  be read (it returned a captcha), so its wording is UNVERIFIED. SCP is governed by its
+  Terms of Service; whether SCP393's downloads need a sign-in is UNVERIFIED. Either way,
+  cite Neftel et al. 2019 and record URL, bytes and SHA-256 at download.
+
+### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `python -W ignore scripts/prepare_subtype_reference.py` | The gene map (831 of 840) and the published-label table (618 rows, git-ignored) |
+| `python scripts/build_subtype_centroids.py`, twice | Two centroid sets; `CHECKSUMS.json` byte-identical across runs |
+| `python scripts/subtype_scoring_set_dependence.py` | Table (a) |
+| `python scripts/compare_subtype_labels.py` | Table (c) |
+| `gliostrata harmonize-clinical`, then `gliostrata build-feature-store --mode real`, twice | 594 patients; views 283, 570, 298; every output byte-identical across the two runs |
+| full suite, Python-level socket entry points replaced and a CGGA file-access audit hook | 1112 passed, 1 skipped in 242 s (1113 collected in 34 modules); 0 blocked connection attempts; 0 accesses to a CGGA path in the repository |
+| `ruff check --select E9,F63,F7,F82 src tests scripts` | All checks passed |
+| `ruff check src tests scripts` (advisory) | 166 findings: 29 in `src`, 130 in `tests`, 7 in `scripts` (170 at `baseline-r1`; the four removed were in `features/store.py` and `tests/test_features.py`, both rewritten; the new files add none) |
+
+**External reads.** No CGGA value was read, downloaded or hashed; nothing under
+`data/raw/cgga` or `data/processed/cgga` was opened, listed or hashed, and the ledger is
+unchanged (11 entries, 2 value reads). Network reads, all public and all TCGA or
+reference material: GDC API queries (data release 46.0) for the KPS and resection trace;
+the GDC publication files and CRAN tarball listed above; the papers' methods read on
+their PMC and GDC pages; the GEO and Single Cell Portal file listings for Part D (no data
+file downloaded).
+
+**What this is not.** It is not validation. The subtype agreement is with labels from the
+same cohort the centroids came from, partly produced by a classifier. The state and TME
+values are cohort-relative enrichment scores. T1 has not been run, and nothing here reads
+CGGA. L4 to L7 have not run on real data.
+
+**Open issues.**
+
+1. The state and TME scores are cohort-relative, including over the v2-test patients; D6
+   does not cover them.
+2. Every reported internal number had the 169 v2-test patients in its training folds.
+3. Neither Snakemake rule of this stage has run here; CI's `workflow-dry-run` job is their
+   first run. `dvc repro` on real data still stops at the stub `profile` stage.
+4. `cgga_external_v1` is blocked as Part A item 1 states.
+5. Pre-registration 4.5 and 3.3 misname T1's scoring sets; the proposed text waits for an
+   amendment (`05_future_plan.md` section 5.5).
+6. `configs/scoring_rules.yaml` says "per-gene z-scored" where rule 9(d) says per sample,
+   across genes.
+7. Whether `treatment_arm`, which reads only the first diagnosis record, misses
+   treatments was not checked.
+8. The Neftel atlas is not on disk; T1's deconvolution row cannot be run.
+9. Closed. `.gitattributes` keeps the centroid files byte-exact on checkout: in a fresh
+   clone of `2e19939` (with `core.autocrlf=true`) both centroid sets hash to the values in
+   `CHECKSUMS.json`. The full suite in that clone, `PYTHONPATH=<clone>/src`, sockets
+   blocked: 1085 passed, 28 skipped (the real-data tests, whose inputs are git-ignored,
+   and the Snakemake test); `gliostrata` resolved inside the clone.
+10. The stale stage 3 store, `data/processed/tcga_gbm/feature_store.parquet` (155 patients,
+    git-ignored), still sits beside the new `data/processed/tcga_gbm_feature_store*` files.
+11. `scripts/prepare_subtype_reference.py` needs `openpyxl` and `pyreadr`, which are in
+    neither `pyproject.toml` nor the lock file.
+12. Of the 76 v2-test labels behind the 0.737, 65 are Brennan ssGSEA classifier labels and
+    11 Verhaak 2010 clustering labels: the honest number mostly measures agreement with
+    another classifier.
+13. Three cohort patients carry a KPS of 0 in the raw GDC record (`kps_raw` "0"; all three
+    in the v2 training split). A score of 0 means dead, which is implausible at
+    diagnosis. The store keeps the value as recorded; it entered variant 1's TCGA fit.
+    Whether it is a coding error at source was not checked.
+14. Snakemake has never executed on this machine: neither the new rules nor the existing
+    ones.

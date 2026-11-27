@@ -1,10 +1,12 @@
 # GlioStrata — Implementation Roadmap
 
-Status as of 2026-11-26. Three statuses are used:
+Status as of 2026-11-27 (stage 3b). Four statuses are used:
 
 - **Working / Implemented** — does what it says, with tests.
 - **Implemented, not wired** — real, tested code that the CLI pipeline does not
   call yet. Wiring it in is a change to `src/gliostrata/cli.py` and `dvc.yaml`.
+- **Implemented, wired (real mode)** — called by `gliostrata build-feature-store --mode real`
+  on TCGA; the synthetic pipeline still uses the stub of the same layer.
 - **Stub** — returns synthetic or schema-only output and says so in its docstring.
 
 ## Status by layer
@@ -15,11 +17,13 @@ Status as of 2026-11-26. Three statuses are used:
 | L0 | `scripts/download_cgga.py` | Implemented | Pre-registered external cohort, RNA-seq batches; the microarray batch is not ingested yet |
 | L0 | `data/ingest.py` | Stub | `generate_synthetic_cohort` works; the `download_*` functions raise |
 | L1 | `data/harmonize.py` | Stub | Schema normalisation + QC rows; ComBat / harmony calls TODO |
+| L1 | `data/clinical.py` | Working (TCGA) | `gliostrata harmonize-clinical`: clinical table with owned columns, a separate label table, a reason code for every missing value; nothing imputed |
 | L1 | `data/qc.py` | Stub | Purity / consistency checks TODO |
-| L2 | `profiling/verhaak.py` | Implemented, not wired | Signature-based subtype scoring from bulk expression |
-| L2 | `profiling/deconvolve.py` | Implemented, not wired | Marker-based state and TME scoring from bulk expression |
+| L2 | `profiling/centroid.py` | Implemented, wired (real mode) | Single-sample nearest centroid over the published Verhaak 840-gene signature (831 genes resolved); two frozen centroid sets with checksums. The per-patient subtype. Measured, not validated |
+| L2 | `profiling/verhaak.py` | Implemented | Cohort-relative signature scoring; descriptive cohort distributions only |
+| L2 | `profiling/deconvolve.py` | Implemented, wired (real mode) | Marker-based state and TME scoring from bulk expression; cohort-relative by default |
 | L2 | `profiling/{subtype,states,tme}.py` | Stub | Synthetic calls; this is what `gliostrata profile` runs |
-| L3 | `features/store.py` | Working | Assembles the feature store. First built from real data by `scripts/build_tcga_feature_store.py` (155 of 594 TCGA patients, every exclusion counted) |
+| L3 | `features/{store,contract,views,build}.py` | Working | `gliostrata build-feature-store --mode real\|synthetic`. The store holds every cohort patient (594 on TCGA) and never filters; outcomes in a separate label table; named views profiling (283), transferable model (570) and molecular model (298) with per-split flow counts |
 | L4 | `simulation/tumor.py`, `simulation/nsc.py` | Stub | PhysiCell wrapper and chemotaxis solver TODO; synthetic curves provided |
 | L5 | `prediction/cox.py` | Implemented, not wired | Fitted Cox-PH. External C-index and Brier score on CGGA miss the T2 thresholds (`docs/cgga_validation.md`) |
 | L5 | `prediction/survival.py` | Stub | Synthetic hazard model; this is what the CLI uses |
@@ -34,15 +38,18 @@ Status as of 2026-11-26. Three statuses are used:
 1. **L0 ingestion** — done for TCGA (direct GDC REST API in `scripts/`, not
    TCGAbiolinks) and CGGA RNA-seq. CPTAC is not started.
 2. **L1 harmonization** — ComBat-seq for batch correction (open).
-3. **L2 subtype classifier** — implemented as signature-based scoring
-   (`profiling/verhaak.py`), not a random forest; wiring it into the pipeline is open.
+3. **L2 subtype classifier** — single-sample nearest centroid over the published
+   Verhaak 840-gene signature (`profiling/centroid.py`), wired into
+   `build-feature-store --mode real`. Not the protocol's random forest + 1D-CNN.
+   Its T1 evaluation on CGGA is not run.
 4. **L2 state deconvolution** — `CIBERSORTx` (web tool) → import results.
    `profiling/deconvolve.py` is the marker-based alternative; the CIBERSORTx
    signature-matrix builder is not implemented.
-5. **L3 feature store** — working. `scripts/build_tcga_feature_store.py` runs L0 to L3 on the real TCGA
-   inputs through the expression-based L2 modules (155 of 594 patients, every
-   exclusion reported). The CLI and the workflow still use the stub L2; wiring
-   them to this path is open.
+5. **L3 feature store** — working. `gliostrata build-feature-store --mode real` runs
+   L2 and L3 on the real TCGA inputs (all 594 patients in the store; three named
+   views with their flow counts). The DVC stage and the Snakemake rule (with
+   `source=tcga`) run the same command; `scripts/build_tcga_feature_store.py` is a
+   thin wrapper over it. The synthetic mode stays the default for tests.
 6. **L5 survival model** — implemented as a hand-written Cox-PH
    (`prediction/cox.py`, Breslow partial likelihood). DeepSurv is open.
 7. **L4 simulation** — install PhysiCell, wrap with `pyMCDS`.
@@ -52,7 +59,7 @@ Status as of 2026-11-26. Three statuses are used:
 
 ## What the tests cover
 
-1075 tests in 31 modules: 1074 pass and 1 is skipped without the optional dependencies. They
+1113 tests in 34 modules (1112 passed, 1 skipped) run without the optional dependencies. They
 pass without network access and without heavy dependencies (scanpy, lifelines,
 botorch and PhysiCell are not required). Tests that read the real TCGA
 data skip when it is absent; no test reads CGGA; one workflow test skips when Snakemake is not

@@ -68,15 +68,20 @@ Source: `docs/preregistration.md` section 2; `src/gliostrata/evaluation/threshol
 The pipeline has eight layers. The table says what each does **today**. "Working" means it
 does what it claims and is tested. "Implemented, not wired" means real, tested code that
 the `gliostrata` command does not call. "Stub" means it returns synthetic or schema-only
-output.
+output. "Wired (real mode)" means `gliostrata build-feature-store --mode real` calls it
+on TCGA, while the synthetic pipeline still uses the stub of the same layer. Status as of
+2026-11-27 (stage 3b).
 
 | Layer | Purpose | Module | Status today |
 | --- | --- | --- | --- |
 | L0 | Ingestion | `scripts/download_tcga_*.py`, `scripts/download_cgga.py` | **Working.** Real downloads from the GDC API and CGGA. |
 | L1 | Harmonisation | `data/harmonize.py`, `data/qc.py` | Stub. Schema normalisation and QC rows; no batch correction. |
-| L2 | Tumour profiling | `profiling/verhaak.py`, `profiling/deconvolve.py` | **Implemented, not wired.** Reads bulk expression. |
-| L2 | Tumour profiling | `profiling/subtype.py`, `states.py`, `tme.py` | Stub. Derives calls from the clinical table; this is what the CLI runs. |
-| L3 | Feature store | `features/store.py` | Working, but it consumes the stub L2 outputs. |
+| L1 | Clinical harmonisation (TCGA) | `data/clinical.py` | **Working.** `gliostrata harmonize-clinical`: a clinical table with owned columns only and a separate label table; every missing value carries a reason code traced to the raw GDC record; nothing imputed. |
+| L2 | Subtype, per patient | `profiling/centroid.py` | **Implemented, wired (real mode).** Single-sample nearest centroid over the published Verhaak 2010 840-gene signature (831 genes resolved), centroids frozen from the TCGA v2 training split. A patient's call does not depend on the other patients scored. Measured, not validated. |
+| L2 | Subtype, cohort-relative | `profiling/verhaak.py` | Implemented. Signature scoring whose calls depend on the scoring set; used for descriptive cohort distributions only. |
+| L2 | States and TME | `profiling/deconvolve.py` | **Implemented, wired (real mode).** Marker-enrichment scores, not cell proportions; cohort-relative by default. Measured, not validated. |
+| L2 | Tumour profiling | `profiling/subtype.py`, `states.py`, `tme.py` | Stub. Derives calls from the clinical table; this is what `gliostrata profile` and the synthetic pipeline run. |
+| L3 | Feature store | `features/store.py`, `contract.py`, `views.py`, `build.py` | **Working.** Real mode on TCGA: every cohort patient, one row each, never filtered; outcomes in a separate label table; each column with its source, the SHA-256 of its file and a class; each missing value with a reason code. Model-ready populations are named views. L5 to L7 refuse the real store. |
 | L4 | Simulation | `simulation/tumor.py`, `simulation/nsc.py` | Stub. Synthetic curves. |
 | L5 | Outcome prediction | `prediction/cox.py` | **Implemented, not wired.** A fitted Cox model; failed T2 externally. |
 | L5 | Outcome prediction | `prediction/survival.py` | Stub. This is what the CLI runs. |
@@ -85,10 +90,39 @@ output.
 | L7 | Wet-lab handoff | `handoff/protocol.py` | Working. JSON protocol documents; not bench-executable. |
 | Evaluation | Pre-registration | `evaluation/thresholds.py`, `partitions.py` | **Working.** Registry, sealed partitions, drift detection. |
 
-The most important consequence: the L0 expression ingest is real and produces count and
-TPM matrices, but **nothing downstream in the pipeline reads them**. Every subtype call,
-cell-state fraction and TME fraction the pipeline writes today is computed from clinical
-covariates, not measured. Source: `docs/roadmap.md`, `docs/reproducibility.md` section 6.
+The most important consequence: on the synthetic path, every subtype call, cell-state
+fraction and TME fraction is still computed from clinical covariates by the stubs. On
+TCGA, `build-feature-store --mode real` reads the TPM matrix, and its values are measured
+but not validated. L4 to L7 have not run on real data. Source: `docs/roadmap.md`,
+`docs/reproducibility.md` section 6, `06_evidence_reports.md` stage 3b.
+
+### Patient flow on TCGA (stage 3b, 2026-11-27)
+
+The store holds all 594 cohort patients. Each model-ready view states its own
+requirements and counts; per-split counts are for `tcga_gbm_clinical_v2` (425 train,
+169 test).
+
+| View | Requires | Patients | Train | Test |
+| --- | --- | --- | --- | --- |
+| Store | nothing; never filters | 594 | 425 | 169 |
+| `profiling` | an expression sample | 283 | 201 | 82 |
+| `transferable_model` | age, sex, treatment arm; an observed outcome | 570 | 405 | 165 |
+| `molecular_model` | the transferable requirements, an IDH call and an MGMT call | 298 | 214 | 84 |
+
+The transferable and molecular views reproduce the T2 fit sets (570 and 298), with no
+rule tuned to match. KPS is not a requirement of any view: it is missing for 152 of the
+594, all absent at the GDC source.
+
+### Measured but not validated
+
+- The per-patient subtype: a nearest-centroid assignment. It agrees with the published
+  TCGA labels for 56 of 76 v2-test patients (0.737), a descriptive check on the cohort
+  the centroids came from. T1 has not been run.
+- The state and TME scores: normalised marker-enrichment scores, not cell proportions,
+  and cohort-relative over the 283 profiled patients. No ground truth exists for them in
+  the project; T1's deconvolution row needs the Neftel 2019 atlas, which is not on disk.
+- The MGMT call: a two-probe score thresholded at 0.35 (`docs/mgmt_idh_calling.md`).
+- The IDH call: from open MAF files; untested patients are no call, never wild type.
 
 ## 1.5 Data in hand
 
@@ -130,18 +164,18 @@ Source: manifests under `data/partitions/`; `docs/reproducibility.md` section 4.
 | Property | Value |
 | --- | --- |
 | Package | `gliostrata` 0.1.0, MIT licence, Python >= 3.10 (developed on 3.14.3) |
-| Test suite | **1075 tests in 31 modules: 1074 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27; 1042 in 27 modules the day before) |
+| Test suite | **1113 tests in 34 modules: 1112 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27; 1075 in 31 modules at `baseline-r1`) |
 | The one skip | A Snakemake-dependent workflow test; Snakemake is an optional dependency and was not installed |
 | Real-data tests | Skip when the TCGA or CGGA files are absent; they ran here because the data are present |
 | Blocking lint (`E9,F63,F7,F82`) | Clean across `src`, `tests`, `scripts` |
-| Advisory lint (full project config) | 170 findings: 30 in `src`, 133 in `tests`, 7 in `scripts` (2026-11-27; 171 the day before). 166 are naming rules that flag names such as `X` and `N`, which are conventional in statistical code |
-| Pipeline definition | 9 DVC stages in `dvc.yaml`; 9 Snakemake rule files under `workflow/rules/` |
+| Advisory lint (full project config) | 166 findings, 29 in `src`, 130 in `tests`, 7 in `scripts` (after stage 3b, 2026-11-27). At `baseline-r1`: 170 findings, 30 in `src`, 133 in `tests`, 7 in `scripts` (171 the day before). 166 are naming rules that flag names such as `X` and `N`, which are conventional in statistical code |
+| Pipeline definition | 10 DVC stages in `dvc.yaml` (9 before stage 3b; `harmonize_clinical` added); 9 Snakemake rule files under `workflow/rules/` |
 | Continuous integration | 5 jobs: lint, tests from the lock file, tests on Python 3.10 from the floors, partition-drift guardrail, Snakemake dry run with an offline fixture run. The two changed jobs have not run on GitHub |
 | Dependencies | `requirements-lock.txt` (2026-11-27): 37 installed distributions, Python 3.14.3. `requirements-floor.txt`: the lowest versions pyproject accepts. No container image |
 
 The advisory lint count rose from 148 to 171 on 2026-11-26 because two new files were
 added (20 and 3 findings). They follow the naming convention of their sibling files.
-Stage R1 (2026-11-27) added none and removed one, which leaves 170.
+Stage R1 (2026-11-27) added none and removed one, which leaves 170. Stage 3b added none and removed four, all in two files it rewrote (`features/store.py` and `tests/test_features.py`), which leaves 166.
 
 ## 1.8 State of the pre-registration
 
@@ -152,7 +186,7 @@ Stage R1 (2026-11-27) added none and removed one, which leaves 170.
 | Threshold registry | In code, checksum-frozen, tested |
 | Author details, DOI, registered commit | **Placeholders.** To be completed at deposit |
 | Comparator model for T2's improvement row | **Placeholder.** "TO BE COMPLETED BY AUTHOR" |
-| Amendments logged | Five dated entries, all 2026-11-26. Four are marked as written after CGGA was read; one (the T1 harmonisation rule) is marked "No" |
+| Amendments logged | Seven dated entries: five of 2026-11-26 and two of 2026-11-27 (stage R1, wording and the fold-wise rerun). Four of the 2026-11-26 entries are marked as written after CGGA was read; the T1 harmonisation rule and both 2026-11-27 entries are marked "No" (no data read for them) |
 | Machine-readable registration state | `configs/registration.yaml`. The OSF DOI is `null` until the deposit; the read guard reads it |
 | Access ledger | `data/access_ledger.jsonl`. 11 entries (0 to 10); 2 are value reads, both T2 and both before deposit; 2 are checksum-only accesses (6 and 7), 4 are schema or availability accesses (0, 1, 3 and 4), and 3 (8 to 10) are an observation and two notes, not accesses |
 

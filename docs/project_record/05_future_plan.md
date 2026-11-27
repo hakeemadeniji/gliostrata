@@ -141,7 +141,8 @@ Changing the 0.65 threshold was listed only to reject it.
 
 ## 5.4 Open decisions for the project lead
 
-None of these has been made. Each changes something a document currently says.
+Each changes something a document currently says. The five rows that came from the stage 3
+slice were decided on 2026-11-27 (section 5.4.1); the others are still open.
 
 | Decision | Options as recorded | Where it is recorded |
 | --- | --- | --- |
@@ -154,11 +155,27 @@ None of these has been made. Each changes something a document currently says.
 | MGMT-STP27 | The published assay's coefficients are unverified; a two-probe score is used and labelled as such | `docs/mgmt_idh_calling.md` section 3.1 |
 | Attribution of the T1 harmonisation rule | The decision memo attributes it to Verhaak et al. (2010); the pre-registration records it as a project choice | `docs/osf_final_fields.md`, notes |
 | Download of the CGGA microarray matrix | Manual download; name, size and checksum to be sent back | T1 prerequisite |
-| Resection extent | Absent for all 594 patients in the TCGA clinical table, so both resection features are constant. Find a source for it, or remove the feature from the model and say so | `06_evidence_reports.md`, stage 3 |
-| KPS missing for 64 of the 283 patients with expression | Complete cases only (the 155-patient store), or median with an indicator, which `prediction/cox.py` already implements. The choice changes the cohort | Same |
-| No MGMT or IDH call for 78 of the 283 | Exclude the patient (the slice's default), or record 0 with that stated. A missingness indicator needs a change to the feature store | Same |
-| Scoring set for the subtype, state and TME calls | The 283 cohort patients with expression. The values depend on this set and would differ under any other | Same |
-| Placeholder columns in the harmonised cohort | `features/store.py` lets a cohort column shadow an L2 output of the same name. The slice removes all-null placeholders and refuses a column with values. Whether L3 itself should refuse is open | Same |
+| Resection extent | **Decided 2026-11-27**: see 5.4.1 D3. Absent at source for all 594 patients, so it is `not_available_in_cohort`, never "biopsy"; no view requires it. Finding a source remains open | `06_evidence_reports.md`, stage 3 |
+| KPS missing for 64 of the 283 patients with expression | **Decided 2026-11-27**: see 5.4.1 D4. Complete cases wherever an analysis needs KPS; median-plus-indicator only as a labelled sensitivity analysis declared before it is run; never imputed in the store | Same |
+| No MGMT or IDH call for 78 of the 283 | **Decided 2026-11-27**: see 5.4.1 D3 and D4. A missing call is no call, never 0; call status has three states; the `molecular_model` view requires both calls | Same |
+| Scoring set for the subtype, state and TME calls | **Decided 2026-11-27 for the subtype**: see 5.4.1 D6 and D6-v2 (single-sample, centroids from the v2 training split). The state and TME scores are still cohort-relative over the 283 (section 5.5) | Same |
+| Placeholder columns in the harmonised cohort | **Decided 2026-11-27**: see 5.4.1 D5. L1 owns its columns; L3 raises on a duplicate source and on a null-only shadow | Same |
+
+### 5.4.1 Decided on 2026-11-27 (stage 3b)
+
+These are binding. They were fixed from availability counts and from principle, never by
+comparing outcomes, and before the store they govern was rebuilt. Each replaces an open row
+of the table above, marked there.
+
+| # | Decision | Reason |
+| --- | --- | --- |
+| D1 | The feature store holds all 594 cohort patients, one row each, and never filters. Every column carries its role, source layer, source input, the SHA-256 of the file it came from, and a class: `measured`, `derived_from_measurement`, `clinical_record` or `not_available` (`<store>_columns.json`). Every missing value carries a reason code from a fixed vocabulary (`<store>_missing.parquet`): `not_recorded_at_source`, `recorded_unknown_at_source`, `lost_in_harmonisation`, `missing_in_source_table`, `not_available_in_cohort`, `no_expression_sample`, `scoring_failed`, `not_tested`, `tested_not_callable`. Outcomes are labels, not features: overall survival and vital status are kept in a separate label table keyed by patient id (`<store>_labels.parquet`), a label column supplied to the store as a feature raises, and a label column in a feature matrix raises. A missing outcome is an exclusion reason for a model-ready view, never a feature. Treatment arm is a feature, not an outcome | A store that filters hides who was lost and why; the stage 3 store held 155 of 594 and only its report said why. Provenance per column makes a value traceable to the file it came from. Keeping labels apart makes outcome leakage into features a raised error instead of a convention |
+| D2 | Model-ready populations are separate named views built from the store. Each declares its required columns and emits its own flow counts, with per-split counts for `tcga_gbm_clinical_v2`. Three are defined (`features/views.py`): `profiling` (an expression sample; 283), `transferable_model` (age, sex, treatment arm, and an observed outcome; 570), `molecular_model` (the transferable requirements plus an IDH call and an MGMT call; 298) | One store, several populations: each analysis states its population instead of inheriting the store's |
+| D3 | Absent never becomes a value. Missing resection is `not_available_in_cohort`, never "biopsy". A missing molecular call is no call, never 0. Call status has three states: `called`, `not_tested`, `tested_not_callable` (on TCGA: MGMT 415, 179, 0; IDH 368, 225, 1; the one is a patient sequenced on a recurrent sample only). The continuous MGMT score and the threshold used (0.35) are kept | The stage 3 store read every patient as "biopsy", because resection is absent at source for all 594 (Part A item 6), and the slice's `zero` option would have read an untested patient as unmethylated or IDH wild type |
+| D4 | KPS and the molecular calls are used as complete cases wherever an analysis needs them. Median-plus-indicator is allowed only as a labelled sensitivity analysis, declared before it is run. KPS is never imputed in the store | Every missing KPS is absent at source (`06_evidence_reports.md`, stage 3b, Part A item 4), so imputation fills a value the record never had; the indicator is itself prognostic (HR 1.57) |
+| D5 | Column ownership. The harmonised clinical table (`gliostrata harmonize-clinical`, `data/interim/tcga_gbm_clinical_harmonized.parquet`) carries only the columns the clinical layer owns; a column under an L2 or molecular name that holds a value stops it. `build_feature_store` takes each input by explicit name and raises on a column supplied by more than one input and on a null-only column that shadows a computed feature. The script's workaround is removed, so there is one code path | Stage 3 finding 3: the cohort's null placeholders would have silently replaced the L2 outputs. One code path means the rule cannot be bypassed by calling the store without the script |
+| D6 | Subtype: per-patient output always uses single-sample assignment (nearest centroid, Pearson, over the published Verhaak 840-gene signature; each sample's log2(TPM+1) z-scored across its own genes, the registered T1 rule 2.2 item 9(d)). The cohort-relative signature scoring is labelled as such and used only for descriptive cohort distributions. Limits: these two candidates plus one variant (three classes, without Neural), one tuning round (none was used), TCGA labels only | Fixed on principle, not on which mode scored better: a patient's feature must not change when other patients enter or leave the scoring set. The cohort-relative mode changed 2 to 18 calls of 283 under random halving and 5 to 7 of the 45 v2-test store patients when they were scored alone (the leak of review item M6); the single-sample mode changed none |
+| D6-v2 | Scoring-set decision for the v2 split. Two frozen centroid sets. `verhaak840_tcga_v2train`, estimated on the v2 training split only (170 labelled patients), is the one used for the store's per-patient subtype and for any internal evaluation on the v2 test split. `verhaak840_tcga_all` (246 labelled patients) is reserved for T1. No v2 test patient contributes to the centroids the store uses | The v2 test split is reserved for internal held-out evaluation (pre-registration 4.5); centroids estimated on it would leak it into every feature derived from them |
 
 ## 5.5 Known gaps, found and not fixed
 
@@ -185,8 +202,8 @@ them.
   not imported.
 - **A deferred consolidation.** `prediction/cox.py` carries its own bootstrap routine with
   a note to consolidate it; changing it would alter random streams.
-- **Advisory lint backlog.** 170 findings on 2026-11-27 (171 the day before), mostly
-  naming rules. Stage R1 added none.
+- **Advisory lint backlog.** 170 findings at `baseline-r1` (171 the day before), mostly
+  naming rules. Stage R1 added none. After stage 3b: 166 (four removed in files the stage rewrote; none added).
 - **No container image.** The lock file exists since 2026-11-27: `requirements-lock.txt`
   pins the 37 installed distributions of the runtime and `dev` closure (Python 3.14.3),
   and CI's `test` job installs from it. There is still no image, and the `workflow`
@@ -220,11 +237,86 @@ them.
   `tests/test_ci_partition_drift.py` runs it.
 - **DVC is not initialised.** `.dvc/` does not exist and no remote is configured.
 - **The GDC is not pinned to a data release.** A re-run queries today's GDC.
-- **Nothing in L2 is validated against a published reference.**
-- **No end-to-end run on the real cohort has been recorded.** Partly closed on 2026-11-26:
-  L0 to L3 runs on TCGA as a standalone script (`scripts/build_tcga_feature_store.py`,
-  155 of 594 patients). L4 to L7 do not run on real data, and the pipeline's own L2 is
-  still the stub.
+- **Nothing in L2 is validated against a published reference.** The single-sample
+  subtype agrees with the published TCGA labels for 56 of 76 v2-test patients (0.737), a
+  descriptive check on its own cohort (`06_evidence_reports.md`, stage 3b). T1 has not
+  been run.
+- **No end-to-end run on the real cohort has been recorded.** L0 to L3 run on TCGA
+  through `gliostrata build-feature-store --mode real` since 2026-11-27 (stage 3b; all
+  594 patients in the store; `scripts/build_tcga_feature_store.py` is now a thin wrapper
+  over it). L4 to L7 do not run on real data: `optimize` and `generate-protocol` refuse
+  the real store rather than encode an absent value as a value. `dvc repro` on real data
+  still stops at the stub `profile` stage.
+
+Found in stage 3b (2026-11-27), not fixed:
+
+- **Three cohort patients have a KPS of 0 at source.** The raw GDC record says "0" for
+  each (all three in the v2 training split). A KPS of 0 means dead, which is implausible
+  at diagnosis. The store keeps the value as recorded, and it entered variant 1's TCGA
+  fit. Whether it is a coding error at source was not checked.
+- **The state and TME scores are cohort-relative.** `deconvolve.py`'s default
+  normalisation standardises each signature across the samples scored, so a patient's
+  value depends on the others: scoring the first 50 of the 283 alone moves a state
+  fraction by up to 0.0744 and changes the highest state of 6 of the 50. The store's
+  values were scored over all 283 profiled patients, the 82 v2-test patients among them.
+  This is a scoring-set dependence of the kind review item M6 found for the subtype, and
+  decision D6 does not cover it. The `proportional` option is cohort-independent but is
+  not the default. A decision is needed before these values feed any internal evaluation
+  on the v2 test split.
+- **The v2 test split has never been held out.** Every reported internal number had the
+  169 v2-test patients in its training folds: the three T2 fits (including the TCGA fits
+  scored on CGGA), their internal C-indices, the IDH sensitivity runs and the fold-wise
+  rerun. No script reads `train_ids` or `test_ids`. The pre-registration discloses this
+  for T2 only (`06_evidence_reports.md`, stage 3b, Part A item 8).
+- **Snakemake has never executed on the development machine**, so neither rule of stage 3b
+  has run there. Snakemake is not installed; the `harmonize_clinical` and `build_feature_store` rules were
+  checked only through the tests and by running the same `gliostrata` commands by hand. CI's
+  `workflow-dry-run` job will be their first run.
+- **`cgga_external_v1` is still blocked** (Part A item 1). The real eligibility step has
+  not been run; `scripts/cgga_external_eligibility.py` does not call
+  `read_guard.record_access`, so running it as it stands would be an unledgered access;
+  and its output under `data/processed/**` is git-ignored, so it must be checksummed in
+  the commit that adds the manifest. The guard itself would admit the step: it is an
+  `availability` access, and only a `values` access is subject to the deposit and seal
+  gates. A script must still call it.
+- **`configs/scoring_rules.yaml` says "per-gene z-scored vector"** for the T1 rule, while
+  pre-registration 2.2 item 9(d) says each sample is z-scored across its genes. The
+  registry wording should be aligned with 9(d).
+- **`treatment_arm` takes treatments from the first diagnosis record only**
+  (`download_tcga_clinical.py`, `flatten_case`). The live GDC lists 136 patients with a
+  "Surgery, NOS" record against 39 in the raw file. Whether this changes `treatment_arm`
+  was not checked.
+- **Pre-registration section 4.5 names `cgga_external_v1` as the primary external test
+  for T1.** It is not: T1's subtype row is scored on the 108 labelled CGGA microarray
+  patients (2.2 item 9; only 28 of them have RNA-seq, which the partition requires), and
+  its deconvolution row on simulated mixtures (item 10). Section 3.3 has the same error.
+  Not corrected, because stage 3b may not edit the pre-registration. Proposed text, for
+  the next amendment:
+
+  > Role: **Primary external test for T2, T4 and T5.** It is not the scoring set of
+  > either T1 row. **Not created.** … *(status text unchanged)*
+  >
+  > *Note on T1.* T1 is scored outside this partition, by registered rule. Its
+  > subtype-accuracy row uses the CGGA microarray patients that carry a reference Verhaak
+  > label (108 at ingest; section 2.2 item 9). The scoring set is fixed by the rule
+  > `T1_subtype_accuracy_cgga` in `configs/scoring_rules.yaml` and frozen as its own
+  > manifest before the read. Of the 108, 28 also have RNA-seq and may also be in
+  > `cgga_external_v1`. The overlap does not change either scoring set. T1's
+  > deconvolution row is scored on 100 pseudo-bulk mixtures simulated from the Neftel
+  > 2019 atlas (item 10) and reads no cohort.
+
+  And in section 3.3: "Final numbers for T2 are reported on the frozen external test
+  partitions; T1 is scored on the sets fixed in section 2.2 items 9 and 10."
+- **The stale stage 3 store is still on disk.** `data/processed/tcga_gbm/feature_store.parquet`
+  (155 patients, git-ignored) sits beside the new `data/processed/tcga_gbm_feature_store*`
+  files; nothing reads it.
+- **The 0.737 subtype agreement is mostly with another classifier.** 65 of the 76 v2-test
+  labels are Brennan 2013 ssGSEA classifier labels; 11 are Verhaak 2010 clustering labels.
+- **The Neftel 2019 atlas is not on disk**, so T1's deconvolution row cannot be run. Its
+  public sources, sizes and terms are in `06_evidence_reports.md`, stage 3b, Part D.
+- **`scripts/prepare_subtype_reference.py` needs `openpyxl` and `pyreadr`**, which are in
+  neither `pyproject.toml` nor the lock file, to rebuild the published-label table and the gene map from the
+  downloads. The committed centroid sets and gene map do not need it.
 
 ## 5.6 Milestones and publication plan, as stated in the protocol
 

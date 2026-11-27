@@ -27,16 +27,16 @@ different stages, stated per layer:
 | Layer | Module | Status |
 |-------|--------|--------|
 | L0 — Ingestion | `scripts/download_tcga_*.py`, `scripts/download_cgga.py` | **Working** — real GDC and CGGA downloads. `gliostrata ingest` itself only implements `--source synthetic`. |
-| L1 — Harmonization | `gliostrata.data.harmonize`, `gliostrata.data.qc` | Stub — schema normalisation and QC rows; no batch correction. |
-| L2 — Tumor profiling | `gliostrata.profiling.verhaak`, `gliostrata.profiling.deconvolve` | **Implemented** from bulk expression, **not wired into the pipeline**. What `gliostrata profile` runs (`subtype`, `states`, `tme`) is a stub. |
-| L3 — Feature store | `gliostrata.features.store` | **Working**. First built from real data by `scripts/build_tcga_feature_store.py`: 155 of 594 TCGA patients, every exclusion counted (`docs/project_record/06_evidence_reports.md`, stage 3). |
+| L1 — Harmonization | `gliostrata.data.harmonize`, `gliostrata.data.qc`, `gliostrata.data.clinical` | `harmonize` is a stub (schema normalisation and QC rows; no batch correction). `harmonize-clinical` is **working** on TCGA: a clinical table with explicitly owned columns and a separate label table, every missing value with a reason code, nothing imputed. |
+| L2 — Tumor profiling | `gliostrata.profiling.centroid`, `gliostrata.profiling.deconvolve`, `gliostrata.profiling.verhaak` | **Implemented** from bulk expression; run on TCGA by `gliostrata build-feature-store --mode real`. Subtype: single-sample nearest centroid over the published Verhaak 840-gene signature (831 genes resolved), centroids frozen from the TCGA v2 training split. State and TME scores are still cohort-relative. Measured, not validated. What `gliostrata profile` runs (`subtype`, `states`, `tme`) is still a stub. |
+| L3 — Feature store | `gliostrata.features.store`, `contract`, `views`, `build` | **Working**. Built from real data by `gliostrata build-feature-store --mode real`: all 594 TCGA patients, one row each, never filtered; outcomes in a separate label table; every column with its source and class, every missing value with a reason code. Model-ready populations are named views: profiling 283, transferable model 570, molecular model 298 (`docs/project_record/06_evidence_reports.md`, stage 3b). |
 | L4 — Simulation | `gliostrata.simulation.tumor`, `nsc` | Stub (synthetic curves) |
 | L5 — Outcome prediction | `gliostrata.prediction.cox` | **Fitted Cox-PH model**, not wired into the pipeline. Neither its external C-index nor its Brier score on CGGA met the registered T2 thresholds (`docs/cgga_validation.md`). `gliostrata.prediction.survival`, which the CLI uses, is a stub. |
 | L6 — Optimizer | `gliostrata.optimization.config_space`, `bayesian` | **Working** (ranked enumeration). `optimization.bayes_opt` adds a Gaussian-process optimizer; the BoTorch backend is TODO. |
 | L7 — Wet-lab handoff | `gliostrata.handoff.protocol` | **Working** (JSON protocol generator) |
 | — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification, access ledger and read guard |
 
-The test suite has 1075 tests in 31 modules: 1074 pass and 1 is skipped (it needs Snakemake, an
+The test suite has 1113 tests in 34 modules: 1112 pass and 1 is skipped (the skipped test needs Snakemake, an
 optional dependency). It passes with all outbound sockets blocked. Tests that need the real
 TCGA data skip when it is absent, and no test reads CGGA. Heavy optional dependencies
 (scanpy, lifelines, botorch, PhysiCell) are NOT required.
@@ -101,8 +101,10 @@ pytest
 | `gliostrata pipeline-dry-run [--n 20] [--config <path>]` | Run the full L0→L7 pipeline on synthetic data and print a summary. |
 | `gliostrata ingest --source <tcga\|cgga\|cptac\|synthetic> --out <path>` | L0 — ingest from a source. Only `synthetic` is implemented here; for TCGA and CGGA use `scripts/download_tcga_*.py` and `scripts/download_cgga.py`. |
 | `gliostrata harmonize --input <path> --out <path>` | L1 — harmonize ingested data (stub). |
-| `gliostrata profile --input <path> --out <path>` | L2 — tumor profiling (stub; not the expression-based code in `profiling/verhaak.py` and `profiling/deconvolve.py`). |
-| `gliostrata build-feature-store --input <path> --out <path>` | L3 — assemble unified feature store. |
+| `gliostrata profile --input <path> --out <path>` | L2 — tumor profiling (stub; not the expression-based code, which `build-feature-store --mode real` runs). |
+| `gliostrata harmonize-clinical [--cohort <path>] [--raw <path>]` | L1 — TCGA clinical table with owned columns (`data/interim/tcga_gbm_clinical_harmonized.parquet`) and a separate label table (`data/interim/tcga_gbm_labels.parquet`). Every missing value is traced to the raw GDC record for its reason code. Refuses any path containing "cgga". Also writes `data/interim/tcga_gbm_clinical_harmonized_provenance.json` (SHA-256 of inputs and outputs). |
+| `gliostrata build-feature-store --mode synthetic --input <path> --out <path>` | L2 + L3 on synthetic data (the default mode; labelled synthetic in every file it writes). |
+| `gliostrata build-feature-store --mode real` | L2 + L3 on TCGA: single-sample subtype against the frozen centroid set `verhaak840_tcga_v2train`, state and TME scores, molecular calls. Writes the store, its label table, its missing-value reason table, its column metadata and a report of the three views with per-split flow counts. Every input defaults to its repository path. A stub L2 output, a missing centroid set, a centroid set other than `verhaak840_tcga_v2train`, a missing or mismatched L1 provenance sidecar, or any path containing "cgga" stops it before anything is written. |
 | `gliostrata optimize --input <path> --out <dir> [--n-top 5] [--seed 42]` | L6 — therapeutic configuration optimization (ranked enumeration). |
 | `gliostrata generate-protocol --input <configs.parquet> --feature-store <fs.parquet> --out <dir>` | L7 — wet-lab handoff protocol generation. |
 | `gliostrata freeze-partition --input <cohort.parquet> --manifest <path.json> [--verify]` | Seal a train/test partition, or verify a sealed one still reproduces. Run `--verify` before every evaluation. |
@@ -150,14 +152,16 @@ gliostrata/
 │   ├── data/                      ← L0-L1
 │   │   ├── ingest.py              ← synthetic cohort generator (download_* are stubs)
 │   │   ├── harmonize.py           ← L1: schema harmonization (stub: no batch correction)
-│   │   └── qc.py                  ← L1: quality control gates (stub)
+│   │   ├── qc.py                  ← L1: quality control gates (stub)
+│   │   └── clinical.py            ← L1: TCGA clinical table with owned columns, label table, reason codes
 │   ├── profiling/                 ← L2
-│   │   ├── verhaak.py             ← Verhaak subtype scoring from bulk expression
+│   │   ├── centroid.py            ← single-sample Verhaak 840-gene nearest centroid (the per-patient subtype)
+│   │   ├── verhaak.py             ← cohort-relative Verhaak signature scoring (descriptive distributions only)
 │   │   ├── deconvolve.py          ← marker-based cell-state / TME scoring
 │   │   ├── subtype.py             ← stubs: what `gliostrata profile` runs
 │   │   ├── states.py              ←   (synthetic calls)
 │   │   └── tme.py                 ←   (synthetic calls)
-│   ├── features/store.py          ← L3: unified patient feature store
+│   ├── features/                  ← L3: store.py (assembly), contract.py (files, classes, reason codes), views.py (named views), build.py (real and synthetic runs)
 │   ├── simulation/                ← L4 (stubs)
 │   │   ├── tumor.py               ← PhysiCell growth wrapper
 │   │   └── nsc.py                 ← NSC migration + payload kinetics
@@ -178,7 +182,9 @@ gliostrata/
 │   ├── download_tcga_{clinical,expression,mutations,methylation}.py   ← L0, network
 │   ├── download_cgga.py           ← L0: external validation cohort, network
 │   ├── join_molecular_calls.py    ← join IDH / MGMT calls onto the cohort
-│   ├── build_tcga_feature_store.py  ← L0 to L3 on the real TCGA inputs (155 of 594 patients)
+│   ├── build_tcga_feature_store.py  ← thin wrapper: `gliostrata build-feature-store --mode real`
+│   ├── build_subtype_centroids.py, prepare_subtype_reference.py  ← the frozen 840-gene centroid sets
+│   ├── subtype_scoring_set_dependence.py, compare_subtype_labels.py  ← descriptive subtype checks
 │   ├── export_cibersortx.py       ← CIBERSORTx mixture file
 │   ├── validate_cox_cgga.py       ← T2 external validation (C-index)
 │   ├── validate_brier_cgga.py     ← T2 external validation (Brier score)
@@ -186,8 +192,8 @@ gliostrata/
 │   ├── cgga_external_eligibility.py  ← patients eligible for the sealed external partition
 │   ├── generate_synthetic_data.py
 │   └── run_full_pipeline.py
-├── tests/                         ← 31 test modules, 1075 tests
-├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds; registration.yaml the registration state)
+├── tests/                         ← 34 test modules, 1113 tests
+├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds; registration.yaml the registration state; subtype_centroids/ the frozen centroid sets with their checksums)
 ├── workflow/                      ← Snakemake workflow (Snakefile + rules/)
 ├── data/partitions/               ← sealed partition manifests (in git)
 ├── data/access_ledger.jsonl        ← every access to the held-out cohort (in git, append-only)

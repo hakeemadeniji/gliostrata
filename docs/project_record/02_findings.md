@@ -1,6 +1,7 @@
 # 2. Findings
 
-Every result the project has measured, as of 2026-11-26. Each section gives the design,
+Every result the project has measured, as of 2026-11-26; findings 9 to 13 added on
+2026-11-27 (stage 3b). Each section gives the design,
 the numbers, what they do and do not show, and where the numbers come from.
 
 **Reading labels.** **Met**: the point estimate and its decisive 95% bound both clear the
@@ -21,6 +22,11 @@ on CGGA.
 | 6 | Excluding the 23 IDH-mutant patients moves the internal C-index by 0.0079, under the pre-specified limit of 0.01. | Sensitivity: **robust** |
 | 7 | The external cohort is 305 patients, not the ">1,000" the protocol assumed; 218 are eligible for T4 and T5. | Cohort fact |
 | 8 | T1's accuracy threshold cannot be met on the 28 labelled RNA-seq patients even with a perfect score; the 108-patient microarray set is needed. | Sample-size bound |
+| 9 | Every missing KPS (152 of 594) is absent at the GDC source; none was lost in harmonisation. Resection extent is absent at source for all 594. | Data fact |
+| 10 | The cohort-relative subtype calls depend on the scoring set: 2 to 18 of 283 calls change when the set is halved, and 5 to 7 of the 45 v2-test store patients change when they are scored alone. The single-sample calls change in none. | Descriptive; measures review item M6 |
+| 11 | The single-sample subtype agrees with the published TCGA labels for 56 of 76 v2-test patients (0.737, exact 95% CI 0.623 to 0.831). | Descriptive; not validation |
+| 12 | Every reported internal number had the 169 v2-test patients in its training folds. | Disclosure |
+| 13 | The state and TME scores are cohort-relative: 6 of 50 patients change their highest state when scored alone. | Descriptive; not covered by D6 |
 
 Two of eleven registered thresholds have been evaluated. Both were not met.
 
@@ -291,7 +297,69 @@ superseded.
 
 Source: `docs/preregistration.md` section 2.2 item 9; `docs/osf_final_fields.md`.
 
-## 2.9 What has not been shown
+## 2.9 Findings 9 to 13: the TCGA inputs and the subtype classifier (stage 3b)
+
+All on TCGA only; no CGGA value was read. Sources: `06_evidence_reports.md`, stage 3b;
+`data/results/tcga_gbm/subtype_scoring_set_dependence.json`,
+`subtype_label_comparison.json` and `feature_store_build_report.json`.
+
+**Finding 9: what is missing is missing at source.** KPS is missing for 152 of the 594
+cohort patients: 149 have no KPS in any GDC follow-up record and 3 carry only the string
+"Unknown". Of the 592 modelled by variant 1, that is 150 (147 and 3); of the 283 with
+expression, 64 (63 and 1). None had a numeric value that harmonisation lost, and a check
+against the live GDC API (data release 46.0) found no numeric KPS in any follow-up of any
+of the 152. Resection extent is absent at source: the raw clinical table has no resection
+field, and no GDC residual-disease, residual-tumour or procedure field holds a value for
+any of the 594. The one expression sample outside the cohort, TCGA-28-2510-01A, belongs to
+a case whose GDC record is empty. Consequence: imputing KPS fills a value the record never
+had (decision D4); the store records resection as not available, never as "biopsy"
+(decision D3).
+
+**Finding 10: the cohort-relative subtype depends on the scoring set.** The committed
+signature classifier (`profiling/verhaak.py`) standardises each score across the samples
+scored together. Measured against joint scoring of the 283 (seed 20261127, 20 random
+halvings):
+
+| Change to the scoring set | Calls compared | Cohort-relative: calls changed | Single-sample: calls changed |
+| --- | --- | --- | --- |
+| Random halves | 283 | mean 9.15 (2 to 18) | 0 |
+| The 16 IDH-mutant samples removed | 267 | 10 | 0 |
+| The 155 stage-3 store patients scored alone | 155 | 8 | 0 |
+| The 45 v2-test store patients scored alone, against the 283-joint calls | 45 | 7 | 0 |
+| The same 45, against the 155-joint calls | 45 | 5 | 0 |
+
+The stage 3 store's subtype features therefore leaked the v2 test patients into each
+other's values (review item M6). The per-patient subtype is now the single-sample call
+(decision D6).
+
+**Finding 11: the single-sample call against published labels.** Reference: Brennan et
+al. 2013, whose labels are partly from the 2010 consensus clustering and partly from a
+single-sample GSEA classifier. G-CIMP and unlabelled patients are excluded.
+
+| Mode | Patients | Agree | Rate | Exact 95% CI |
+| --- | --- | --- | --- | --- |
+| Single-sample, centroids from the v2 training split, on the v2 test split | 76 | 56 | 0.737 | 0.623 to 0.831 |
+| Cohort-relative, on the same 76 | 76 | 43 | 0.566 | 0.447 to 0.679 |
+
+Of the 76 labels, 65 come from Brennan's ssGSEA classifier and 11 from the 2010
+consensus clustering; the single-sample call agrees with 46 of the 65 and 10 of the 11.
+This is a check on the cohort the centroids came from, mostly against another
+classifier. It is not external validation and says nothing about T1, which is scored on
+CGGA microarray patients and has not been run.
+
+**Finding 12: the v2 test split was never held out.** The 169 v2-test patients are
+reserved for internal held-out evaluation, but no script reads the split. Every reported
+internal number had them in its training folds: the three T2 fits (including the TCGA
+fits scored on CGGA), their internal C-indices, the IDH sensitivity runs and the
+fold-wise rerun. The pre-registration discloses this for T2 only.
+
+**Finding 13: the state and TME scores are cohort-relative too.** Their default
+normalisation standardises each signature across the samples scored. Scoring the first 50
+of the 283 alone moves a state fraction by up to 0.0744 and changes the highest state of
+6 of the 50. The store's state and TME values were scored over the 283, v2-test patients
+included. No decision covers this yet (`05_future_plan.md`, section 5.5).
+
+## 2.10 What has not been shown
 
 A reader should be able to tell a measured result from an absence of one.
 
@@ -315,7 +383,7 @@ A reader should be able to tell a measured result from an absence of one.
   existed. This departs from the pre-registration's stated procedure and is disclosed in
   its amendment log.
 
-## 2.10 Reproducing the results
+## 2.11 Reproducing the results
 
 ```bash
 # T2 C-index row (synthetic-data tests, then the evaluation)
@@ -332,6 +400,14 @@ python scripts/download_tcga_methylation.py --out data/raw/tcga_gbm/methylation
 python scripts/join_molecular_calls.py
 python scripts/idh_sensitivity_cox.py
 python scripts/idh_sensitivity_subtype.py
+
+# Stage 3b: the store, the centroid sets and the subtype checks (TCGA only)
+gliostrata harmonize-clinical
+gliostrata build-feature-store --mode real
+python scripts/prepare_subtype_reference.py      # needs the data/external/ downloads, openpyxl and pyreadr
+python scripts/build_subtype_centroids.py         # rebuilds configs/subtype_centroids/
+python scripts/subtype_scoring_set_dependence.py  # finding 10
+python scripts/compare_subtype_labels.py          # finding 11
 ```
 
 - Both T2 scripts are deterministic (seed 42). Re-running one reproduces its numbers and
