@@ -168,12 +168,12 @@ resolutions are pre-registered rather than chosen after the data is seen.
    search makes 60 uniform draws. 60 is the optimizer code's existing default; it was
    not tuned on any data and will not be recalibrated on the external cohort.
    *Tie rule:* a patient whose regret is zero under both methods is a tie and is
-   dropped by the signed-rank test. At most 20 tied patients are tolerated; if more
-   are tied, the p-value is still reported but this threshold is INCONCLUSIVE
-   whatever its value, and it is not re-run after dropping patients. That is a
-   registered exception to section 6, under which a signed-rank p >= 0.01 is FAIL.
-   The comparison is paired per patient and the Wilcoxon signed-rank test is
-   two-sided.
+   dropped by the signed-rank test. At most 20 tied patients are tolerated (40% of
+   the 50 patients); if more are tied, the p-value is still reported but this
+   threshold is INCONCLUSIVE whatever its value, and it is not re-run after dropping
+   patients. That is a registered exception to section 6, under which a signed-rank
+   p >= 0.01 is FAIL. The comparison is paired per patient and the Wilcoxon
+   signed-rank test is two-sided.
 6. **T5 success and safety are defined on *predicted* outcomes.** Both metrics are
    computed from the project's own survival model, so T5 is a statement about internal
    consistency of the framework, not about realised patient benefit. This is registered
@@ -209,7 +209,12 @@ resolutions are pre-registered rather than chosen after the data is seen.
    at 29 patients (0.8806); 30 is registered as the floor: 30 of 30 gives 0.8843 and
    29 of 30 gives 0.8278. (d) *Harmonisation:* **TO BE COMPLETED BY AUTHOR: the
    cross-platform harmonisation method.** It is entered in section 8 before the
-   microarray expression matrix is examined.
+   microarray expression matrix is examined. (e) *Margin, stated so the choice of
+   scoring set can be checked:* on 108 patients the criterion tolerates up to 6
+   errors (102 of 108 gives 0.8830; 101 of 108 gives 0.8710). An observed accuracy
+   near 0.95 needs roughly 71 to 100 patients to clear (68 of 71 gives 0.8814; 95 of
+   100 gives 0.8872), so a smaller scoring set would be undecidable unless accuracy
+   were near-perfect.
 10. **T1 state-deconvolution r has no ground truth in the project.** *Registered
     resolution:* the truth is 100 pseudo-bulk mixtures simulated from the Neftel
     2019 single-cell atlas (GEO GSE131928; 28 glioblastoma tumours) with imposed
