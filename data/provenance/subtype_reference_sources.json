@@ -1,0 +1,67 @@
+{
+ "what": "External public files used by the stage 3b subtype classifier (decision D6). Metadata only; the files themselves are git-ignored under data/external/.",
+ "retrieved_utc_date": "2026-11-27",
+ "files": [
+  {
+   "path": "data/external/verhaak2010_gdc/TCGA_unified_CORE_ClaNC840.txt",
+   "url": "https://api.gdc.cancer.gov/data/13f8fd25-6b1d-40b3-9341-48e355b77fd3",
+   "bytes": 1050693,
+   "sha256": "c69b92feb65b29d1a3d913818cb480fa8d1b4c8b73dcc3a2df7954855145b86d",
+   "citation": "Verhaak et al. 2010, Cancer Cell 17:98-110, doi:10.1016/j.ccr.2009.12.020; GDC publication page https://gdc.cancer.gov/about-data/publications/gbm_exp ('Expression values and subtype calls for the Core TCGA samples using the unified scaled data')",
+   "use": "The 840-gene ClaNC signature (gene list used) and the labels of the 173 core samples. Labels come from consensus average-linkage hierarchical clustering of 202 samples on 1,740 genes; core samples are those with positive silhouette width (paper, Results). Not used as training labels: only 45 of the 283 expression patients are core samples."
+  },
+  {
+   "path": "data/external/verhaak2010_gdc/ClaNC840_centroids.xls",
+   "url": "https://api.gdc.cancer.gov/data/941f81a1-05d7-4f84-80ec-534b8dc1ebac",
+   "bytes": 155648,
+   "sha256": "2791462d46b68466b1646d695d047533060c193f7ae2bbf187e48d5834e49260",
+   "citation": "Verhaak et al. 2010; same GDC page ('ClaNC 840 gene list and centroids')",
+   "use": "Published microarray centroids. Downloaded for provenance; not used (the centroids here are re-estimated on TCGA RNA-seq)."
+  },
+  {
+   "path": "data/external/verhaak2010_gdc/exp2008_202SampleList.txt",
+   "url": "https://api.gdc.cancer.gov/data/e557d020-0607-4942-b621-ee4dbb9caf16",
+   "bytes": 4040,
+   "sha256": "9b553d647d32c1d04c564db6c53c3aabed5b9fbfe4ec40629976dd6165eda298",
+   "citation": "Verhaak et al. 2010; same GDC page ('A list of the 202 samples used for analysis')",
+   "use": "Reference only; not used."
+  },
+  {
+   "path": "data/external/brennan2013_gdc/Molecular_subtype_classification.xlsx",
+   "url": "https://api.gdc.cancer.gov/data/5282bb68-67ab-4706-8552-f7ac5191ab83",
+   "bytes": 95038,
+   "sha256": "964cbead473e554d3c5d5ed064933b74494c5e23fdf9aae8bef90029beb34a00",
+   "citation": "Brennan et al. 2013, Cell 155:462-477, doi:10.1016/j.cell.2013.09.034; GDC publication page https://gdc.cancer.gov/about-data/publications/gbm_2013 (SI Table S7)",
+   "use": "Training and reference labels ('Cluster'). Provenance per sample: 'CanCellPaper 2010' = INCLUDED carries the Verhaak 2010 consensus-clustering label; the others 'were classified into one of classes using single sample gene set enrichment analysis' (Brennan 2013, Results, 'Molecular subclasses defined by global mRNA expression'). G-CIMP is reported as a separate group. One patient (TCGA-07-0227) has two all-NA rows."
+  },
+  {
+   "path": "data/external/ceccarelli2016_gdc/TableS1.PatientData.20151020.v3.xlsx",
+   "url": "https://api.gdc.cancer.gov/data/a0886693-4c6e-40de-9cb1-8bfcb4bb30a7",
+   "bytes": 398944,
+   "sha256": "84e1b493d045dd0794f2d2dcba77d533311751b5d2e3caa7989a141cba0dfa29",
+   "citation": "Ceccarelli et al. 2016, Cell 164:550-563, doi:10.1016/j.cell.2015.12.028; GDC publication page https://gdc.cancer.gov/about-data/publications/lgggbm_2016 ('AWG Clinical Supplementary Info'; served as TableS1.PatientData.20151020.v3.xlsx)",
+   "use": "Cross-check only: 'Original Subtype' agrees with Brennan 2013 'Cluster' on all 524 GBM patients labelled in both. Not used for training."
+  },
+  {
+   "path": "data/external/hgnchelper_cran/HGNChelper_0.8.16.tar.gz",
+   "url": "https://cran.r-project.org/src/contrib/HGNChelper_0.8.16.tar.gz",
+   "bytes": 1647350,
+   "sha256": "91d4c90bf54b4b49a4aaf58cbef3f23eae7c5e93c6b19f48e986495d9a8a93e9",
+   "citation": "CRAN package HGNChelper 0.8.16 (Date/Publication 2026-11-01)",
+   "use": "Member HGNChelper/data/hgnc.table.rda (previous HGNC symbol -> approved symbol) resolved 94 retired symbols of the 840. Read with pyreadr; nothing executed."
+  },
+  {
+   "path": "data/external/hgnchelper_cran/x/HGNChelper/data/hgnc.table.rda",
+   "url": "member of the tarball above",
+   "bytes": 432272,
+   "sha256": "b2a912dffa397d43e82cd14d07d31316f4e6e3f412908c34f3fdcf24e4742373",
+   "citation": "HGNChelper 0.8.16",
+   "use": "Extracted member actually read."
+  }
+ ],
+ "derived": {
+  "configs/subtype_centroids/clanc840_genes.json": "scripts/prepare_subtype_reference.py",
+  "data/processed/tcga_gbm/published_subtype_labels.parquet (git-ignored; patient-level)": "scripts/prepare_subtype_reference.py",
+  "configs/subtype_centroids/verhaak840_tcga_v2train.json and verhaak840_tcga_all.json": "scripts/build_subtype_centroids.py"
+ }
+}

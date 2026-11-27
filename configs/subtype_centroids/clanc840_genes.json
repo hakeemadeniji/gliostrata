@@ -1,0 +1,4242 @@
+{
+ "what": "The Verhaak et al. (2010) ClaNC 840-gene signature resolved to the GENCODE v36 symbols of gene_annotation.parquet. No patient data.",
+ "rule": "direct if the published symbol is in the annotation; else the unique HGNC approved symbol (HGNChelper 0.8.16 hgnc.table) that is in the annotation; else excluded (ambiguous or not_in_annotation)",
+ "inputs": {
+  "verhaak_core": {
+   "file": "TCGA_unified_CORE_ClaNC840.txt",
+   "sha256": "c69b92feb65b29d1a3d913818cb480fa8d1b4c8b73dcc3a2df7954855145b86d"
+  },
+  "hgnc_table": {
+   "file": "HGNChelper_0.8.16.tar.gz:HGNChelper/data/hgnc.table.rda",
+   "sha256": "b2a912dffa397d43e82cd14d07d31316f4e6e3f412908c34f3fdcf24e4742373"
+  },
+  "annotation": {
+   "file": "data/raw/tcga_gbm/expression/gene_annotation.parquet",
+   "sha256": "408434126c8e57807d79b0f44ab7b13ccde25699155d8fd0236f9adadba34960"
+  }
+ },
+ "counts": {
+  "ambiguous": 2,
+  "direct": 737,
+  "hgnc_previous_symbol": 94,
+  "not_in_annotation": 7
+ },
+ "n_usable": 831,
+ "genes": [
+  {
+   "published_symbol": "CDKN1B",
+   "symbol": "CDKN1B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EPB41",
+   "symbol": "EPB41",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLGN",
+   "symbol": "CLGN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PDE10A",
+   "symbol": "PDE10A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RALGPS2",
+   "symbol": "RALGPS2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TAF5",
+   "symbol": "TAF5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACTR1A",
+   "symbol": "ACTR1A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PELI1",
+   "symbol": "PELI1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF804A",
+   "symbol": "ZNF804A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPM1D",
+   "symbol": "PPM1D",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RAD21",
+   "symbol": "RAD21",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SORCS3",
+   "symbol": "SORCS3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ALCAM",
+   "symbol": "ALCAM",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PURG",
+   "symbol": "PURG",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC1A1",
+   "symbol": "SLC1A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NR0B1",
+   "symbol": "NR0B1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FBXO21",
+   "symbol": "FBXO21",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GADD45G",
+   "symbol": "GADD45G",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GABRA3",
+   "symbol": "GABRA3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FHOD3",
+   "symbol": "FHOD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMSL8",
+   "symbol": "TMSB15A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "LRRTM4",
+   "symbol": "LRRTM4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PAFAH1B3",
+   "symbol": "PAFAH1B3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FAM110B",
+   "symbol": "FAM110B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "REEP1",
+   "symbol": "REEP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SNX26",
+   "symbol": "ARHGAP33",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "LRP6",
+   "symbol": "LRP6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C1QL1",
+   "symbol": "C1QL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMCC1",
+   "symbol": "TMCC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GSK3B",
+   "symbol": "GSK3B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MMP16",
+   "symbol": "MMP16",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LPHN3",
+   "symbol": "ADGRL3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "DLL3",
+   "symbol": "DLL3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEC61A2",
+   "symbol": "SEC61A2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ICK",
+   "symbol": "CILK1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "RAP2A",
+   "symbol": "RAP2A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF286A",
+   "symbol": "ZNF286A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FAM125B",
+   "symbol": "MVB12B",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ZEB2",
+   "symbol": "ZEB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AMOTL2",
+   "symbol": "AMOTL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NKX2-2",
+   "symbol": "NKX2-2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TTC3",
+   "symbol": "TTC3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TOP2B",
+   "symbol": "TOP2B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SCN3A",
+   "symbol": "SCN3A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TOX3",
+   "symbol": "TOX3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MLLT11",
+   "symbol": "MLLT11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RALGPS1",
+   "symbol": "RALGPS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GSTA4",
+   "symbol": "GSTA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DGKI",
+   "symbol": "DGKI",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MTSS1",
+   "symbol": "MTSS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SATB1",
+   "symbol": "SATB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KIF21B",
+   "symbol": "KIF21B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PODXL2",
+   "symbol": "PODXL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CRMP1",
+   "symbol": "CRMP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNG4",
+   "symbol": "GNG4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYT1",
+   "symbol": "MYT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BCL7A",
+   "symbol": "BCL7A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CHD7",
+   "symbol": "CHD7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SOX4",
+   "symbol": "SOX4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SOX11",
+   "symbol": "SOX11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DCX",
+   "symbol": "DCX",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C6orf134",
+   "symbol": "ATAT1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "FAM77C",
+   "symbol": "NKAIN1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MARCKSL1",
+   "symbol": "MARCKSL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C1orf106",
+   "symbol": "INAVA",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "DBN1",
+   "symbol": "DBN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DPYSL4",
+   "symbol": "DPYSL4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMEFF1",
+   "symbol": "TMEFF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STMN4",
+   "symbol": "STMN4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DUSP26",
+   "symbol": "DUSP26",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PAK7",
+   "symbol": "PAK5",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "PAK3",
+   "symbol": "PAK3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAST1",
+   "symbol": "MAST1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TNRC4",
+   "symbol": "CELF3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "CDK5R1",
+   "symbol": "CDK5R1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ATP1A3",
+   "symbol": "ATP1A3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FGF9",
+   "symbol": "FGF9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "WASF1",
+   "symbol": "WASF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CA10",
+   "symbol": "CA10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RP11-35N6.1",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "SOX10",
+   "symbol": "SOX10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ERBB3",
+   "symbol": "ERBB3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RAB33A",
+   "symbol": "RAB33A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IL1RAPL1",
+   "symbol": "IL1RAPL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DNM3",
+   "symbol": "DNM3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GPR17",
+   "symbol": "GPR17",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLASP2",
+   "symbol": "CLASP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPM1E",
+   "symbol": "PPM1E",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STMN1",
+   "symbol": "STMN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLRT1",
+   "symbol": "FLRT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EPHB1",
+   "symbol": "EPHB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HDAC2",
+   "symbol": "HDAC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PHF16",
+   "symbol": "JADE3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "LOC81691",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "CDC7",
+   "symbol": "CDC7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYB",
+   "symbol": "MYB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MCM10",
+   "symbol": "MCM10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ATAD5",
+   "symbol": "ATAD5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HMGB3",
+   "symbol": "HMGB3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDC25A",
+   "symbol": "CDC25A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TOPBP1",
+   "symbol": "TOPBP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HN1",
+   "symbol": "JPT1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "AOF2",
+   "symbol": "KDM1A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SLCO5A1",
+   "symbol": "SLCO5A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NOL4",
+   "symbol": "NOL4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "YPEL1",
+   "symbol": "YPEL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CXXC4",
+   "symbol": "CXXC4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF643",
+   "symbol": "ZFP69B",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "KLRK1",
+   "symbol": "KLRK1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KLRC4",
+   "symbol": "KLRC4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KLRC3",
+   "symbol": "KLRC3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PCDH11Y",
+   "symbol": "PCDH11Y",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PCDH11X",
+   "symbol": "PCDH11X",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HRASLS",
+   "symbol": "PLAAT1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "KIAA1166",
+   "symbol": "ZC4H2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ZNF184",
+   "symbol": "ZNF184",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASK",
+   "symbol": "CASK",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF711",
+   "symbol": "ZNF711",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF510",
+   "symbol": "ZNF510",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "WDR68",
+   "symbol": "DCAF7",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MYST2",
+   "symbol": "KAT7",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "CBX1",
+   "symbol": "CBX1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CAMSAP1L1",
+   "symbol": "CAMSAP2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "HOXD3",
+   "symbol": "HOXD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MATR3",
+   "symbol": "MATR3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMEM118",
+   "symbol": "RNFT2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "LOC55565",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "VAX2",
+   "symbol": "VAX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMEM35",
+   "symbol": "TMEM35A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "NRXN1",
+   "symbol": "NRXN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SPTBN2",
+   "symbol": "SPTBN2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NCALD",
+   "symbol": "NCALD",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SOX2",
+   "symbol": "SOX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SCG3",
+   "symbol": "SCG3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TTYH1",
+   "symbol": "TTYH1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C1orf61",
+   "symbol": "MIR9-1HG",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "GPM6A",
+   "symbol": "GPM6A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DPF1",
+   "symbol": "DPF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RUFY3",
+   "symbol": "RUFY3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NRXN2",
+   "symbol": "NRXN2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NCAM1",
+   "symbol": "NCAM1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAPT",
+   "symbol": "MAPT",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SRGAP3",
+   "symbol": "SRGAP3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FXYD6",
+   "symbol": "FXYD6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ABAT",
+   "symbol": "ABAT",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PHLPP",
+   "symbol": "PHLPP1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "OLIG2",
+   "symbol": "OLIG2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAP2",
+   "symbol": "MAP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BCAN",
+   "symbol": "BCAN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NLGN3",
+   "symbol": "NLGN3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CSPG5",
+   "symbol": "CSPG5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DPP6",
+   "symbol": "DPP6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYO10",
+   "symbol": "MYO10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BAI3",
+   "symbol": "ADGRB3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ASCL1",
+   "symbol": "ASCL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEZ6L",
+   "symbol": "SEZ6L",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CKB",
+   "symbol": "CKB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CRB1",
+   "symbol": "CRB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GRIA2",
+   "symbol": "GRIA2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ARHGEF9",
+   "symbol": "ARHGEF9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VEZF1",
+   "symbol": "VEZF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MMP15",
+   "symbol": "MMP15",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MARCKS",
+   "symbol": "MARCKS",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BEX1",
+   "symbol": "BEX1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CNTN1",
+   "symbol": "CNTN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "E2F3",
+   "symbol": "E2F3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBPJ",
+   "symbol": "RBPJ",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BCOR",
+   "symbol": "BCOR",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "P2RX7",
+   "symbol": "P2RX7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C20orf42",
+   "symbol": "FERMT1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "CSNK1E",
+   "symbol": "CSNK1E",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF248",
+   "symbol": "ZNF248",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLCB4",
+   "symbol": "PLCB4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PFN2",
+   "symbol": "PFN2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GPR23",
+   "symbol": "LPAR4",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "GRID2",
+   "symbol": "GRID2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MPPED2",
+   "symbol": "MPPED2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TSPAN3",
+   "symbol": "TSPAN3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TTPA",
+   "symbol": "TTPA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SIRT5",
+   "symbol": "SIRT5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASQ1",
+   "symbol": "CASQ1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AKR7A3",
+   "symbol": "AKR7A3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MRPL49",
+   "symbol": "MRPL49",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GUK1",
+   "symbol": "GUK1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VSX1",
+   "symbol": "VSX1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NDRG2",
+   "symbol": "NDRG2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPP2R5A",
+   "symbol": "PPP2R5A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RND1",
+   "symbol": "RND1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF323",
+   "symbol": "ZSCAN31",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "LYRM1",
+   "symbol": "LYRM1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEPW1",
+   "symbol": "SELENOW",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "USP33",
+   "symbol": "USP33",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANKRD46",
+   "symbol": "ANKRD46",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SPAST",
+   "symbol": "SPAST",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PRPSAP2",
+   "symbol": "PRPSAP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PDE6D",
+   "symbol": "PDE6D",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ORC4L",
+   "symbol": "ORC4",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SCHIP1",
+   "symbol": "SCHIP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NSL1",
+   "symbol": "NSL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CRBN",
+   "symbol": "CRBN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CRYZL1",
+   "symbol": "CRYZL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACYP2",
+   "symbol": "ACYP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MGST3",
+   "symbol": "MGST3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PEX19",
+   "symbol": "PEX19",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MDH1",
+   "symbol": "MDH1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ATP5L",
+   "symbol": "ATP5MG",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "TSNAX",
+   "symbol": "TSNAX",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAT2B",
+   "symbol": "MAT2B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "YPEL5",
+   "symbol": "YPEL5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TCEAL1",
+   "symbol": "TCEAL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CALM2",
+   "symbol": "CALM2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ATP5F1",
+   "symbol": "ATP5PB",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "COX5B",
+   "symbol": "COX5B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PEX11B",
+   "symbol": "PEX11B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IMPA1",
+   "symbol": "IMPA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TTC1",
+   "symbol": "TTC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GABARAPL2",
+   "symbol": "GABARAPL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NDUFS3",
+   "symbol": "NDUFS3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FBXO3",
+   "symbol": "FBXO3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CCDC121",
+   "symbol": "CCDC121",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CRYL1",
+   "symbol": "CRYL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SNX11",
+   "symbol": "SNX11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GABRB2",
+   "symbol": "GABRB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SERPINI1",
+   "symbol": "SERPINI1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KCNK1",
+   "symbol": "KCNK1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SNCG",
+   "symbol": "SNCG",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CPNE6",
+   "symbol": "CPNE6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KCNJ3",
+   "symbol": "KCNJ3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GRM1",
+   "symbol": "GRM1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VIP",
+   "symbol": "VIP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HPCAL4",
+   "symbol": "HPCAL4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HPCA",
+   "symbol": "HPCA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CRYM",
+   "symbol": "CRYM",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CCK",
+   "symbol": "CCK",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GPR22",
+   "symbol": "GPR22",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CHN1",
+   "symbol": "CHN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CA4",
+   "symbol": "CA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ADD3",
+   "symbol": "ADD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CAMK2G",
+   "symbol": "CAMK2G",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NTSR2",
+   "symbol": "NTSR2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AGXT2L1",
+   "symbol": "ETNPPL",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "EDG1",
+   "symbol": null,
+   "resolution": "ambiguous",
+   "candidates": [
+    "HEXIM1",
+    "S1PR1"
+   ]
+  },
+  {
+   "published_symbol": "MYBPC1",
+   "symbol": "MYBPC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPP1R1A",
+   "symbol": "PPP1R1A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FEZF2",
+   "symbol": "FEZF2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LOC201229",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "SLCO1A2",
+   "symbol": "SLCO1A2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DHRS9",
+   "symbol": "DHRS9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLJ22655",
+   "symbol": "RERGL",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "THTPA",
+   "symbol": "THTPA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC30A10",
+   "symbol": "SLC30A10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANXA3",
+   "symbol": "ANXA3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FXYD1",
+   "symbol": "FXYD1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PARP8",
+   "symbol": "PARP8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAGEH1",
+   "symbol": "MAGEH1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC16A7",
+   "symbol": "SLC16A7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PGBD5",
+   "symbol": "PGBD5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TPM3",
+   "symbol": "TPM3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDC42",
+   "symbol": "CDC42",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PSCD1",
+   "symbol": "CYTH1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ENPP4",
+   "symbol": "ENPP4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MMD",
+   "symbol": "MMD",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FAM49B",
+   "symbol": "CYRIB",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ARRB1",
+   "symbol": "ARRB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ROGDI",
+   "symbol": "ROGDI",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GRM3",
+   "symbol": "GRM3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SGK3",
+   "symbol": "SGK3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLCL1",
+   "symbol": "PLCL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BEST1",
+   "symbol": "BEST1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KIAA1598",
+   "symbol": "SHTN1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ENPP2",
+   "symbol": "ENPP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EDIL3",
+   "symbol": "EDIL3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC31A2",
+   "symbol": "SLC31A2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EVI2A",
+   "symbol": "EVI2A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMEM144",
+   "symbol": "TMEM144",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLCA4",
+   "symbol": "CLCA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MBP",
+   "symbol": "MBP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UGT8",
+   "symbol": "UGT8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BCAS1",
+   "symbol": "BCAS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SH3GL3",
+   "symbol": "SH3GL3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "REPS2",
+   "symbol": "REPS2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BASP1",
+   "symbol": "BASP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DYNC1I1",
+   "symbol": "DYNC1I1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SH3GL2",
+   "symbol": "SH3GL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FUT9",
+   "symbol": "FUT9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANKS1B",
+   "symbol": "ANKS1B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDR1",
+   "symbol": "CDR1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ATRNL1",
+   "symbol": "ATRNL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNAI1",
+   "symbol": "GNAI1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AGTPBP1",
+   "symbol": "AGTPBP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EPB41L3",
+   "symbol": "EPB41L3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FHIT",
+   "symbol": "FHIT",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NANOS1",
+   "symbol": "NANOS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TCEAL2",
+   "symbol": "TCEAL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPFIA2",
+   "symbol": "PPFIA2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANXA7",
+   "symbol": "ANXA7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UROS",
+   "symbol": "UROS",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPA1",
+   "symbol": "PPA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SAR1A",
+   "symbol": "SAR1A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CUTC",
+   "symbol": "CUTC",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MSRB2",
+   "symbol": "MSRB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HPRT1",
+   "symbol": "HPRT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACSL4",
+   "symbol": "ACSL4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "POPDC3",
+   "symbol": "POPDC3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MGC72080",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "SEPP1",
+   "symbol": "SELENOP",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MORF4L2",
+   "symbol": "MORF4L2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MC1R",
+   "symbol": "MC1R",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KIAA0020",
+   "symbol": "PUM3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "AFAP1",
+   "symbol": "AFAP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ADCY9",
+   "symbol": "ADCY9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GPR172A",
+   "symbol": "SLC52A2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "PHC2",
+   "symbol": "PHC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SRF",
+   "symbol": "SRF",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEC61A1",
+   "symbol": "SEC61A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CHST3",
+   "symbol": "CHST3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DNAJC13",
+   "symbol": "DNAJC13",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDV3",
+   "symbol": "CDV3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PABPC1",
+   "symbol": "PABPC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MLXIP",
+   "symbol": "MLXIP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STK10",
+   "symbol": "STK10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SP1",
+   "symbol": "SP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SNTB2",
+   "symbol": "SNTB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RREB1",
+   "symbol": "RREB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LEPREL2",
+   "symbol": "P3H3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "KIRREL",
+   "symbol": "KIRREL1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "AKAP13",
+   "symbol": "AKAP13",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLXNA1",
+   "symbol": "PLXNA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KIAA0152",
+   "symbol": "MLEC",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MYO1E",
+   "symbol": "MYO1E",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CTSA",
+   "symbol": "CTSA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMEM43",
+   "symbol": "TMEM43",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TPM4",
+   "symbol": "TPM4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TSPAN9",
+   "symbol": "TSPAN9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLNA",
+   "symbol": "FLNA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLOD3",
+   "symbol": "PLOD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CSGlcA-T",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "ZYX",
+   "symbol": "ZYX",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACTN4",
+   "symbol": "ACTN4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NOTCH3",
+   "symbol": "NOTCH3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "COL4A2",
+   "symbol": "COL4A2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SERPINH1",
+   "symbol": "SERPINH1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LAMC1",
+   "symbol": "LAMC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LMAN1",
+   "symbol": "LMAN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "P4HB",
+   "symbol": "P4HB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HSP90B1",
+   "symbol": "HSP90B1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CKAP4",
+   "symbol": "CKAP4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRAM2",
+   "symbol": "TRAM2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C19orf28",
+   "symbol": "MFSD12",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "FAM38A",
+   "symbol": "PIEZO1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "GANAB",
+   "symbol": "GANAB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LAMA5",
+   "symbol": "LAMA5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PXN",
+   "symbol": "PXN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UNC45A",
+   "symbol": "UNC45A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "QTRTD1",
+   "symbol": "QTRT2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "FAM46A",
+   "symbol": "TENT5A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "PLEKHA4",
+   "symbol": "PLEKHA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZDHHC18",
+   "symbol": "ZDHHC18",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AFF4",
+   "symbol": "AFF4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BOP1",
+   "symbol": "BOP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RRP1B",
+   "symbol": "RRP1B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EXT1",
+   "symbol": "EXT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MBTPS1",
+   "symbol": "MBTPS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HNRPAB",
+   "symbol": "HNRNPAB",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "GNL2",
+   "symbol": "GNL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBM15B",
+   "symbol": "RBM15B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNL1",
+   "symbol": "GNL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MIER2",
+   "symbol": "MIER2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "XPO6",
+   "symbol": "XPO6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "JARID1A",
+   "symbol": "KDM5A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ZNF146",
+   "symbol": "ZNF146",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EEF2",
+   "symbol": "EEF2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BRD4",
+   "symbol": "BRD4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STK11",
+   "symbol": "STK11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "POLRMT",
+   "symbol": "POLRMT",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FZR1",
+   "symbol": "FZR1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C19orf29",
+   "symbol": "CACTIN",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "GTF2F1",
+   "symbol": "GTF2F1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ARHGEF18",
+   "symbol": "ARHGEF18",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UPF1",
+   "symbol": "UPF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AP3D1",
+   "symbol": "AP3D1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNA11",
+   "symbol": "GNA11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "WIZ",
+   "symbol": "WIZ",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DOT1L",
+   "symbol": "DOT1L",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CHERP",
+   "symbol": "CHERP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AKAP8L",
+   "symbol": "AKAP8L",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TYK2",
+   "symbol": "TYK2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KIAA0892",
+   "symbol": "MAU2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SPPL2B",
+   "symbol": "SPPL2B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C19orf6",
+   "symbol": "TMEM259",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MYO9B",
+   "symbol": "MYO9B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GATAD2A",
+   "symbol": "GATAD2A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TCF3",
+   "symbol": "TCF3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTBP1",
+   "symbol": "PTBP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NCLN",
+   "symbol": "NCLN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLCG1",
+   "symbol": "PLCG1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NFATC3",
+   "symbol": "NFATC3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRRAP",
+   "symbol": "TRRAP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NUP188",
+   "symbol": "NUP188",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CIZ1",
+   "symbol": "CIZ1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZBTB43",
+   "symbol": "ZBTB43",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FBXL11",
+   "symbol": "KDM2A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "GOLGA2",
+   "symbol": "GOLGA2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BICD2",
+   "symbol": "BICD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LARP1",
+   "symbol": "LARP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GOLGA3",
+   "symbol": "GOLGA3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MSL2L1",
+   "symbol": "MSL2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MORC2",
+   "symbol": "MORC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TTC28",
+   "symbol": "TTC28",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYST3",
+   "symbol": "KAT6A",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "NCL",
+   "symbol": "NCL",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PRKDC",
+   "symbol": "PRKDC",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HNRPM",
+   "symbol": "HNRNPM",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "NIPBL",
+   "symbol": "NIPBL",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RNASEN",
+   "symbol": "DROSHA",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "HNRPH3",
+   "symbol": "HNRNPH3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "HNRPA3",
+   "symbol": null,
+   "resolution": "ambiguous",
+   "candidates": [
+    "HNRNPA3",
+    "HNRNPA3P1"
+   ]
+  },
+  {
+   "published_symbol": "JMJD2B",
+   "symbol": "KDM4B",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SAFB",
+   "symbol": "SAFB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ELAVL1",
+   "symbol": "ELAVL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LMNB2",
+   "symbol": "LMNB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DNMT1",
+   "symbol": "DNMT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SMARCA4",
+   "symbol": "SMARCA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ILF3",
+   "symbol": "ILF3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KHSRP",
+   "symbol": "KHSRP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HCFC1",
+   "symbol": "HCFC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RAD54L2",
+   "symbol": "RAD54L2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HELZ",
+   "symbol": "HELZ",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MED12",
+   "symbol": "MED12",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KPNB1",
+   "symbol": "KPNB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DDX42",
+   "symbol": "DDX42",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CHD4",
+   "symbol": "CHD4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GCN1L1",
+   "symbol": "GCN1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "EP400",
+   "symbol": "EP400",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "THOC2",
+   "symbol": "THOC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TPR",
+   "symbol": "TPR",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SRRM2",
+   "symbol": "SRRM2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBBP6",
+   "symbol": "RBBP6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BAT2D1",
+   "symbol": "PRRC2C",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "BPTF",
+   "symbol": "BPTF",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANKRD11",
+   "symbol": "ANKRD11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBM10",
+   "symbol": "RBM10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF629",
+   "symbol": "ZNF629",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HNRPUL2",
+   "symbol": "HNRNPUL2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ABL1",
+   "symbol": "ABL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SSRP1",
+   "symbol": "SSRP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BRPF1",
+   "symbol": "BRPF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UBN1",
+   "symbol": "UBN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAML1",
+   "symbol": "MAML1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRIO",
+   "symbol": "TRIO",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TOP1",
+   "symbol": "TOP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GPR161",
+   "symbol": "GPR161",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BMS1",
+   "symbol": "BMS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PPM1G",
+   "symbol": "PPM1G",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DCP1A",
+   "symbol": "DCP1A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PCSK7",
+   "symbol": "PCSK7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASP2",
+   "symbol": "CASP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FER",
+   "symbol": "FER",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NCOR2",
+   "symbol": "NCOR2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DIAPH1",
+   "symbol": "DIAPH1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DPP3",
+   "symbol": "DPP3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TARS",
+   "symbol": "TARS1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "CDK6",
+   "symbol": "CDK6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ABCD2",
+   "symbol": "ABCD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GAS1",
+   "symbol": "GAS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TGIF2",
+   "symbol": "TGIF2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TBX2",
+   "symbol": "TBX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DOCK6",
+   "symbol": "DOCK6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CAMK2B",
+   "symbol": "CAMK2B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CALM1",
+   "symbol": "CALM1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SHOX2",
+   "symbol": "SHOX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IRS2",
+   "symbol": "IRS2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GRIK1",
+   "symbol": "GRIK1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MEIS1",
+   "symbol": "MEIS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ADAM19",
+   "symbol": "ADAM19",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "JAG1",
+   "symbol": "JAG1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LHFP",
+   "symbol": "LHFPL6",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "TMEM147",
+   "symbol": "TMEM147",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMED1",
+   "symbol": "TMED1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RIN1",
+   "symbol": "RIN1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PEPD",
+   "symbol": "PEPD",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HS3ST3B1",
+   "symbol": "HS3ST3B1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDH4",
+   "symbol": "CDH4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACSL3",
+   "symbol": "ACSL3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RGS6",
+   "symbol": "RGS6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KCNF1",
+   "symbol": "KCNF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LMO2",
+   "symbol": "LMO2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FZD7",
+   "symbol": "FZD7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC2A10",
+   "symbol": "SLC2A10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBCK1",
+   "symbol": "RBCK1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NPEPL1",
+   "symbol": "NPEPL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "POFUT1",
+   "symbol": "POFUT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MCC",
+   "symbol": "MCC",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLJ11286",
+   "symbol": "SHFL",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "CD97",
+   "symbol": "ADGRE5",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "PLA2G5",
+   "symbol": "PLA2G5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ARNTL",
+   "symbol": "ARNTL",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANXA5",
+   "symbol": "ANXA5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PIPOX",
+   "symbol": "PIPOX",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LRRC16",
+   "symbol": "CARMIL1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ELOVL2",
+   "symbol": "ELOVL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VAV3",
+   "symbol": "VAV3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MEOX2",
+   "symbol": "MEOX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLJ21963",
+   "symbol": "ACSS3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "NR2E1",
+   "symbol": "NR2E1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SIPA1L1",
+   "symbol": "SIPA1L1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GALNT4",
+   "symbol": "GALNT4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LRP10",
+   "symbol": "LRP10",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LAMB2",
+   "symbol": "LAMB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "OSBPL3",
+   "symbol": "OSBPL3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRIP6",
+   "symbol": "TRIP6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GSTK1",
+   "symbol": "GSTK1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTPN14",
+   "symbol": "PTPN14",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TEAD3",
+   "symbol": "TEAD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EPHB4",
+   "symbol": "EPHB4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PCSK5",
+   "symbol": "PCSK5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DLC1",
+   "symbol": "DLC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CD151",
+   "symbol": "CD151",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ITGA7",
+   "symbol": "ITGA7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "M6PRBP1",
+   "symbol": "PLIN3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "RASGRP1",
+   "symbol": "RASGRP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACSBG1",
+   "symbol": "ACSBG1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MLC1",
+   "symbol": "MLC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CENTD1",
+   "symbol": "ARAP2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SLC4A4",
+   "symbol": "SLC4A4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FGFR3",
+   "symbol": "FGFR3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTPRA",
+   "symbol": "PTPRA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ITGB8",
+   "symbol": "ITGB8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EYA2",
+   "symbol": "EYA2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NES",
+   "symbol": "NES",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DENND2A",
+   "symbol": "DENND2A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DAG1",
+   "symbol": "DAG1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CENTD3",
+   "symbol": "ARAP3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SPRY2",
+   "symbol": "SPRY2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PDGFA",
+   "symbol": "PDGFA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC12A4",
+   "symbol": "SLC12A4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GLG1",
+   "symbol": "GLG1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SSH3",
+   "symbol": "SSH3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PMP22",
+   "symbol": "PMP22",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SOCS2",
+   "symbol": "SOCS2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EGFR",
+   "symbol": "EGFR",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC6A11",
+   "symbol": "SLC6A11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC6A9",
+   "symbol": "SLC6A9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LFNG",
+   "symbol": "LFNG",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNG7",
+   "symbol": "GNG7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEMA6D",
+   "symbol": "SEMA6D",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FZD3",
+   "symbol": "FZD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BTBD2",
+   "symbol": "BTBD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF446",
+   "symbol": "ZNF446",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DMWD",
+   "symbol": "DMWD",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GRIK5",
+   "symbol": "GRIK5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF20",
+   "symbol": "ZNF20",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CREB5",
+   "symbol": "CREB5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "WSCD1",
+   "symbol": "WSCD1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRIB2",
+   "symbol": "TRIB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BLM",
+   "symbol": "BLM",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GPR56",
+   "symbol": "ADGRG1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SEMA6A",
+   "symbol": "SEMA6A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NPAS3",
+   "symbol": "NPAS3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SOX9",
+   "symbol": "SOX9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "QTRT1",
+   "symbol": "QTRT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CC2D1A",
+   "symbol": "CC2D1A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AKT2",
+   "symbol": "AKT2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LRFN3",
+   "symbol": "LRFN3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SCAMP4",
+   "symbol": "SCAMP4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C19orf22",
+   "symbol": "R3HDM4",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "RBM42",
+   "symbol": "RBM42",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HMG20B",
+   "symbol": "HMG20B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMEM161A",
+   "symbol": "TMEM161A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "APBA3",
+   "symbol": "APBA3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RFXANK",
+   "symbol": "RFXANK",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KEAP1",
+   "symbol": "KEAP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NR2F6",
+   "symbol": "NR2F6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ERCC2",
+   "symbol": "ERCC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KIAA0355",
+   "symbol": "GARRE1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "HSPBP1",
+   "symbol": "HSPBP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MGC2752",
+   "symbol": null,
+   "resolution": "not_in_annotation",
+   "candidates": []
+  },
+  {
+   "published_symbol": "ZNF606",
+   "symbol": "ZNF606",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF671",
+   "symbol": "ZNF671",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF264",
+   "symbol": "ZNF264",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF8",
+   "symbol": "ZNF8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF211",
+   "symbol": "ZNF211",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF304",
+   "symbol": "ZNF304",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF134",
+   "symbol": "ZNF134",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF419",
+   "symbol": "ZNF419",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF45",
+   "symbol": "ZNF45",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF228",
+   "symbol": "ZNF112",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ZNF227",
+   "symbol": "ZNF227",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF235",
+   "symbol": "ZNF235",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PRPF31",
+   "symbol": "PRPF31",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MEGF8",
+   "symbol": "MEGF8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CD3EAP",
+   "symbol": "POLR1G",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "PRKD2",
+   "symbol": "PRKD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IRF3",
+   "symbol": "IRF3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "B3GALT1",
+   "symbol": "B3GALT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDH2",
+   "symbol": "CDH2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NOS2A",
+   "symbol": "NOS2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "FBXO17",
+   "symbol": "FBXO17",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAB21L1",
+   "symbol": "MAB21L1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDH6",
+   "symbol": "CDH6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEPT11",
+   "symbol": "SEPTIN11",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "KLHL4",
+   "symbol": "KLHL4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EXTL3",
+   "symbol": "EXTL3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KLHDC8A",
+   "symbol": "KLHDC8A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SMO",
+   "symbol": "SMO",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GLI2",
+   "symbol": "GLI2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RFX2",
+   "symbol": "RFX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNAS",
+   "symbol": "GNAS",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZFHX4",
+   "symbol": "ZFHX4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LRP5",
+   "symbol": "LRP5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KLHL25",
+   "symbol": "KLHL25",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RGS12",
+   "symbol": "RGS12",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLIP2",
+   "symbol": "CLIP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "POMT2",
+   "symbol": "POMT2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SARS2",
+   "symbol": "SARS2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TLE2",
+   "symbol": "TLE2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VPS16",
+   "symbol": "VPS16",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "JUND",
+   "symbol": "JUND",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYO5C",
+   "symbol": "MYO5C",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TGFB3",
+   "symbol": "TGFB3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ILK",
+   "symbol": "ILK",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SNTA1",
+   "symbol": "SNTA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GJA1",
+   "symbol": "GJA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NDP",
+   "symbol": "NDP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UAP1",
+   "symbol": "UAP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "YAP1",
+   "symbol": "YAP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LTBP1",
+   "symbol": "LTBP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SYPL1",
+   "symbol": "SYPL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RABGAP1L",
+   "symbol": "RABGAP1L",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ALDH3B1",
+   "symbol": "ALDH3B1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LOX",
+   "symbol": "LOX",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FHL2",
+   "symbol": "FHL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IGFBP6",
+   "symbol": "IGFBP6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DCBLD2",
+   "symbol": "DCBLD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BNC2",
+   "symbol": "BNC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASP8",
+   "symbol": "CASP8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HEXA",
+   "symbol": "HEXA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "COL8A2",
+   "symbol": "COL8A2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TES",
+   "symbol": "TES",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AIM1",
+   "symbol": "CRYBG1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ENG",
+   "symbol": "ENG",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FXYD5",
+   "symbol": "FXYD5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LY75",
+   "symbol": "LY75",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLAU",
+   "symbol": "PLAU",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SH2B3",
+   "symbol": "SH2B3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CDCP1",
+   "symbol": "CDCP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRIM38",
+   "symbol": "TRIM38",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SP100",
+   "symbol": "SP100",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FES",
+   "symbol": "FES",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "S100A4",
+   "symbol": "S100A4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "P4HA2",
+   "symbol": "P4HA2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "COL5A1",
+   "symbol": "COL5A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "COL1A2",
+   "symbol": "COL1A2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "COL1A1",
+   "symbol": "COL1A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "THBS1",
+   "symbol": "THBS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IL1R1",
+   "symbol": "IL1R1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LAMB1",
+   "symbol": "LAMB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LTBP2",
+   "symbol": "LTBP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RAB27A",
+   "symbol": "RAB27A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HEXB",
+   "symbol": "HEXB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TMBIM1",
+   "symbol": "TMBIM1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "COPZ2",
+   "symbol": "COPZ2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANXA4",
+   "symbol": "ANXA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PGCP",
+   "symbol": "CPQ",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "SRPX2",
+   "symbol": "SRPX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ZNF217",
+   "symbol": "ZNF217",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DRAM",
+   "symbol": "DRAM1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MRC2",
+   "symbol": "MRC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "WWTR1",
+   "symbol": "WWTR1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SERPINE1",
+   "symbol": "SERPINE1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLCF1",
+   "symbol": "CLCF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LRRFIP1",
+   "symbol": "LRRFIP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FURIN",
+   "symbol": "FURIN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBMS1",
+   "symbol": "RBMS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NRP1",
+   "symbol": "NRP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYH9",
+   "symbol": "MYH9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ADAM12",
+   "symbol": "ADAM12",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MVP",
+   "symbol": "MVP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FER1L3",
+   "symbol": "MYOF",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "IQGAP1",
+   "symbol": "IQGAP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CAST",
+   "symbol": "CAST",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SHC1",
+   "symbol": "SHC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ITGA5",
+   "symbol": "ITGA5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FNDC3B",
+   "symbol": "FNDC3B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GLT25D1",
+   "symbol": "COLGALT1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "TCIRG1",
+   "symbol": "TCIRG1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TGOLN2",
+   "symbol": "TGOLN2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TNFRSF1A",
+   "symbol": "TNFRSF1A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANXA1",
+   "symbol": "ANXA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTRF",
+   "symbol": "CAVIN1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "EHD2",
+   "symbol": "EHD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "EFEMP2",
+   "symbol": "EFEMP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TIMP1",
+   "symbol": "TIMP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LGALS1",
+   "symbol": "LGALS1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LGALS3",
+   "symbol": "LGALS3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CHI3L1",
+   "symbol": "CHI3L1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLIC1",
+   "symbol": "CLIC1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CCDC109B",
+   "symbol": "MCUB",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "EMP3",
+   "symbol": "EMP3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ANXA2",
+   "symbol": "ANXA2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PDPN",
+   "symbol": "PDPN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PYGL",
+   "symbol": "PYGL",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ARSJ",
+   "symbol": "ARSJ",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SWAP70",
+   "symbol": "SWAP70",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRADD",
+   "symbol": "TRADD",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLS3",
+   "symbol": "PLS3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ICAM3",
+   "symbol": "ICAM3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VAMP5",
+   "symbol": "VAMP5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RRAS",
+   "symbol": "RRAS",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PROCR",
+   "symbol": "PROCR",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RAB32",
+   "symbol": "RAB32",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ASL",
+   "symbol": "ASL",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RELB",
+   "symbol": "RELB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TGFBI",
+   "symbol": "TGFBI",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC16A3",
+   "symbol": "SLC16A3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IL15RA",
+   "symbol": "IL15RA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ELF4",
+   "symbol": "ELF4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC10A3",
+   "symbol": "SLC10A3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GCNT1",
+   "symbol": "GCNT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LYPLA3",
+   "symbol": "PLA2G15",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "DSC2",
+   "symbol": "DSC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAPK13",
+   "symbol": "MAPK13",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HK3",
+   "symbol": "HK3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAN2B1",
+   "symbol": "MAN2B1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GRN",
+   "symbol": "GRN",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CEBPB",
+   "symbol": "CEBPB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MGAT1",
+   "symbol": "MGAT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLJ20273",
+   "symbol": "RBM47",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "POLD4",
+   "symbol": "POLD4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "VDR",
+   "symbol": "VDR",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NOD2",
+   "symbol": "NOD2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DAB2",
+   "symbol": "DAB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTGER4",
+   "symbol": "PTGER4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "THBD",
+   "symbol": "THBD",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLAUR",
+   "symbol": "PLAUR",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASP5",
+   "symbol": "CASP5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASP4",
+   "symbol": "CASP4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CASP1",
+   "symbol": "CASP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLAMF8",
+   "symbol": "SLAMF8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FLJ22662",
+   "symbol": "PLBD1",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "RHOG",
+   "symbol": "RHOG",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CTSB",
+   "symbol": "CTSB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CTSC",
+   "symbol": "CTSC",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TGFBR2",
+   "symbol": "TGFBR2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IL4R",
+   "symbol": "IL4R",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LHFPL2",
+   "symbol": "LHFPL2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "GNA15",
+   "symbol": "GNA15",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TNFRSF1B",
+   "symbol": "TNFRSF1B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CCR5",
+   "symbol": "CCR5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DOK3",
+   "symbol": "DOK3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BATF",
+   "symbol": "BATF",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RAC2",
+   "symbol": "RAC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NCF2",
+   "symbol": "NCF2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "KYNU",
+   "symbol": "KYNU",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "DSE",
+   "symbol": "DSE",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C1orf38",
+   "symbol": "THEMIS2",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "ITGAM",
+   "symbol": "ITGAM",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MS4A4A",
+   "symbol": "MS4A4A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MSR1",
+   "symbol": "MSR1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "IFI30",
+   "symbol": "IFI30",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NCF4",
+   "symbol": "NCF4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CD14",
+   "symbol": "CD14",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SIGLEC9",
+   "symbol": "SIGLEC9",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTPN6",
+   "symbol": "PTPN6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MYO1F",
+   "symbol": "MYO1F",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LAIR1",
+   "symbol": "LAIR1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LAPTM5",
+   "symbol": "LAPTM5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ITGB2",
+   "symbol": "ITGB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TLR2",
+   "symbol": "TLR2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTPRC",
+   "symbol": "PTPRC",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ALOX5",
+   "symbol": "ALOX5",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LCP1",
+   "symbol": "LCP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FCGR2A",
+   "symbol": "FCGR2A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CD4",
+   "symbol": "CD4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LCP2",
+   "symbol": "LCP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CSTA",
+   "symbol": "CSTA",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SERPINA1",
+   "symbol": "SERPINA1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PSCD4",
+   "symbol": "CYTH4",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MAFB",
+   "symbol": "MAFB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SYNGR2",
+   "symbol": "SYNGR2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STXBP2",
+   "symbol": "STXBP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ARPC1B",
+   "symbol": "ARPC1B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SIGLEC7",
+   "symbol": "SIGLEC7",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LILRB3",
+   "symbol": "LILRB3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "NPC2",
+   "symbol": "NPC2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRPM2",
+   "symbol": "TRPM2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FMNL1",
+   "symbol": "FMNL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LY96",
+   "symbol": "LY96",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SLC11A1",
+   "symbol": "SLC11A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ECGF1",
+   "symbol": "TYMP",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "MFSD1",
+   "symbol": "MFSD1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SQRDL",
+   "symbol": "SQOR",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "PSCDBP",
+   "symbol": "CYTIP",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "S100A11",
+   "symbol": "S100A11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TNFAIP8",
+   "symbol": "TNFAIP8",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FPRL2",
+   "symbol": "FPR3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "C5AR1",
+   "symbol": "C5AR1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "LILRB2",
+   "symbol": "LILRB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "AMPD3",
+   "symbol": "AMPD3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STAB1",
+   "symbol": "STAB1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAN1A1",
+   "symbol": "MAN1A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CTSZ",
+   "symbol": "CTSZ",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "STAT6",
+   "symbol": "STAT6",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FCGR2B",
+   "symbol": "FCGR2B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ST14",
+   "symbol": "ST14",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACSL1",
+   "symbol": "ACSL1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SCPEP1",
+   "symbol": "SCPEP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ACPP",
+   "symbol": "ACP3",
+   "resolution": "hgnc_previous_symbol"
+  },
+  {
+   "published_symbol": "RAB11FIP1",
+   "symbol": "RAB11FIP1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TNFRSF11A",
+   "symbol": "TNFRSF11A",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "WIPF1",
+   "symbol": "WIPF1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TNFAIP3",
+   "symbol": "TNFAIP3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PTPN22",
+   "symbol": "PTPN22",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SAT1",
+   "symbol": "SAT1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PLK3",
+   "symbol": "PLK3",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SEC24D",
+   "symbol": "SEC24D",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CLEC2B",
+   "symbol": "CLEC2B",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MAN2A1",
+   "symbol": "MAN2A1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BDKRB2",
+   "symbol": "BDKRB2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CD2AP",
+   "symbol": "CD2AP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "SFT2D2",
+   "symbol": "SFT2D2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RUNX2",
+   "symbol": "RUNX2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ITGA4",
+   "symbol": "ITGA4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "HFE",
+   "symbol": "HFE",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FHOD1",
+   "symbol": "FHOD1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TRIM22",
+   "symbol": "TRIM22",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PHF11",
+   "symbol": "PHF11",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "RBKS",
+   "symbol": "RBKS",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "MGST2",
+   "symbol": "MGST2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "C1orf54",
+   "symbol": "C1orf54",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "BLVRB",
+   "symbol": "BLVRB",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CYBRD1",
+   "symbol": "CYBRD1",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "ARHGAP29",
+   "symbol": "ARHGAP29",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "CNN2",
+   "symbol": "CNN2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TLR4",
+   "symbol": "TLR4",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "PIGP",
+   "symbol": "PIGP",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "UCP2",
+   "symbol": "UCP2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "FOLR2",
+   "symbol": "FOLR2",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "TEC",
+   "symbol": "TEC",
+   "resolution": "direct"
+  },
+  {
+   "published_symbol": "S100A13",
+   "symbol": "S100A13",
+   "resolution": "direct"
+  }
+ ]
+}
