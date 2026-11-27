@@ -1,0 +1,19 @@
+{
+ "what": "CGGA RSEM FPKM release, fetched for T2's comparator (pre-registration 2.2 item 2).",
+ "retrieved_utc": "2026-11-27T19:41:44+00:00",
+ "ledger_seq": 13,
+ "files": {
+  "mRNAseq_693": {
+   "path": "data/raw/cgga/_cache/CGGA.mRNAseq_693.RSEM-genes.20200506.txt.zip",
+   "url": "https://www.cgga.org.cn/download?file=download/20200506/CGGA.mRNAseq_693.RSEM-genes.20200506.txt.zip&type=mRNAseq_693&time=20200506",
+   "bytes": 29738046,
+   "sha256": "5c4971d75fd7121be73d6e91b334d5b9dd44f4b8d24b9b0ca80ac92ee623a08d"
+  },
+  "mRNAseq_325": {
+   "path": "data/raw/cgga/_cache/CGGA.mRNAseq_325.RSEM-genes.20200506.txt.zip",
+   "url": "https://www.cgga.org.cn/download?file=download/20200506/CGGA.mRNAseq_325.RSEM-genes.20200506.txt.zip&type=mRNAseq_325&time=20200506",
+   "bytes": 14292049,
+   "sha256": "78f1549f5d369f2381fa11501855929d4b5e493a2d129a3c81af2f522afb186b"
+  }
+ }
+}

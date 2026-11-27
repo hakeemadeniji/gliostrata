@@ -1,10 +1,12 @@
 # T2 comparator search: log
 
-Status: **run 2026-11-27, not yet closed.** 13 of the 549 records still await their full
-text (section 4). Under the rule as first registered (re-run as published), no model is
-eligible so far. Later the same day, before the deposit, the rule was amended (option B):
-the same candidates are judged as *gene sets*, to be refitted under the project's own
-conditions. Pre-registration section 2.2 item 2 holds the amended rule.
+Status: **closed 2026-11-27. One model is eligible under the rule as first registered:
+PMID 38174685** (section 3). Of the 13 papers that had no open full text, 10 were read from
+PDFs the author obtained through a university library and 3 could not be obtained. The
+eligible paper was one of the 10. Earlier the same day, while those 13 were still unread,
+the rule had been amended to a refitted gene set (option B). After the eligible model was
+found, the lead chose to restore the rule as first registered for the verdict. Option B is
+kept as a secondary, descriptive comparison (pre-registration section 2.2 item 2).
 
 This is the single search registered in pre-registration section 2.2 item 2 (b),
 committed in `aacedb1` before the search was run. The registered text is authoritative.
@@ -29,7 +31,7 @@ The reasoning behind it is in `docs/t2_comparator_shortlist.md`.
 first-publication date, the stage the record stopped at, its first failing criterion,
 the reason, and how it was screened.
 
-## 3. Results so far
+## 3. Results
 
 | Stopped at | First failing criterion | Records |
 | --- | --- | --- |
@@ -37,25 +39,41 @@ the reason, and how it was screened.
 | Title and abstract | E1 | 1 |
 | Title and abstract | E2 | 330 |
 | Title and abstract | E4 | 61 |
-| Full text | E3 | 71 |
+| Full text | E3 | 80 |
 | Full text | E5 | 2 |
-| Full text not obtained | E3 (not established) | 15 |
-| **Eligible** | | **0** |
+| Full text not obtained | E3 (not established) | 5 |
+| **Eligible** | | **1** (PMID 38174685) |
 
-At the full-text stage, the first reviewer also found that 16 papers had used CGGA
-mRNAseq_325 or _693 for training or gene selection (E5). Those papers are counted above
-under E3, their first failing criterion.
+At the full-text stage, reviewers also found that 17 papers had used CGGA mRNAseq_325 or
+_693 for training or gene selection (E5). Those papers are counted above under E3, their
+first failing criterion.
 
-## 4. Records still open
+**The eligible model.** Sun G, Liu W. "The neutrophil extracellular traps-related gene
+signature predicts the prognosis of glioblastoma multiforme". *Folia Neuropathologica*
+2024;62(1):59-75, doi:10.5114/fn.2023.132980. It is a 7-gene LASSO-Cox risk score, trained
+on 167 TCGA-GBM patients and validated on 237 CGGA mRNAseq_693 GBM patients:
 
-Of the 15 papers with no open full text:
-- 2 fail E5 on their abstract: 39476302 and 38662286, both trained on CGGA.
-- 13 cannot be judged without the full text: 39736337, 39322177, 39216044, 39216042,
-  39162363, 38959943, 38719174, 38615384, 38462406, 38369937, 38318849, 38174685 and
-  37539935.
+RS = 0.223340457·CPPED1 + 0.1517013·F3 + 0.046311722·G0S2 - 0.219913858·MAPK1 +
+0.192197058·MME + 0.016505054·MMP9 + 0.414575274·MPO
 
-The author is obtaining those 13 through a university library. They will be screened by
-the same protocols before the outcome is recorded.
+The training expression is TCGA-GBM "RNA-seq data (log2(fpkm+1))" from UCSC Xena.
+
+- **E1 (2024):** first published in print in 2024. Crossref records no earlier online
+  date, and created the record on 2024-01-04. The "2023" in the DOI is the year the DOI
+  was assigned.
+- **E4 (inputs available):** confirmed by an availability check of CGGA's FPKM release
+  (access ledger entry 16). All 7 genes are present in both batches, and all 218
+  partition patients have a column.
+- **E6 (the best of the eligible):** does not apply; it is the only eligible model.
+
+## 4. Records without a full text
+
+- **3 could not be obtained**, even through the author's library: 38959943, 38318849 and
+  37539935. They are recorded as "full text not obtained; E3 not established".
+- **2 fail E5 on their abstract**, as trained on CGGA: 39476302 and 38662286.
+
+The 10 PDFs that were obtained are kept, unredistributed, in
+`data/external/t2_comparator_fulltext/` (git-ignored).
 
 ## 5. Decisions made during the screen, disclosed
 
