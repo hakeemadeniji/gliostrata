@@ -28,7 +28,7 @@ different stages, stated per layer:
 |-------|--------|--------|
 | L0 — Ingestion | `scripts/download_tcga_*.py`, `scripts/download_cgga.py` | **Working** — real GDC and CGGA downloads. `gliostrata ingest` itself only implements `--source synthetic`. |
 | L1 — Harmonization | `gliostrata.data.harmonize`, `gliostrata.data.qc`, `gliostrata.data.clinical` | `harmonize` is a stub (schema normalisation and QC rows; no batch correction). `harmonize-clinical` is **working** on TCGA: a clinical table with explicitly owned columns and a separate label table, every missing value with a reason code, nothing imputed. |
-| L2 — Tumor profiling | `gliostrata.profiling.centroid`, `gliostrata.profiling.deconvolve`, `gliostrata.profiling.verhaak` | **Implemented** from bulk expression; run on TCGA by `gliostrata build-feature-store --mode real`. Subtype: single-sample nearest centroid over the published Verhaak 840-gene signature (831 genes resolved), centroids frozen from the TCGA v2 training split. State and TME scores are still cohort-relative. Measured, not validated. What `gliostrata profile` runs (`subtype`, `states`, `tme`) is still a stub. |
+| L2 — Tumor profiling | `gliostrata.profiling.centroid`, `gliostrata.profiling.deconvolve`, `gliostrata.profiling.verhaak` | **Implemented** from bulk expression; run on TCGA by `gliostrata build-feature-store --mode real`. Subtype: single-sample nearest centroid over the published Verhaak 840-gene signature (831 genes resolved), centroids frozen from the TCGA v2 training split. State and TME scores are still cohort-relative. On 100 simulated mixtures from the Neftel 2019 atlas the state scores recover the imposed proportions (T1's deconvolution row: mean per-state r 0.9521, 95% CI 0.9430 to 0.9589, against 0.75; run before the OSF deposit and optimistic by design, see `docs/t1_deconvolution_spec.md`). Measured, not validated on tumours. What `gliostrata profile` runs (`subtype`, `states`, `tme`) is still a stub. |
 | L3 — Feature store | `gliostrata.features.store`, `contract`, `views`, `build` | **Working**. Built from real data by `gliostrata build-feature-store --mode real`: all 594 TCGA patients, one row each, never filtered; outcomes in a separate label table; every column with its source and class, every missing value with a reason code. Model-ready populations are named views: profiling 283, transferable model 570, molecular model 298 (`docs/project_record/06_evidence_reports.md`, stage 3b). |
 | L4 — Simulation | `gliostrata.simulation.tumor`, `nsc` | Stub (synthetic curves) |
 | L5 — Outcome prediction | `gliostrata.prediction.cox` | **Fitted Cox-PH model**, not wired into the pipeline. Neither its external C-index nor its Brier score on CGGA met the registered T2 thresholds (`docs/cgga_validation.md`). `gliostrata.prediction.survival`, which the CLI uses, is a stub. |
@@ -36,7 +36,7 @@ different stages, stated per layer:
 | L7 — Wet-lab handoff | `gliostrata.handoff.protocol` | **Working** (JSON protocol generator) |
 | — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification, access ledger and read guard |
 
-The test suite has 1113 tests in 34 modules: 1112 pass and 1 is skipped (the skipped test needs Snakemake, an
+The test suite has 1126 tests in 35 modules: 1125 pass and 1 is skipped (the skipped test needs Snakemake, an
 optional dependency). It passes with all outbound sockets blocked. Tests that need the real
 TCGA data skip when it is absent, and no test reads CGGA. Heavy optional dependencies
 (scanpy, lifelines, botorch, PhysiCell) are NOT required.
@@ -192,7 +192,7 @@ gliostrata/
 │   ├── cgga_external_eligibility.py  ← patients eligible for the sealed external partition
 │   ├── generate_synthetic_data.py
 │   └── run_full_pipeline.py
-├── tests/                         ← 34 test modules, 1113 tests
+├── tests/                         ← 35 test modules, 1126 tests
 ├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds; registration.yaml the registration state; subtype_centroids/ the frozen centroid sets with their checksums)
 ├── workflow/                      ← Snakemake workflow (Snakefile + rules/)
 ├── data/partitions/               ← sealed partition manifests (in git)

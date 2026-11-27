@@ -27,8 +27,10 @@ on CGGA.
 | 11 | The single-sample subtype agrees with the published TCGA labels for 56 of 76 v2-test patients (0.737, exact 95% CI 0.623 to 0.831). | Descriptive; not validation |
 | 12 | Every reported internal number had the 169 v2-test patients in its training folds. | Disclosure |
 | 13 | The state and TME scores are cohort-relative: 6 of 50 patients change their highest state when scored alone. | Descriptive; not covered by D6 |
+| 14 | On 100 pseudo-bulk mixtures of malignant cells from the Neftel 2019 atlas, the state scores recover the imposed proportions: mean per-state Pearson r 0.9521 (95% CI 0.9430 to 0.9589) against 0.75. | T1 deconvolution: **PASS, run before deposit**; optimistic by design |
 
-Two of eleven registered thresholds have been evaluated. Both were not met.
+Three of eleven registered thresholds have been evaluated. T2's two were not met. T1's
+deconvolution row passed, run before the deposit on simulated mixtures (finding 14).
 
 ## 2.2 Finding 1: the survival model does not transfer to CGGA (T2, C-index)
 
@@ -359,13 +361,47 @@ of the 283 alone moves a state fraction by up to 0.0744 and changes the highest 
 6 of the 50. The store's state and TME values were scored over the 283, v2-test patients
 included. No decision covers this yet (`05_future_plan.md`, section 5.5).
 
-## 2.10 What has not been shown
+## 2.10 Finding 14: state recovery on simulated Neftel mixtures (T1, deconvolution)
+
+**Design.** Fixed in `docs/t1_deconvolution_spec.md` and committed (`f5b9fe6`) before
+the run. 6,568 malignant Smart-seq2 cells of the Neftel 2019 atlas (GEO GSE131928, with
+the per-cell annotation of the Curated Cancer Cell Atlas), each given its highest Neftel
+state score. 100 mixtures of 500 cells, weights from a flat Dirichlet. The project's
+estimator (`deconvolve_states_expression`, defaults) scored the 100 mixtures together.
+Metric: the mean of the four per-state Pearson r between estimate and imposed weight;
+percentile bootstrap over mixtures, 1000 resamples. Run once.
+
+| | r | 95% CI |
+| --- | --- | --- |
+| **Mean of four (decides)** | **0.9521** | **0.9430 to 0.9589** |
+| NPC | 0.9647 | 0.9472 to 0.9768 |
+| OPC | 0.9528 | 0.9290 to 0.9682 |
+| AC | 0.9204 | 0.8885 to 0.9447 |
+| MES | 0.9705 | 0.9574 to 0.9797 |
+
+**Verdict:** PASS by the registry (lower bound 0.9430 >= 0.75). **Run before the
+deposit**, so exploratory until it is made, and the deposit must say the result was
+known.
+
+**What it does not show.** That the estimator measures state composition in a tumour.
+The mixtures hold malignant cells only; the truth comes from the same cells; and the
+atlas states and the estimator's markers come from the same Neftel meta-modules, so part
+of the agreement is built in. The registration calls this test optimistic for these
+reasons. The declared secondary, the cohort-independent `proportional` option, gives
+0.8541 (0.8358 to 0.8750); it is descriptive. T1's subtype-accuracy row has not been
+run.
+
+Source: `docs/project_record/06_evidence_reports.md`, section "T1, state-deconvolution
+row"; `data/results/t1/neftel_mixture_deconvolution.json`.
+
+## 2.11 What has not been shown
 
 A reader should be able to tell a measured result from an absence of one.
 
-- **No pre-registered test has been met.** T2's two evaluated rows failed. T1, T3, T4 and
-  T5 have not been run, so nothing can be said about subtyping accuracy, simulation
-  fidelity, the optimiser, or end-to-end benefit.
+- **No pre-registered test has been met confirmatorily.** T2's two evaluated rows failed.
+  T1's deconvolution row passed on simulated mixtures, before the deposit (finding 14).
+  T1's subtype row, T3, T4 and T5 have not been run, so nothing can be said about
+  subtyping accuracy on CGGA, simulation fidelity, the optimiser, or end-to-end benefit.
 - **No survival benefit has been demonstrated, predicted or otherwise.** T5, the test that
   would measure a predicted benefit, has not been run, and its credibility is bounded by
   T2, which failed.
@@ -383,7 +419,7 @@ A reader should be able to tell a measured result from an absence of one.
   existed. This departs from the pre-registration's stated procedure and is disclosed in
   its amendment log.
 
-## 2.11 Reproducing the results
+## 2.12 Reproducing the results
 
 ```bash
 # T2 C-index row (synthetic-data tests, then the evaluation)
@@ -408,6 +444,10 @@ python scripts/prepare_subtype_reference.py      # needs the data/external/ down
 python scripts/build_subtype_centroids.py         # rebuilds configs/subtype_centroids/
 python scripts/subtype_scoring_set_dependence.py  # finding 10
 python scripts/compare_subtype_labels.py          # finding 11
+
+# T1 deconvolution row (finding 14); refuses to overwrite its result
+python scripts/t1_deconvolution_mixtures.py --dry-run
+python scripts/t1_deconvolution_mixtures.py
 ```
 
 - Both T2 scripts are deterministic (seed 42). Re-running one reproduces its numbers and

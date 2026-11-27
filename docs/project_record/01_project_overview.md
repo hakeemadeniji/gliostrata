@@ -32,10 +32,10 @@ Source: `docs/preregistration.md` section 1.
 A threshold is met only if the point estimate **and** its decisive 95% confidence bound
 both clear it.
 
-| Test | Metric | Requirement | Status (2026-11-26) |
+| Test | Metric | Requirement | Status (2026-11-27) |
 | --- | --- | --- | --- |
 | T1 | Subtyping accuracy, CGGA external | >= 0.88 | Not run |
-| T1 | State deconvolution, Pearson r | >= 0.75 | Not run |
+| T1 | State deconvolution, Pearson r | >= 0.75 | **PASS, run before deposit**: 0.9521 (CI 0.9430 to 0.9589) on 100 simulated Neftel mixtures. Optimistic by design; exploratory until the deposit |
 | T2 | Survival C-index, CGGA external | >= 0.65 | **FAIL**: 0.5385 (CI 0.4994 to 0.5807) |
 | T2 | Improvement over a 2024 baseline | >= 0.03 | **Not evaluated**: no comparator named |
 | T2 | Brier score at 18 months | <= 0.25 | **FAIL**: 0.2617 (CI 0.2391 to 0.2829) |
@@ -117,10 +117,14 @@ rule tuned to match. KPS is not a requirement of any view: it is missing for 152
 
 - The per-patient subtype: a nearest-centroid assignment. It agrees with the published
   TCGA labels for 56 of 76 v2-test patients (0.737), a descriptive check on the cohort
-  the centroids came from. T1 has not been run.
+  the centroids came from. T1's subtype row has not been run; its deconvolution row was
+  run before deposit (below).
 - The state and TME scores: normalised marker-enrichment scores, not cell proportions,
-  and cohort-relative over the 283 profiled patients. No ground truth exists for them in
-  the project; T1's deconvolution row needs the Neftel 2019 atlas, which is not on disk.
+  and cohort-relative over the 283 profiled patients. On 100 simulated mixtures of
+  malignant cells from the Neftel 2019 atlas the state scores recover the imposed
+  proportions (mean per-state r 0.9521; T1's deconvolution row, run before deposit). That
+  is a recovery test on simulated mixtures, not a measurement on tumours; the TME scores
+  have no ground truth here.
 - The MGMT call: a two-probe score thresholded at 0.35 (`docs/mgmt_idh_calling.md`).
 - The IDH call: from open MAF files; untested patients are no call, never wild type.
 
@@ -134,6 +138,7 @@ rule tuned to match. KPS is not a requirement of any view: it is missing for 152
 | TCGA-GBM | MGMT promoter methylation calls (from 450 beta-value files) | 422 callable; **415 of 594** cohort patients have a call |
 | CGGA | Clinical rows, three batches pooled | 1,319 rows, of which **333 are primary GBM**, which are **305 unique patients** |
 | CGGA | RNA-seq read counts (two batches) | 76.9 MB matrix; **225 patients** have an expression profile |
+| Neftel 2019 atlas | Smart-seq2 matrix (GEO GSM3828672) and the 3CA per-cell annotation, obtained 2026-11-27 | 7,930 cells, 28 tumours; 6,568 malignant cells with state scores used for T1's deconvolution row |
 
 Of the 305 CGGA patients, **218** have both an expression profile and a complete survival
 outcome and are therefore eligible for the sealed external partition. The CGGA microarray
@@ -164,7 +169,7 @@ Source: manifests under `data/partitions/`; `docs/reproducibility.md` section 4.
 | Property | Value |
 | --- | --- |
 | Package | `gliostrata` 0.1.0, MIT licence, Python >= 3.10 (developed on 3.14.3) |
-| Test suite | **1113 tests in 34 modules: 1112 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27; 1075 in 31 modules at `baseline-r1`) |
+| Test suite | **1126 tests in 35 modules: 1125 pass, 1 skipped, 0 failed**, with all outbound sockets blocked (measured 2026-11-27, after T1's deconvolution row; 1113 in 34 modules after stage 3b; 1075 in 31 modules at `baseline-r1`) |
 | The one skip | A Snakemake-dependent workflow test; Snakemake is an optional dependency and was not installed |
 | Real-data tests | Skip when the TCGA or CGGA files are absent; they ran here because the data are present |
 | Blocking lint (`E9,F63,F7,F82`) | Clean across `src`, `tests`, `scripts` |

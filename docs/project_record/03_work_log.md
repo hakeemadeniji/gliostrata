@@ -190,6 +190,15 @@ in `06_evidence_reports.md`, stage 3b.
 | Correct pre-registration 3.3 and 4.5 (after the stage, at the project lead's request) | The text proposed in Part A item 2, applied; a dated amendment in section 8 | `cgga_external_v1` is the primary external test for T2, T4 and T5; T1 is scored on its own registered scoring sets. No threshold, bound, rule, scoring set or partition changed; threshold-table checksum unchanged | `16b6c09` |
 | Align the scoring-rule registry with rule 9(d) (after the stage, at the project lead's request) | `configs/scoring_rules.yaml`, the T1 rule's description | "Per-gene z-scored" replaced by 9(d)'s wording: each sample z-scored across its own genes. Rule id, analyses and manifest fields unchanged | The commit after `16b6c09` |
 
+## Phase L. T1's state-deconvolution row (2026-11-27; run before deposit)
+
+| Task | Method | Outcome | Commit |
+| --- | --- | --- | --- |
+| Obtain the atlas | GEO GSM3828672 (Smart-seq2 matrix); the 3CA per-cell annotation, because GEO has no malignant flag or state and the Broad portal refused an anonymous download | Both checksummed; provenance recorded | `f5b9fe6` |
+| Specify before running | `docs/t1_deconvolution_spec.md`; script and 13 tests; independent pre-run review (2 must-fix, 3 should-fix, all applied) | Committed before the run | `f5b9fe6` |
+| Run once | `python scripts/t1_deconvolution_mixtures.py`, 11:40:07Z to 11:40:45Z, exit 0 | Mean per-state r 0.9521 (CI 0.9430 to 0.9589): PASS, run before deposit. Secondary (proportional) 0.8541 | |
+| Record | This record, the changelog, reproducibility | Pre-registration section 5 and the OSF text noted as out of date, not edited | The commit after `f5b9fe6` |
+
 ## Reads of the external cohort, in total
 
 | # | When | What was read | What was computed |

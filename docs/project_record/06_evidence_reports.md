@@ -897,3 +897,121 @@ CGGA. L4 to L7 have not run on real data.
     Whether it is a coding error at source was not checked.
 14. Snakemake has never executed on this machine: neither the new rules nor the existing
     ones.
+
+## T1, state-deconvolution row: Neftel 2019 mixtures (2026-11-27; run before deposit)
+
+**Scope.** The deconvolution half of T1 (pre-registration section 2 and 2.2 items 1 and
+10), which needs no cohort and no deposit. The atlas was obtained, the mixture-generation
+specification was written, reviewed and committed, and the analysis was then run once.
+**Run before deposit:** the pre-registration is not deposited, so this row is
+exploratory until it is, and its result was known before the deposit; the deposit must
+say so. No TCGA or CGGA file was read. No threshold, bound, rule, partition or seed of
+the registration changed. `docs/preregistration.md` was not edited.
+
+**Commits.** `f5b9fe6` (the specification `docs/t1_deconvolution_spec.md`, the script
+`scripts/t1_deconvolution_mixtures.py`, its 13 tests and
+`data/provenance/neftel2019_sources.json`), committed before the run; the run was made
+from that commit. Then the commit that adds this record.
+
+**Inputs** (git-ignored under `data/external/`; provenance in
+`data/provenance/neftel2019_sources.json`):
+
+| File | Source | Bytes | SHA-256 |
+| --- | --- | --- | --- |
+| `GSM3828672_Smartseq2_GBM_IDHwt_processed_TPM.tsv.gz` | GEO GSE131928, sample GSM3828672 (Neftel et al., Cell 2019) | 310,775,398 | `73be3319…daf960f5` |
+| `Meta-data_Neftel2019_Brain.tar.gz` | Curated Cancer Cell Atlas (3CA), Tirosh lab | 888,416 | `df01ad31…7c7a7b80` |
+
+GEO carries no per-cell malignant flag or state; 3CA's release of the same data carries
+both. The Broad Single Cell Portal copy (SCP393) refused an anonymous download (HTTP
+401). Every 3CA cell name matches a GEO column. The GEO values are log2(TPM/10 + 1); back-
+transformed, every used cell sums to 999,851 to 1,000,099 (float32). Neither source
+states a licence (UNVERIFIED; recorded in the provenance file).
+
+**Before the run** (in this order): inputs downloaded and checksummed; their format,
+columns and cell counts inspected; the specification, script and tests written; an
+independent pre-run review (it may not run the analysis) found two must-fix items, both
+fixed (peak memory; a rule for an aborted run) and three should-fix items, all fixed
+(NOT EVALUABLE rules for an undefined r or more than 10 undefined bootstrap resamples;
+the scale check reworded; the 3CA scores described as distributed by 3CA); 13 tests
+passed; `--dry-run` matched the specification's counts; then the commit.
+
+**The run.** `python scripts/t1_deconvolution_mixtures.py`, once, from `f5b9fe6`,
+2026-11-27T11:40:07Z to 11:40:45Z, exit 0. No abort, no re-run.
+
+| Item | Value |
+| --- | --- |
+| Cells | 6,568 malignant cells with all six module scores, of 7,930; 26 tumours; no tie |
+| Cells per state | NPC 1,985; OPC 1,047; AC 1,928; MES 1,608 |
+| Genes | 23,686; all 59 marker genes of the estimator present |
+| Mixtures | 100; flat Dirichlet weights; 500 cells each; seed 131928; each sums to 1,000,000 (999,998.2 to 1,000,000.8) |
+| Estimator | `deconvolve_states_expression`, defaults (ssGSEA, softmax over each state's z-score across the 100 mixtures) |
+| Bootstrap | 1000 resamples of mixtures, seed 42; 0 undefined; no clipping |
+
+**Result.**
+
+| Metric | Value | 95% CI |
+| --- | --- | --- |
+| **Mean of the four per-state Pearson r (primary)** | **0.9521** | **0.9430 to 0.9589** |
+| r, NPC | 0.9647 | 0.9472 to 0.9768 |
+| r, OPC | 0.9528 | 0.9290 to 0.9682 |
+| r, AC | 0.9204 | 0.8885 to 0.9447 |
+| r, MES | 0.9705 | 0.9574 to 0.9797 |
+| Pooled r over the 400 pairs (descriptive) | 0.9506 | |
+
+**Verdict, from the registry** (`T1_state_deconvolution_pearson_r`): **PASS**, "95% CI
+lower bound 0.943042 >= 0.75". The point estimate lies inside its interval; nothing was
+widened. **Run before deposit; exploratory until the deposit.**
+
+Descriptive, reported alongside: per-state r against the realised fractions (n/500):
+NPC 0.9712, OPC 0.9566, AC 0.9252, MES 0.9745. RMSE between estimate and weight: NPC
+0.0487, OPC 0.0542, AC 0.0705, MES 0.0479. AC is the weakest state. The module notes that
+one of its AC markers, GFAP, is saturated in TCGA bulk tumours; whether that explains AC's
+lower r on these mixtures was not examined.
+
+**The declared secondary** (descriptive; cannot change the verdict): the same estimator
+with `fraction_method="proportional"`, which does not depend on the other samples
+scored. Mean per-state r 0.8541 (95% CI 0.8358 to 0.8750); per state NPC 0.8420, OPC
+0.8731, AC 0.7947, MES 0.9065. Lower than the cohort-relative default on these mixtures,
+and still above 0.75. This bears on the open decision about the store's cohort-relative
+state scores (`05_future_plan.md` section 5.5); it does not decide it.
+
+**Outputs** (git-ignored):
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `data/results/t1/neftel_mixture_deconvolution.json` | 5,768 | `a6921697b1b3af92ca1ba483fb6b74ea5d00dce231ceb862341cf6b8d60dc5e4` |
+| `data/results/t1/neftel_mixture_deconvolution_mixtures.parquet` | 24,948 | `a17c8459ae34b646cf56149b69818fe16678f0f1cbbc5bdf03f960e0ea9296ce` |
+
+**What this is not.**
+
+- Not evidence that the estimator measures state composition in a tumour. The test is
+  optimistic by registration and by construction (specification section 6): the
+  mixtures hold malignant cells only, with no immune, stromal or normal-brain cells; the
+  truth comes from the same cells; and the atlas states and the estimator's marker
+  panels come from the same Neftel meta-modules, so part of the agreement is built in.
+- Not a confirmatory result: run before the deposit.
+- Not CIBERSORTx, which the protocol names; the project's marker-enrichment estimator was
+  tested. A CIBERSORTx run would be post hoc and exploratory (item 10).
+- Not T1 as a whole. T1's subtype-accuracy row (CGGA microarray, 108 labelled patients)
+  has not been run.
+
+**External reads.** No CGGA and no TCGA file. Network: the GEO FTP (one file), the 3CA
+page and its Dropbox link (one file, plus a header request for the 468 MB data archive,
+which was not downloaded), the Broad Single Cell Portal API (study listing; one refused
+download), the Human Cell Atlas index (file listing).
+
+**Tests and lint.** `pytest tests/test_t1_deconvolution.py`: 13 passed. Full suite, sockets blocked and a CGGA file-access audit hook: 1125 passed, 1 skipped in 256 s (1126 collected in 35 modules); 0 blocked connection attempts; 0 accesses to a CGGA path in the repository. Blocking lint clean; advisory lint 166, unchanged (the two new files add none).
+
+**Open issues.**
+
+1. Pre-registration section 5 ("the single-cell reference atlases ... have not been
+   obtained") and `docs/osf_final_fields.md` ("DATA STILL TO BE OBTAINED: Deconvolution
+   ground truth") are now out of date, and the deposit must disclose that this row was
+   run before it. Not edited: a change to the pre-registration waits for the project
+   lead.
+2. Whether to record this result in the pre-registration, as section 2.3 does for T2,
+   is the project lead's decision.
+3. The licences of the GEO series and the 3CA release are not stated by either source.
+4. The store's state and TME scores remain cohort-relative over the 283 profiled
+   patients. The secondary above shows the cohort-independent option also recovers
+   simulated proportions (0.854); no decision has been taken.

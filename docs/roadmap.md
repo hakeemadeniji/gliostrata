@@ -21,7 +21,7 @@ Status as of 2026-11-27 (stage 3b). Four statuses are used:
 | L1 | `data/qc.py` | Stub | Purity / consistency checks TODO |
 | L2 | `profiling/centroid.py` | Implemented, wired (real mode) | Single-sample nearest centroid over the published Verhaak 840-gene signature (831 genes resolved); two frozen centroid sets with checksums. The per-patient subtype. Measured, not validated |
 | L2 | `profiling/verhaak.py` | Implemented | Cohort-relative signature scoring; descriptive cohort distributions only |
-| L2 | `profiling/deconvolve.py` | Implemented, wired (real mode) | Marker-based state and TME scoring from bulk expression; cohort-relative by default |
+| L2 | `profiling/deconvolve.py` | Implemented, wired (real mode) | Marker-based state and TME scoring from bulk expression; cohort-relative by default. The state scores recover 100 simulated Neftel 2019 mixtures (T1 deconvolution row: mean per-state r 0.9521, PASS, run before deposit; `docs/t1_deconvolution_spec.md`) |
 | L2 | `profiling/{subtype,states,tme}.py` | Stub | Synthetic calls; this is what `gliostrata profile` runs |
 | L3 | `features/{store,contract,views,build}.py` | Working | `gliostrata build-feature-store --mode real\|synthetic`. The store holds every cohort patient (594 on TCGA) and never filters; outcomes in a separate label table; named views profiling (283), transferable model (570) and molecular model (298) with per-split flow counts |
 | L4 | `simulation/tumor.py`, `simulation/nsc.py` | Stub | PhysiCell wrapper and chemotaxis solver TODO; synthetic curves provided |
@@ -59,7 +59,7 @@ Status as of 2026-11-27 (stage 3b). Four statuses are used:
 
 ## What the tests cover
 
-1113 tests in 34 modules (1112 passed, 1 skipped) run without the optional dependencies. They
+1126 tests in 35 modules (1125 passed, 1 skipped) run without the optional dependencies. They
 pass without network access and without heavy dependencies (scanpy, lifelines,
 botorch and PhysiCell are not required). Tests that read the real TCGA
 data skip when it is absent; no test reads CGGA; one workflow test skips when Snakemake is not

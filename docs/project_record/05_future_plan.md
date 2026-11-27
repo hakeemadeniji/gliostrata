@@ -84,7 +84,7 @@ disk. None changes a number that has been measured.
 | Test | Registered rule | Scoring set | What is missing today |
 | --- | --- | --- | --- |
 | T1 subtype accuracy | Exact binomial lower bound >= 0.88, two-sided | 108 CGGA microarray patients with a reference label; below 30 labelled patients it is NOT EVALUABLE | The microarray expression matrix has not been downloaded, and no classifier matches the registered rule (section 5.1.1). The harmonisation rule is fixed. |
-| T1 deconvolution | Mean of four per-state Pearson r >= 0.75, CI lower | 100 simulated pseudo-bulk mixtures from the Neftel 2019 atlas | The mixtures have not been simulated. |
+| T1 deconvolution | Mean of four per-state Pearson r >= 0.75, CI lower | 100 simulated pseudo-bulk mixtures from the Neftel 2019 atlas | **Run 2026-11-27, before the deposit: PASS** (0.9521, CI 0.9430 to 0.9589). Specification `docs/t1_deconvolution_spec.md`, committed before the run (`f5b9fe6`). Exploratory until the deposit, which must disclose it |
 | T2 improvement over baseline | Paired difference in C-index >= 0.03, CI lower | Identical frozen partition for both models | **No comparator model is named.** If none can be re-run, the row is NOT EVALUABLE. |
 | T3 tumour growth | RMSE <= 15% of final volume, CI upper | At least 10 PDX control-arm curves spanning four subtypes | **No qualifying dataset.** Data due 2027-01-15; calibration by 2027-03-01; otherwise NOT EVALUABLE. |
 | T3 NSC migration | r >= 0.65, CI lower | In vivo tracking series | **No qualifying dataset.** Same closing rule. |
@@ -239,8 +239,10 @@ them.
 - **The GDC is not pinned to a data release.** A re-run queries today's GDC.
 - **Nothing in L2 is validated against a published reference.** The single-sample
   subtype agrees with the published TCGA labels for 56 of 76 v2-test patients (0.737), a
-  descriptive check on its own cohort (`06_evidence_reports.md`, stage 3b). T1 has not
-  been run.
+  descriptive check on its own cohort (`06_evidence_reports.md`, stage 3b). T1's
+  subtype row has not been run. The state scores recover simulated Neftel mixtures (T1's
+  deconvolution row, run before deposit), which is not a check against a published
+  reference on tumours.
 - **No end-to-end run on the real cohort has been recorded.** L0 to L3 run on TCGA
   through `gliostrata build-feature-store --mode real` since 2026-11-27 (stage 3b; all
   594 patients in the store; `scripts/build_tcga_feature_store.py` is now a thin wrapper
@@ -305,8 +307,18 @@ Found in stage 3b (2026-11-27), not fixed:
   files; nothing reads it.
 - **The 0.737 subtype agreement is mostly with another classifier.** 65 of the 76 v2-test
   labels are Brennan 2013 ssGSEA classifier labels; 11 are Verhaak 2010 clustering labels.
-- **The Neftel 2019 atlas is not on disk**, so T1's deconvolution row cannot be run. Its
-  public sources, sizes and terms are in `06_evidence_reports.md`, stage 3b, Part D.
+- **Resolved 2026-11-27: the Neftel 2019 atlas is on disk** (GEO GSM3828672 and the 3CA
+  per-cell annotation; `data/provenance/neftel2019_sources.json`) and T1's deconvolution
+  row has been run once, before the deposit (`06_evidence_reports.md`, section "T1,
+  state-deconvolution row").
+- **The pre-registration and the OSF text now understate the data in hand.**
+  Pre-registration section 5 says the single-cell reference atlases have not been
+  obtained, and `docs/osf_final_fields.md` lists the deconvolution ground truth as still
+  to be obtained. Both need correcting before the deposit, which must also disclose that
+  T1's deconvolution row was run, and passed, before it. Whether to record the result in
+  the pre-registration, as section 2.3 does for T2, is for the project lead. Not edited.
+- **The licences of the atlas inputs are not stated** by GEO or by 3CA (UNVERIFIED);
+  both are cited.
 - **`scripts/prepare_subtype_reference.py` needs `openpyxl` and `pyreadr`**, which are in
   neither `pyproject.toml` nor the lock file, to rebuild the published-label table and the gene map from the
   downloads. The committed centroid sets and gene map do not need it.

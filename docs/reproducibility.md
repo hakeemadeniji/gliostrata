@@ -405,15 +405,18 @@ writes the predictions out.
 - **Nothing in L2 is validated against a published reference.** The single-sample
   subtype agrees with the published TCGA labels for 56 of 76 v2-test patients
   (0.737), a descriptive check on the cohort its centroids came from, not a
-  validation. The state and TME scores have no ground truth here. T1 has not been
-  run.
+  validation. The state scores recover the imposed proportions of 100 simulated
+  Neftel 2019 mixtures (T1's deconvolution row, mean per-state r 0.9521, run before
+  deposit; `docs/t1_deconvolution_spec.md`), an optimistic recovery test, not a
+  measurement on tumours. The TME scores have no ground truth here. T1's subtype row
+  has not been run.
 
 ### What *is* genuinely reproducible today
 
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite: 1113 tests, 1112 passing and 1 skipped, with all outbound sockets blocked.
+2. The test suite: 1126 tests, 1125 passing and 1 skipped, with all outbound sockets blocked.
 3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
    methylation calls (real GDC API code with cohort filtering, barcode parsing and
    a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does

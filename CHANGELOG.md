@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — T1 state-deconvolution row (2026-11-27; run before deposit)
+- `docs/t1_deconvolution_spec.md`: the mixture-generation specification, committed
+  before the run with `scripts/t1_deconvolution_mixtures.py`, its 13 tests and
+  `data/provenance/neftel2019_sources.json` (GEO GSM3828672 and the 3CA per-cell
+  annotation of the Neftel 2019 atlas; both git-ignored under `data/external/`).
+- Result, run once: mean per-state Pearson r 0.9521 (95% CI 0.9430 to 0.9589) on 100
+  pseudo-bulk mixtures of malignant cells, against 0.75: PASS by the registry. Run
+  before the deposit, so exploratory until it; optimistic by design (malignant cells
+  only; the atlas states and the estimator's markers share the Neftel meta-modules).
+  Declared secondary (`fraction_method="proportional"`): 0.8541 (0.8358 to 0.8750).
+
 ### Added — pre-registration and the real data layers
 - Pre-registration machinery: checksum-frozen threshold registry
   (`evaluation/thresholds.py`), frozen partitions with drift detection
