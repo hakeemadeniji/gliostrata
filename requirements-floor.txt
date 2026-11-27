@@ -1,0 +1,34 @@
+# Floor pins: the lowest published version that satisfies each requirement in
+# pyproject.toml (the runtime dependencies and the `dev` extra), for the
+# `test-floor` CI job on Python 3.10.
+#
+# pyproject declares only lower bounds and requires-python = ">=3.10". This
+# file makes that claim testable: the job installs exactly these versions and
+# runs the suite. It was not run before 2026-11-27. If it is red, the floor is
+# wrong: either make the code work there, or raise the bound in pyproject.toml
+# and here, in one commit.
+#
+# One entry differs from a literal reading of its bound: black>=23.0 is pinned
+# to 23.1.0 because no 23.0.x was published. Transitive dependencies are not
+# pinned here; the floors are about what the project itself declares. The exact
+# environment that produced the results is requirements-lock.txt.
+
+# runtime dependencies
+numpy==1.24.0
+pandas==2.0.0
+scipy==1.11.0
+scikit-learn==1.3.0
+pyyaml==6.0.0
+click==8.1.0
+python-dotenv==1.0.0
+tqdm==4.66.0
+pyarrow==14.0.0
+joblib==1.3.0
+requests==2.31.0
+
+# dev extra
+pytest==7.4.0
+pytest-cov==4.1.0
+black==23.1.0
+ruff==0.1.0
+mypy==1.5.0

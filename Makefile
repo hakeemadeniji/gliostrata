@@ -34,7 +34,7 @@ help:
 	@echo " Quality"
 	@echo "  make test              - run the full pytest suite"
 	@echo "  make test-fast         - run the suite without slow/heavy tests"
-	@echo "  make lint              - ruff, project config (currently ~171 known findings)"
+	@echo "  make lint              - ruff, project config (currently ~170 known findings)"
 	@echo "  make lint-strict       - ruff, errors-only set that CI blocks on"
 	@echo "  make format            - black + ruff --fix"
 	@echo "  make ci                - everything CI runs, locally"

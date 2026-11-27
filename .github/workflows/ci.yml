@@ -10,6 +10,17 @@ name: CI
 #
 # The workflow pipeline job runs with `--config source=synthetic`, which is the
 # only L0 entry point that does not touch the network.
+#
+# Dependency policy (since 2026-11-27):
+#   test          installs requirements-lock.txt: the environment that produced
+#                 the results on record, then the package with --no-deps.
+#   test-floor    installs requirements-floor.txt on Python 3.10: the lowest
+#                 versions pyproject accepts. It is the only test of the claim
+#                 requires-python = ">=3.10".
+#   lint          installs ruff, constrained by the lock file.
+#   partition-drift, workflow-dry-run   install the package (and the `workflow`
+#                 extra). snakemake and dvc are not in the environment that
+#                 produced the results, so they are not locked.
 
 on:
   push:
@@ -23,8 +34,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # The version this project is developed against. pyproject declares
-  # requires-python = ">=3.10"; the working environment is 3.14.
+  # The version the results on record were produced with. pyproject declares
+  # requires-python = ">=3.10"; that floor is tested by the test-floor job.
   PYTHON_VERSION: "3.14"
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
@@ -40,16 +51,16 @@ jobs:
           python-version: "3.14"
           cache: pip
 
-      - name: Install ruff
-        run: pip install "ruff>=0.1"
+      - name: Install ruff at the locked version
+        run: pip install -c requirements-lock.txt "ruff>=0.1"
 
       - name: ruff check (blocking — real errors only)
-        # Deliberately narrow. The repo currently has ~171 findings under the
-        # project's own ruff config (164 in src+tests, 7 in scripts), dominated
-        # by N806/N803 naming rules — which is arguable in
+        # Deliberately narrow. The repo has 170 findings under the project's
+        # own ruff config (2026-11-27; 171 the day before), dominated by the
+        # N806/N803 naming rules, which is arguable in
         # statistical code where `X`, `X_train` and `N` are the conventional
-        # names. Making the full rule set blocking today would land a red CI on
-        # commit 1 and teach everyone to ignore it.
+        # names. Making the full rule set blocking today would land a red CI
+        # on commit 1 and teach everyone to ignore it.
         #
         # This set is the "the code is broken" floor and passes clean right now:
         #   E9  syntax / IO errors      F63 invalid comparisons
@@ -63,7 +74,7 @@ jobs:
         run: ruff check --statistics src tests scripts
 
   test:
-    name: Tests (Python 3.14)
+    name: Tests (Python 3.14, locked)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,12 +84,46 @@ jobs:
           python-version: "3.14"
           cache: pip
 
-      - name: Install package with dev extras
-        run: pip install -e ".[dev]"
+      - name: Install the locked environment, then the package
+        # requirements-lock.txt is the environment that produced the results
+        # on record (the installed transitive closure of the runtime
+        # dependencies and the `dev` extra; Python 3.14.3). The package itself
+        # is not in it and is installed editable with --no-deps, so nothing is
+        # resolved and no version can drift.
+        run: |
+          pip install -r requirements-lock.txt
+          pip install -e . --no-deps
+
+      - name: Show where the package is imported from
+        run: python -c "import gliostrata; print('gliostrata:', gliostrata.__file__)"
 
       - name: Run test suite
         # No network needed. data/raw/** is not in git, so the real-cohort
         # tests skip; everything else runs on synthetic fixtures.
+        run: python -m pytest -q
+
+  test-floor:
+    name: Tests (Python 3.10, lowest accepted versions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install the floors, then the package
+        # pyproject declares only lower bounds and requires-python = ">=3.10".
+        # requirements-floor.txt pins each bound to the lowest published
+        # version that satisfies it. This job tests that claim and nothing
+        # else; it first ran after 2026-11-27. If it is red, the floor is
+        # wrong: fix the code or raise the bound, in one commit.
+        run: |
+          pip install -r requirements-floor.txt
+          pip install -e . --no-deps
+
+      - name: Run test suite
         run: python -m pytest -q
 
   partition-drift:
@@ -93,7 +138,7 @@ jobs:
           cache: pip
 
       - name: Install package
-        run: pip install -e .
+        run: pip install -c requirements-lock.txt -e .
 
       - name: Verify every active partition manifest reproduces
         env:
@@ -109,102 +154,11 @@ jobs:
         # as the cohort is re-ingested. If a patient moves between train and
         # test, every downstream evaluation is contaminated.
         #
-        # Two levels of check:
-        #   1. ALWAYS — manifest integrity: the manifest is sealed, its id
-        #      digests match its id lists, and re-deriving each patient's split
-        #      from (seed, patient_id) reproduces the frozen assignment. This
-        #      needs only git contents, so it is a genuine CI gate.
-        #   2. WHEN AVAILABLE — `gliostrata freeze-partition --verify` against
-        #      the actual cohort parquet. data/raw/** is gitignored, so that
-        #      file is normally absent in CI and this step says so rather than
-        #      pretending to have checked it.
-        run: |
-          python - <<'PY'
-          import os
-          import sys
-          from pathlib import Path
-
-          from gliostrata.evaluation import assign_split, read_manifest, sha256_over_ids
-
-          active = [Path(p) for p in os.environ["ACTIVE_MANIFESTS"].split()]
-          manifests = sorted(Path("data/partitions").glob("*.json"))
-          if not manifests:
-              sys.exit("No partition manifests found in data/partitions/.")
-          for path in active:
-              if not path.is_file():
-                  sys.exit(f"ACTIVE_MANIFESTS lists {path}, which does not exist.")
-
-          failures = []
-          for path in manifests:
-              m = read_manifest(path)
-              role = "ACTIVE" if path in active else "superseded (historical record)"
-              print(f"\n=== {path}  [{role}] ===")
-              print(f"  partition    : {m.partition_name}")
-              print(f"  sealed       : {m.sealed}")
-              print(f"  seed         : {m.seed}")
-              print(f"  n_train/test : {m.n_train} / {m.n_test}")
-
-              if not m.sealed:
-                  failures.append(f"{path}: manifest is UNSEALED (draft)")
-
-              for label, ids, digest in (
-                  ("train_ids", m.train_ids, m.train_ids_sha256),
-                  ("test_ids", m.test_ids, m.test_ids_sha256),
-                  ("all_ids", list(m.train_ids) + list(m.test_ids), m.all_ids_sha256),
-              ):
-                  actual = sha256_over_ids(ids)
-                  if actual != digest:
-                      failures.append(
-                          f"{path}: {label} digest mismatch "
-                          f"(recorded {digest[:12]}..., recomputed {actual[:12]}...)"
-                      )
-
-              if m.stratify_by is None:
-                  drifted = [
-                      pid
-                      for expected, ids in (("train", m.train_ids), ("test", m.test_ids))
-                      for pid in ids
-                      if assign_split(
-                          pid, seed=m.seed, test_fraction=m.test_fraction
-                      ) != expected
-                  ]
-                  if drifted:
-                      failures.append(
-                          f"{path}: {len(drifted)} id(s) no longer hash to their "
-                          f"frozen split, e.g. {drifted[:5]}"
-                      )
-                  else:
-                      print(
-                          f"  re-derived   : all {m.n_train + m.n_test} ids reproduce "
-                          f"their frozen split from (seed, patient_id)"
-                      )
-              else:
-                  print(
-                      f"  re-derived   : SKIPPED (stratified by {m.stratify_by!r}; "
-                      f"needs the cohort table)"
-                  )
-
-              cohort = Path(m.cohort_source)
-              if path not in active:
-                  print(
-                      "  cohort       : not checked -- superseded manifests are frozen "
-                      "history and are EXPECTED to drift from the current cohort"
-                  )
-              elif cohort.exists():
-                  print(f"  cohort       : present at {cohort} -> full --verify below")
-              else:
-                  print(
-                      f"  cohort       : NOT in this checkout ({cohort} is gitignored); "
-                      f"full --verify not run in CI"
-                  )
-
-          if failures:
-              print("\nPARTITION DRIFT:")
-              for f in failures:
-                  print(f"  - {f}")
-              sys.exit(1)
-          print("\nAll partition manifests verified.")
-          PY
+        # The checks live in scripts/ci_partition_drift.py, which
+        # tests/test_ci_partition_drift.py executes against a missing, a
+        # superseded, an external all-test and a tampered manifest. Until
+        # 2026-11-27 this logic was inline here, where no test could run it.
+        run: python scripts/ci_partition_drift.py
 
       - name: Full cohort verification of the active manifests
         # Only ACTIVE manifests, and only when the cohort parquet happens to be

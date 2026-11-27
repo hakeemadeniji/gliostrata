@@ -1,0 +1,41 @@
+{
+  "what": "Sizes, row counts and SHA-256 of the per-modality GDC file manifests under data/raw/tcga_gbm. The manifests themselves are not committed: each maps every downloaded file to a patient barcode (patient_id, case_submitter_id, sample_barcode, aliquot_barcode), so they are patient-level linkage and not file metadata alone. These values fix their content; a recreated manifest must match all three.",
+  "generated": "2026-11-27",
+  "columns_in_each": [
+    "file_id",
+    "file_name",
+    "file_size",
+    "md5sum",
+    "workflow_type or platform",
+    "case_id",
+    "case_submitter_id",
+    "sample_barcode",
+    "aliquot_barcode",
+    "gdc_sample_type",
+    "patient_id",
+    "sample_type_code",
+    "vial"
+  ],
+  "manifests": {
+    "expression/file_manifest.parquet": {
+      "bytes": 61445,
+      "rows": 284,
+      "sha256": "ce160dd1d59d13299ce8da7d5dba8268e33cbc24c800fd9ac7bd0ac80b435cf1"
+    },
+    "methylation/file_manifest.parquet": {
+      "bytes": 91573,
+      "rows": 450,
+      "sha256": "f3c1809ccbf581eb449278119df0c9c187a50acab07f3072bd698c82a2194f90"
+    },
+    "mutations/file_manifest.parquet": {
+      "bytes": 90677,
+      "rows": 464,
+      "sha256": "a41acbf0ea2d7ce6c62ab6cac05d2ecabf993576252f4ec3bc3a22d8a393d91f"
+    }
+  },
+  "sources": {
+    "expression": "scripts/download_tcga_expression.py",
+    "methylation": "scripts/download_tcga_methylation.py",
+    "mutations": "scripts/download_tcga_mutations.py"
+  }
+}

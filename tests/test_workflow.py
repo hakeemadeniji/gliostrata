@@ -637,25 +637,35 @@ class TestCiWorkflow:
     def test_every_job_pins_an_exact_python_version(self):
         """A floating Python is how a green CI stops matching the dev environment."""
         doc = yaml.safe_load(CI_YAML.read_text(encoding="utf-8"))
-        pinned: list[str] = []
+        pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        floor = re.search(r'requires-python\s*=\s*">=\s*(\d+\.\d+)"', pyproject)
+        assert floor, "could not read requires-python from pyproject.toml"
+        by_job: dict[str, set[str]] = {}
         for job_name, job in doc["jobs"].items():
-            versions = [
+            versions = {
                 str(step["with"]["python-version"])
                 for step in job.get("steps", [])
                 if isinstance(step, dict)
                 and "setup-python" in str(step.get("uses", ""))
                 and isinstance(step.get("with"), dict)
                 and "python-version" in step["with"]
-            ]
+            }
             assert versions, f"job {job_name} never pins a Python version"
             for v in versions:
                 assert re.fullmatch(r"\d+\.\d+(\.\d+)?", v), (
                     f"job {job_name} pins python-version {v!r}; it must be an "
                     f"exact version, not a range or expression"
                 )
-                pinned.append(v)
-        # One project, one Python.
-        assert len(set(pinned)) == 1, f"CI pins inconsistent Python versions: {set(pinned)}"
+            by_job[job_name] = versions
+        # One project, one Python. The single exception is deliberate: the floor
+        # job runs the same suite on the oldest Python pyproject accepts, with
+        # the lowest dependency versions it accepts (requirements-floor.txt).
+        main = {v for name, versions in by_job.items() if name != "test-floor" for v in versions}
+        assert len(main) == 1, f"CI pins inconsistent Python versions: {main}"
+        assert by_job.get("test-floor") == {floor.group(1)}, (
+            f"test-floor must pin exactly the requires-python floor {floor.group(1)}; "
+            f"it pins {by_job.get('test-floor')}"
+        )
 
     def test_pinned_python_matches_the_project_floor(self):
         doc = yaml.safe_load(CI_YAML.read_text(encoding="utf-8"))

@@ -1,0 +1,55 @@
+# Lock file for the environment that produced the results on record
+# (docs/project_record/06_evidence_reports.md). Generated on 2026-11-27 from the
+# installed distributions: the transitive closure of the project's runtime
+# dependencies and its `dev` extra, each pinned to the version that is installed.
+#
+# Python 3.14.3 on Windows (ARM64).
+#
+# Environment markers are kept, so the file is usable on another platform:
+# a line whose marker does not hold there is skipped by pip. Requirements that
+# apply only on a platform other than this one are not in the file, because
+# they are not installed here.
+#
+# CI (test job):   pip install -r requirements-lock.txt && pip install -e . --no-deps
+# Elsewhere:       pip install -c requirements-lock.txt -e ".[dev]"
+#
+# To refresh: re-run in the environment that produced the new results, in the
+# same commit that records them.
+
+ast-serialize==0.13.1
+black==26.10.1
+certifi==2026.2.25
+charset-normalizer==3.4.6
+click==8.4.1
+colorama==0.4.6 ; platform_system == 'Windows'
+coverage==7.17.5
+idna==3.11
+iniconfig==2.3.0
+joblib==1.5.3
+librt==0.17.0 ; platform_python_implementation != "PyPy"
+mypy==2.4.1
+mypy-extensions==1.2.0
+numpy==2.4.3
+packaging==26.0
+pandas==3.0.1
+pathspec==1.1.1
+platformdirs==4.9.4
+pluggy==1.6.0
+pyarrow==24.0.0
+pygments==2.19.2
+pytest==9.1.0
+pytest-cov==7.1.0
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.2
+pytokens==0.4.1
+pyyaml==6.0.3
+requests==2.34.2
+ruff==0.15.17
+scikit-learn==1.8.0
+scipy==1.17.1
+six==1.17.0
+threadpoolctl==3.6.0
+tqdm==4.67.3
+typing-extensions==4.15.0 ; python_version < "3.15"
+tzdata==2025.3 ; sys_platform == "win32"
+urllib3==2.6.3
