@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — T2 comparator (2026-11-27)
+- The registered comparator search (`docs/t2_comparator_search/`) was run once (549 records,
+  dual screening, full-text review). It found one model eligible as first registered:
+  PMID 38174685, a 7-gene signature. It decides T2's improvement row, applied as published on
+  CGGA's own FPKM release (`configs/t2_comparator/primary.json`,
+  `data/provenance/cgga_fpkm_sources.json`, `scripts/cgga_fpkm.py`).
+- Option B, a refitted best published gene set (`gliostrata.prediction.geneset_comparator`,
+  `scripts/t2_comparator.py`), is kept as a descriptive secondary. The improvement row uses a
+  batch-stratified C-index. Pre-registration section 2.2 item 2 carries four dated amendments,
+  and OSF stopping rule 9 gains one read, after the deposit.
+
 ### Added — deposit preparation (2026-11-27)
 - `docs/t2_comparator_shortlist.md`: a proposed eligibility rule for T2's 2024 comparator,
   four candidates checked against it (none eligible), and three paths for the lead. Nothing

@@ -13,6 +13,7 @@ from gliostrata.prediction.geneset_comparator import (
     log2_cpm,
     paired_bootstrap_difference,
     score_gene_set,
+    score_published,
     stratified_concordance_index,
 )
 
@@ -164,3 +165,26 @@ def test_paired_bootstrap_with_strata_reports_both_versions():
     assert out["cindex_comparator"] == pytest.approx(
         stratified_concordance_index(time, event, risk_b, strata))
     assert "unstratified_cindex_comparator" in out
+
+
+def test_score_published_is_the_printed_linear_formula():
+    expr = pd.DataFrame({"s1": [1.0, 2.0, 0.5], "s2": [0.0, 4.0, 1.0]}, index=["A", "B", "C"])
+    coefs = {"A": 0.5, "B": -0.25, "C": 2.0}
+    out = score_published(expr, coefs, ["s2", "s1"])
+    assert out.tolist() == [0.5 * 0 - 0.25 * 4 + 2 * 1, 0.5 * 1 - 0.25 * 2 + 2 * 0.5]
+    with pytest.raises(ValueError, match="not in the matrix"):
+        score_published(expr, {"Z": 1.0}, ["s1"])
+
+
+def test_primary_config_matches_the_printed_formula():
+    import json
+    from pathlib import Path
+
+    cfg = json.loads(Path("configs/t2_comparator/primary.json").read_text(encoding="utf-8"))
+    assert cfg["pmid"] == "38174685"
+    assert cfg["coefficients"] == {"CPPED1": 0.223340457, "F3": 0.1517013, "G0S2": 0.046311722,
+                                   "MAPK1": -0.219913858, "MME": 0.192197058,
+                                   "MMP9": 0.016505054, "MPO": 0.414575274}
+    for gene, coef in cfg["coefficients"].items():
+        assert f"Exp ({gene})" in cfg["formula_as_printed"]
+        assert f"{abs(coef)}" in cfg["formula_as_printed"]

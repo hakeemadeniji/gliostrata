@@ -45,6 +45,7 @@ __all__ = [
     "fit_gene_set",
     "score_gene_set",
     "stratified_concordance_index",
+    "score_published",
     "paired_bootstrap_difference",
 ]
 
@@ -205,6 +206,24 @@ def score_gene_set(model: CoxPHModel, gene_set: GeneSet, expr: pd.DataFrame,
                    samples: Sequence[str]) -> np.ndarray:
     """Log-hazard risk (higher is worse) for each sample, from its own values only."""
     return model.predict_log_hazard(design_matrix(expr, gene_set, samples))
+
+
+def score_published(expr: pd.DataFrame, coefficients: dict[str, float],
+                    samples: Sequence[str]) -> np.ndarray:
+    """A published linear risk score, sum of coefficient x expression, applied as published.
+
+    ``expr`` is genes (symbols) x samples, already on the scale the publication states.
+    Every gene must be present; none is dropped or renamed.
+    """
+    missing = [g for g in coefficients if g not in expr.index]
+    if missing:
+        raise ValueError(f"published model genes not in the matrix: {missing}")
+    genes = list(coefficients)
+    coef = np.array([coefficients[g] for g in genes], dtype=float)
+    values = expr.loc[genes, list(samples)].to_numpy(dtype=float)
+    if not np.isfinite(values).all():
+        raise ValueError("non-finite expression on a published model gene")
+    return coef @ values
 
 
 def stratified_concordance_index(time, event, risk, strata) -> float:

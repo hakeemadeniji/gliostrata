@@ -187,7 +187,29 @@ resolutions are pre-registered rather than chosen after the data is seen.
    partition, through the read guard. (i) *What it measures:* the comparison is with a
    published 2024 *gene set* refitted under the conditions of our own model, not with the
    published model itself, and it is reported as such. The reasoning, the alternatives
-   considered and the likely verdict are in `docs/t2_comparator_shortlist.md`.
+   considered and the likely verdict are in `docs/t2_comparator_shortlist.md`. (j) *The search,
+   completed, and the comparator named (2026-11-27, before the deposit).* The 13 records
+   still unread when option B was adopted were then screened: 10 from library PDFs, 3 not
+   obtainable. One record meets E1 to E5 of the rule as first registered: Sun G, Liu W,
+   *Folia Neuropathologica* 2024;62(1):59-75, PMID 38174685, a 7-gene neutrophil
+   extracellular trap signature. It was trained on TCGA-GBM log2(FPKM + 1), and CGGA
+   mRNAseq_693 was used for validation only. The search found no other eligible model,
+   so E6 does not arise. Because the rule fixed before the search yields a comparator,
+   **that comparator decides the verdict**, applied as published:
+   RS = 0.223340457·CPPED1 + 0.1517013·F3 + 0.046311722·G0S2 - 0.219913858·MAPK1 +
+   0.192197058·MME + 0.016505054·MMP9 + 0.414575274·MPO, higher RS meaning higher risk. Each
+   gene is matched by the symbol printed in the paper, and its value is log2(FPKM + 1) from
+   CGGA's own RSEM FPKM release: CGGA.mRNAseq_693 and CGGA.mRNAseq_325
+   .RSEM-genes.20200506, the release the authors validated on. That release was fetched
+   before the deposit; its SHA-256 values are in `data/provenance/cgga_fpkm_sources.json`
+   (access ledger entry 13). An availability check of gene names and sample ids only
+   (entry 16) found all 7 genes in both batches and all 218 partition patients. The
+   batch-stratified C-index of (g), variant 2 as in (f), and the paired bootstrap of (g)
+   apply unchanged. *Option B is kept as a secondary, descriptive comparison:* the gene
+   set chosen by (b) to (e) is scored in the same single read. Its difference from variant
+   2 is reported with its interval but carries no verdict, and nothing about it changes the
+   primary result. The comparison is one read of CGGA, made after the deposit through the
+   read guard on the sealed partition. OSF stopping rule 9 and section 5 list it.
 3. **T3 tumour-growth RMSE "≤ 15% of final volume" — whose final volume, and over which
    curves?** *Registered resolution:* RMSE is computed over the full time course per PDX
    growth curve, normalised by that curve's own observed final volume, then averaged across
@@ -687,8 +709,9 @@ The second cohort is CGGA: 305 unique patients in 333 rows, characterised at sch
 and then read twice for T2 (section 2.3).
 
 **Data not yet obtained.** CGGA has been downloaded and read twice for the T2 evaluation
-(C-index row, then Brier row); no reads beyond the registered T1, T4 and T5 will occur
-without a new pre-registration. GLASS has **not** been
+(C-index row, then Brier row); no reads beyond the registered T1, T4 and T5, and the one
+read for T2's improvement row registered in section 2.2 item 2 (j), will occur without a new
+pre-registration. GLASS has **not** been
 downloaded. CPTAC-GBM, any single-cell reference atlas other than the Neftel 2019 atlas,
 TCIA imaging, and the PDX growth curves and in vivo NSC tracking data required for T3
 have **not** been obtained. Neither has the CGGA microarray expression matrix. The
@@ -813,6 +836,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 5 ("Models fitted"; "Analyses already run") | "Models fitted" still said `cgga_external_v1` did not exist; it now gives the seal date, and that the T1 centroid set was estimated on all labelled TCGA patients, the v2 test split included. "Analyses already run" listed four TCGA analyses; it now also lists the four of stage 3b: the two centroid sets, the single-sample subtype calls with their descriptive agreement check (56 of 76 v2-test patients), the scoring-set dependence measurement, and the feature-store build. | The section exists so that what was done before the deposit is stated; both passages had become out of date. Found while preparing `docs/deposit_checklist.md`. | **No.** No data was read. CGGA had been read twice for T2, and once for the seal's availability check, before this entry. |
 | 2026-11-27 | 2.2 item 2 (comparator amended) | Kept the registered search and its candidates, and replaced "re-run as published" with a re-implementation under identical conditions. Each eligible 2024 gene set (E1, E2, E5; expression-only score with every gene and pair named; every gene present in TCGA and CGGA) is refitted with our Cox estimator on log2(CPM + 1). The comparator is the one with the best 5-fold cross-validated C-index on the v2 training split, refitted on all TCGA patients with RNA-seq and an outcome. Our side, the partition, the paired bootstrap and the threshold are unchanged. No threshold, decisive bound or decision rule changed. | The registered search, run once, found no model eligible to be re-run as published: almost no 2024 paper states the expression scale its coefficients expect (E3). The re-implementation removes that ambiguity, keeps CGGA out of gene selection and fitting, and compares both models under the same training data and estimator. Chosen by the project lead, knowing that a FAIL is the likely verdict (`docs/t2_comparator_shortlist.md`). | **Yes.** Written after the registered comparator search had been run and found no eligible model (13 records still unscreened). CGGA had been read twice for T2, and once for the seal's availability check, before this entry. No comparator has been fitted or scored; no CGGA value has been read for this row. |
 | 2026-11-27 | 2.2 item 2 (g) (batch-stratified C-index) | For the improvement row only, each model's C-index counts a pair of patients as comparable only when both are in the same CGGA RNA-seq batch (mRNAseq_693 or mRNAseq_325), summed over both batches. The unstratified C-index is reported alongside, descriptively. The paired bootstrap, the partition and the threshold are unchanged, and the C-index row's verdict (section 2.3) is not recomputed. | The two batches were processed separately. A technical shift between them would lower the score of an expression-based comparator but not that of the clinical model, which would tilt the comparison for a technical reason. Fixed before any comparator is fitted. | **Yes.** Written after the comparator search and the option B amendment. CGGA had been read twice for T2, and once for the seal's availability check, before this entry. No CGGA value has been read for this row. |
+| 2026-11-27 | 2.2 item 2 (j) added; 5 (data not yet obtained) | Recorded the completed comparator search and named the comparator. 1 of 549 records, PMID 38174685 (Sun and Liu, *Folia Neuropathol* 2024; 7 genes; trained on TCGA log2(FPKM + 1); CGGA used for validation only), meets the rule as first registered. It decides the verdict, applied as published, on CGGA's own RSEM FPKM release (fetched before the deposit, ledger 13; genes and patients checked by name only, ledger 16). Option B's refitted gene set becomes a secondary, descriptive comparison in the same read. One CGGA read is added for this row, after the deposit. No threshold, decisive bound or decision rule changed. | Option B was adopted while 13 records were still unread, on the premise that none was eligible. One of those 13 proved eligible under the rule fixed before the search. The lead chose to restore that rule for the verdict and keep B as secondary. | **Yes.** CGGA had been read twice for T2, once for the seal's availability check, and for the FPKM download (checksum) and its gene-name check (availability) before this entry. No CGGA expression value, clinical field or outcome has been read for this row. |
 
 ---
 
