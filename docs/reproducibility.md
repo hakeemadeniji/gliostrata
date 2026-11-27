@@ -6,7 +6,9 @@ honest status report on that goal. It is deliberately written so that the
 "not yet reproducible" section is as prominent as the instructions.
 
 **Summary in one line:** the *plumbing* is reproducible end to end today; the
-*science* is not, because L1, L2, L5 and L6 are stubs.
+*science* is not, because the pipeline's L1, L2, L5 and L6 steps are stubs. Real
+implementations of L2 (subtype and state/TME scoring), L5 (a fitted Cox model) and
+L6 (a GP optimizer) exist as modules and are not wired into the pipeline (§6).
 
 ---
 
@@ -55,10 +57,9 @@ make pipeline     # gliostrata pipeline-dry-run --config configs/default.yaml
 make ingest           # L0: GDC clinical + bulk RNA-seq. NETWORK. ~1.2 GB cached.
 make verify-partition # MANDATORY gate before anything downstream (see §4)
 make features-real    # L0 -> L3 on the real cohort
-snakemake --cores 4 --snakefile workflow/Snakefile   # the whole thing
 ```
 
-Or, equivalently, `snakemake --cores 4 --snakefile workflow/Snakefile`, which
+Alternatively, `snakemake --cores 4 --snakefile workflow/Snakefile`, which
 resolves the complete DAG and runs only what is missing or stale.
 
 This path is **not** reproducible in the strict sense, for two reasons that are
@@ -124,7 +125,7 @@ the single biggest gap between this repo and a reproducibility release.
 
 ### Current state
 
-`dvc.yaml` is a correct, parsing description of the seven real pipeline stages.
+`dvc.yaml` is a correct, parsing description of the nine real pipeline stages.
 It was verified with `dvc stage list` and `dvc dag` in an isolated DVC 3.67.1
 repo.
 
@@ -259,12 +260,11 @@ and the cohort grew by 11 patients. A `tcga_gbm_clinical_v2.json` (594
 patients) was correctly frozen as a *new* manifest rather than by overwriting
 v1.
 
-**Open decision for the project lead:** v1 is now superseded. Either retire it
-(with a note recording that nothing was ever trained on it) or document it as
-the partition belonging to the 583-row cohort snapshot. Leaving two live
-manifests with no stated precedence is how the wrong one gets used. The CI
-integrity check deliberately cannot catch this — both manifests are internally
-valid — so it needs a human decision.
+**Decision (recorded):** v2 is the current partition and the one
+`make verify-partition` checks. v1 is kept, unmodified, as the historical record
+of the 583-row cohort: CI still integrity-checks it, never verifies it against
+the live cohort, and it should not be used for evaluation. Do not delete or
+re-freeze it.
 
 ---
 
@@ -286,15 +286,19 @@ valid — so it needs a human decision.
 Verified, not assumed. The suite was re-run with `socket.socket.connect`,
 `connect_ex`, `create_connection` and `getaddrinfo` all patched to raise. The
 results were **identical** to the normal run — no test attempted a connection.
+Re-verified 2026-11-26 on the full suite (965 tests: 964 passed, 1 skipped)
+with zero blocked connection attempts.
 Specifically:
 
 - `tests/test_tcga_download.py` and `tests/test_tcga_expression.py` load
   `scripts/download_tcga_*.py` by path and drive the pure functions with
   synthetic fixtures. They assert on the GDC URL *constants* without ever
   requesting them.
-- The three tests in `tests/test_cox.py` that read the real cohort are guarded
-  by `@pytest.mark.skipif(not REAL_COHORT.exists())`. `data/raw/**` is
-  gitignored, so they skip in CI by construction.
+- The real-data tests (`test_cox.py`, `test_verhaak.py`, `test_deconvolve.py`,
+  `test_join_molecular_calls.py`, `test_idh_sensitivity_cox.py`,
+  `test_idh_sensitivity_subtype.py`, `test_validate_cox_cgga.py`) are guarded by
+  `skipif` / `skip` conditions on files under `data/raw/` and `data/processed/`.
+  Both are gitignored, so they skip in CI by construction.
 - The `workflow-dry-run` job uses `source=synthetic`, which routes L0 through
   `gliostrata synthetic-data` and never reaches the two ingest rules.
 
@@ -302,25 +306,21 @@ Specifically:
 
 ### Why the blocking lint set is narrow
 
-The repo currently has ~96 ruff findings under its own config (90 in
-`src`+`tests`, 6 in `scripts`), dominated by `N806`
-(non-lowercase-variable-in-function) — which is arguable in statistical code
+The repo currently has ~148 ruff findings under its own config (144 in
+`src`+`tests`, 4 in `scripts`), dominated by the `N803`/`N806` naming rules
+(argument and variable names) — which is arguable in statistical code
 where `X`, `X_train` and `N` are the conventional names. Making the full set
 blocking today would land a red CI on the first commit and train everyone to
 ignore it. The blocking set is the "the code is broken" floor (syntax errors,
 invalid comparisons, misplaced statements, undefined names) and passes clean.
 The advisory step prints the backlog. Widen the blocking set as it is cleared.
 
-Separately: `pyproject.toml` still declares `[tool.ruff] select`/`ignore` at
-the top level, which modern ruff warns is deprecated in favour of
-`[tool.ruff.lint]`. Harmless today, but the warning appears on every run.
-
 ---
 
 ## 6. What is NOT reproducible
 
-Everything below is **plumbing that works, wrapped around science that does
-not exist yet.** The DAG runs green. That is a statement about the DAG.
+Everything below is **plumbing that works, wrapped around science that is not
+yet in the pipeline.** The DAG runs green.
 
 ### Stubbed layers
 
@@ -328,15 +328,22 @@ not exist yet.** The DAG runs green. That is a statement about the DAG.
 | --- | --- | --- | --- |
 | **L1** harmonize | `gliostrata.data.harmonize` | Schema normalisation and basic QC row filtering. | Cross-cohort batch correction (ComBat/limma), platform harmonization, imputation of missing molecular covariates. |
 | **L2** profile | `gliostrata.profiling.{subtype,states,tme}` | Derives "subtypes", Neftel state fractions and TME composition **from the clinical table**. Reads no expression matrix. | Verhaak classification, Neftel state deconvolution and TME deconvolution from `counts.parquet`/`tpm.parquet`. |
-| **L5** survival | `gliostrata.prediction.survival` | Produces survival numbers without a model fitted on the real cohort. | A validated survival model with calibration and a reported C-index. |
+| **L5** survival | `gliostrata.prediction.survival` | Produces survival numbers without a fitted model. This is what the CLI uses. | A validated survival model with calibration and a reported C-index. |
 | **L6** optimize | `gliostrata.optimization.bayesian` | Ranked enumeration of configurations. | Bayesian optimization against a validated response surface. |
 | **L7** handoff | `gliostrata.handoff.protocol` | Structurally complete JSON documents templated from the above. | Bench-executable protocols. |
 
+Implemented, but not called by the pipeline: `profiling/verhaak.py` (subtype
+scoring) and `profiling/deconvolve.py` (state and TME scoring) read the expression
+matrix; `prediction/cox.py` is a fitted Cox model; `optimization/bayes_opt.py` is a
+Gaussian-process optimizer. Each has its own tests and is reached through
+standalone scripts, not through `gliostrata profile` / `optimize`. See
+`docs/roadmap.md`.
+
 **The single most important consequence:** the L0 expression ingest is real and
 fully implemented, and it produces `counts.parquet` and `tpm.parquet` — and
-**nothing downstream reads them.** Every subtype call, cell-state fraction and
-TME fraction in this pipeline today is computed from clinical covariates. They
-are not measurements.
+**nothing downstream in the pipeline reads them.** Every subtype call,
+cell-state fraction and TME fraction in this pipeline today is computed from
+clinical covariates. They are not measurements.
 
 This is why `workflow/rules/profile.smk` declares `HARMONIZED` as its only
 input and lists the expression matrices as a top-level target instead of an
@@ -369,10 +376,11 @@ writes the predictions out.
 To be fair to the scaffold, the following are real and verified:
 
 1. The offline fixture pipeline, bit-reproducible from a seed (§1.1).
-2. The test suite, 371 tests, passing with no network.
-3. **L0 TCGA-GBM ingestion**, both clinical and bulk RNA-seq — real GDC API
-   code with cohort filtering, barcode parsing and a GENCODE gene annotation.
-   This is the one layer that does what it says.
+2. The test suite: 985 tests, 984 passing and 1 skipped, with all outbound sockets blocked.
+3. **L0 ingestion** — TCGA-GBM clinical, bulk RNA-seq, IDH mutation and MGMT
+   methylation calls (real GDC API code with cohort filtering, barcode parsing and
+   a GENCODE gene annotation), and CGGA RNA-seq. This is the one layer that does
+   what it says end to end.
 4. **The partition freeze/verify machinery** — seeded hash splitting, sealed
    manifests, content-hash drift detection. It has already caught a real cohort
    change (§4), which is the only way to know a guardrail works.

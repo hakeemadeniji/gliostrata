@@ -15,27 +15,31 @@ and `docs/architecture.md` for the system architecture.
 
 ---
 
-## Status — v0.1.0 (scaffold)
+## Status
 
-This is a **first-draft scaffold**. The repository structure, CLI, tests, and synthetic-
-data pipeline all work end-to-end. The actual scientific implementations (TCGA ingestion,
-Verhaak classifier training, PhysiCell simulation, BoTorch optimization, DeepSurv survival
-model) are stubs that return synthetic data — clearly marked in each module's docstring
-and in `docs/roadmap.md`.
+GlioStrata is run as a **pre-registered** study: the evaluation plan, its thresholds
+and the frozen train/test partitions are fixed in this repository. The OSF
+registration itself is drafted (`docs/preregistration.md`) but **not yet deposited**.
+
+The pipeline runs end to end on synthetic data. The scientific layers are at
+different stages, stated per layer:
 
 | Layer | Module | Status |
 |-------|--------|--------|
-| L0 — Public data sources | `gliostrata.data.ingest` | Stub (synthetic cohort generator works) |
-| L1 — Harmonization | `gliostrata.data.harmonize`, `qc` | Stub |
-| L2 — Tumor profiling | `gliostrata.profiling.*` | Stub (subtype, states, TME) |
+| L0 — Ingestion | `scripts/download_tcga_*.py`, `scripts/download_cgga.py` | **Working** — real GDC and CGGA downloads. `gliostrata ingest` itself only implements `--source synthetic`. |
+| L1 — Harmonization | `gliostrata.data.harmonize`, `gliostrata.data.qc` | Stub — schema normalisation and QC rows; no batch correction. |
+| L2 — Tumor profiling | `gliostrata.profiling.verhaak`, `gliostrata.profiling.deconvolve` | **Implemented** from bulk expression, **not wired into the pipeline**. What `gliostrata profile` runs (`subtype`, `states`, `tme`) is a stub. |
 | L3 — Feature store | `gliostrata.features.store` | **Working** |
 | L4 — Simulation | `gliostrata.simulation.tumor`, `nsc` | Stub (synthetic curves) |
-| L5 — Outcome prediction | `gliostrata.prediction.survival` | Stub (Cox-PH linear) |
-| L6 — Optimizer | `gliostrata.optimization.config_space`, `bayesian` | **Working** (random search; BoTorch TODO) |
+| L5 — Outcome prediction | `gliostrata.prediction.cox` | **Fitted Cox-PH model**, not wired into the pipeline. Neither its external C-index nor its Brier score on CGGA met the registered T2 thresholds (`docs/cgga_validation.md`). `gliostrata.prediction.survival`, which the CLI uses, is a stub. |
+| L6 — Optimizer | `gliostrata.optimization.config_space`, `bayesian` | **Working** (ranked enumeration). `optimization.bayes_opt` adds a Gaussian-process optimizer; the BoTorch backend is TODO. |
 | L7 — Wet-lab handoff | `gliostrata.handoff.protocol` | **Working** (JSON protocol generator) |
+| — Evaluation | `gliostrata.evaluation` | **Working** — pre-registered threshold registry, frozen partitions, drift verification |
 
-**62 tests pass** on a clean install. Heavy optional dependencies (scanpy, lifelines,
-botorch, PhysiCell) are NOT required.
+The test suite has 985 tests in 25 modules: 984 pass and 1 is skipped (it needs Snakemake, an
+optional dependency). Tests that need the real TCGA or CGGA data skip when it is
+absent. Heavy optional dependencies
+Snakemake) are NOT required.
 
 ---
 
@@ -95,12 +99,13 @@ pytest
 | `gliostrata version` | Print package version. |
 | `gliostrata synthetic-data --n 50 --out <path>` | Generate a synthetic GBM cohort (Parquet). |
 | `gliostrata pipeline-dry-run [--n 20] [--config <path>]` | Run the full L0→L7 pipeline on synthetic data and print a summary. |
-| `gliostrata ingest --source <tcga\|cgga\|cptac\|synthetic> --out <path>` | L0 — ingest from a source (stub for real sources). |
+| `gliostrata ingest --source <tcga\|cgga\|cptac\|synthetic> --out <path>` | L0 — ingest from a source. Only `synthetic` is implemented here; for TCGA and CGGA use `scripts/download_tcga_*.py` and `scripts/download_cgga.py`. |
 | `gliostrata harmonize --input <path> --out <path>` | L1 — harmonize ingested data (stub). |
-| `gliostrata profile --input <path> --out <path>` | L2 — tumor profiling (stub). |
+| `gliostrata profile --input <path> --out <path>` | L2 — tumor profiling (stub; not the expression-based code in `profiling/verhaak.py` and `profiling/deconvolve.py`). |
 | `gliostrata build-feature-store --input <path> --out <path>` | L3 — assemble unified feature store. |
-| `gliostrata optimize --input <path> --out <dir> [--n-top 5] [--seed 42]` | L6 — Bayesian configuration optimization. |
+| `gliostrata optimize --input <path> --out <dir> [--n-top 5] [--seed 42]` | L6 — therapeutic configuration optimization (ranked enumeration). |
 | `gliostrata generate-protocol --input <configs.parquet> --feature-store <fs.parquet> --out <dir>` | L7 — wet-lab handoff protocol generation. |
+| `gliostrata freeze-partition --input <cohort.parquet> --manifest <path.json> [--verify]` | Seal a train/test partition, or verify a sealed one still reproduces. Run `--verify` before every evaluation. |
 
 ### End-to-end example (synthetic data)
 
@@ -134,68 +139,62 @@ gliostrata generate-protocol \
 gliostrata/
 ├── README.md                      ← you are here
 ├── pyproject.toml                 ← package config + dependencies
-├── requirements.txt               ← core deps (pip)
-├── requirements-dev.txt           ← dev deps (pytest, black, ruff, mypy)
-├── environment.yml                ← conda environment
-├── Makefile                       ← common dev commands (make test, make install, ...)
-├── dvc.yaml                       ← DVC pipeline definition
-├── LICENSE                        ← MIT
-├── .gitignore
-├── .env.example                   ← env var template (dbGaP key, etc.)
+├── requirements.txt / requirements-dev.txt / environment.yml
+├── Makefile                       ← dev commands (make test, make ci, ...)
+├── dvc.yaml                       ← DVC pipeline definition (not initialised; see docs/reproducibility.md)
+├── .github/workflows/ci.yml       ← lint, tests, partition guardrail, workflow dry run
 ├── src/gliostrata/                ← the Python package
-│   ├── __init__.py
-│   ├── __main__.py                ← allows `python -m gliostrata`
 │   ├── cli.py                     ← Click-based CLI
 │   ├── config.py                  ← YAML config loading + typed Config dataclass
 │   ├── data/                      ← L0-L1
-│   │   ├── ingest.py              ← L0: download from public sources (stub)
-│   │   ├── harmonize.py           ← L1: harmonize + batch correct (stub)
+│   │   ├── ingest.py              ← synthetic cohort generator (download_* are stubs)
+│   │   ├── harmonize.py           ← L1: schema harmonization (stub: no batch correction)
 │   │   └── qc.py                  ← L1: quality control gates (stub)
 │   ├── profiling/                 ← L2
-│   │   ├── subtype.py             ← Verhaak subtype classifier (stub)
-│   │   ├── states.py              ← Neftel single-cell state deconvolution (stub)
-│   │   └── tme.py                 ← Tumor microenvironment deconvolution (stub)
-│   ├── features/                  ← L3
-│   │   └── store.py               ← Unified patient feature store (working)
-│   ├── simulation/                ← L4
-│   │   ├── tumor.py               ← PhysiCell tumor growth wrapper (stub)
-│   │   └── nsc.py                 ← NSC migration + payload kinetics (stub)
+│   │   ├── verhaak.py             ← Verhaak subtype scoring from bulk expression
+│   │   ├── deconvolve.py          ← marker-based cell-state / TME scoring
+│   │   ├── subtype.py             ← stubs: what `gliostrata profile` runs
+│   │   ├── states.py              ←   (synthetic calls)
+│   │   └── tme.py                 ←   (synthetic calls)
+│   ├── features/store.py          ← L3: unified patient feature store
+│   ├── simulation/                ← L4 (stubs)
+│   │   ├── tumor.py               ← PhysiCell growth wrapper
+│   │   └── nsc.py                 ← NSC migration + payload kinetics
 │   ├── prediction/                ← L5
-│   │   └── survival.py            ← DeepSurv survival model (stub: Cox-PH linear)
+│   │   ├── cox.py                 ← fitted Cox-PH model
+│   │   └── survival.py            ← stub used by `gliostrata optimize`
 │   ├── optimization/              ← L6
-│   │   ├── config_space.py        ← Configuration space + constraints (working)
-│   │   └── bayesian.py            ← Bayesian optimizer (working: random search; BoTorch TODO)
-│   ├── handoff/                   ← L7
-│   │   └── protocol.py            ← Wet-lab protocol document generator (working)
-│   └── utils/
-│       ├── io.py                  ← Parquet/JSON I/O helpers
-│       └── stats.py               ← Bootstrap CI, CCC, RMST, BH-FDR
-├── tests/                         ← pytest suite (62 tests, all pass)
-│   ├── conftest.py                ← shared fixtures
-│   ├── test_cli.py                ← CLI smoke tests
-│   ├── test_data.py               ← L0-L1 tests
-│   ├── test_profiling.py          ← L2 tests
-│   ├── test_features.py           ← L3 tests
-│   ├── test_simulation.py         ← L4-L5 tests
-│   └── test_optimization.py       ← L6-L7 tests + end-to-end pipeline test
-├── configs/                       ← YAML configs for each layer
-│   ├── default.yaml               ← master config + pre-registered thresholds
-│   ├── data/                      ← per-source configs (tcga, cgga)
-│   ├── profiling/                 ← subtype, states
-│   ├── simulation/                ← tumor, nsc
-│   ├── prediction/                ← survival
-│   └── optimization/              ← bayesian
-├── workflow/                      ← Snakemake workflow (scaffold)
-│   ├── Snakefile
-│   └── rules/
-├── scripts/                       ← standalone helper scripts
+│   │   ├── config_space.py        ← configuration space + constraints
+│   │   ├── bayesian.py            ← ranked enumeration
+│   │   └── bayes_opt.py           ← Gaussian-process Bayesian optimization
+│   ├── evaluation/                ← pre-registration machinery
+│   │   ├── thresholds.py          ← pre-registered thresholds T1-T5 (checksum-frozen)
+│   │   └── partitions.py          ← deterministic, sealable partitions
+│   ├── handoff/protocol.py        ← L7: wet-lab protocol document generator
+│   └── utils/                     ← io.py, stats.py
+├── scripts/                       ← standalone scripts
+│   ├── download_tcga_{clinical,expression,mutations,methylation}.py   ← L0, network
+│   ├── download_cgga.py           ← L0: external validation cohort, network
+│   ├── join_molecular_calls.py    ← join IDH / MGMT calls onto the cohort
+│   ├── export_cibersortx.py       ← CIBERSORTx mixture file
+│   ├── validate_cox_cgga.py       ← T2 external validation (C-index)
+│   ├── validate_brier_cgga.py     ← T2 external validation (Brier score)
+│   ├── idh_sensitivity_cox.py, idh_sensitivity_subtype.py
+│   ├── cgga_external_eligibility.py  ← patients eligible for the sealed external partition
 │   ├── generate_synthetic_data.py
 │   └── run_full_pipeline.py
+├── tests/                         ← 25 test modules, 985 tests
+├── configs/                       ← YAML configs (default.yaml holds the T1-T5 thresholds)
+├── workflow/                      ← Snakemake workflow (Snakefile + rules/)
+├── data/partitions/               ← sealed partition manifests (in git)
 ├── docs/
-│   ├── protocol.md                ← full research protocol (markdown version)
-│   ├── architecture.md            ← 8-layer architecture overview
-│   └── roadmap.md                 ← implementation status + recommended order
-├── notebooks/                     ← exploration notebooks
+│   ├── preregistration.md         ← the OSF pre-registration (not yet deposited)
+│   ├── osf_final_fields.md        ← paste-ready OSF registration text
+│   ├── project_record/           ← full project record: findings, work log, commits, plan
+│   ├── protocol.md                ← full research protocol
+│   ├── architecture.md, roadmap.md, reproducibility.md
+│   └── cgga_ingestion.md, cgga_validation.md, mgmt_idh_calling.md
+├── notebooks/
 │   └── 01_data_exploration.ipynb
 └── data/                          ← local data (gitignored; .gitkeep markers)
     ├── raw/                       ← L0 downloads
@@ -210,9 +209,13 @@ gliostrata/
 ## Configuration
 
 Layer configs are in `configs/`. The master config is `configs/default.yaml` and
-includes the **pre-registered success thresholds** (T1–T5) that are committed to the
-Open Science Framework before any model touches the frozen test partition. Do not
-modify these thresholds without filing a new OSF version.
+includes the **pre-registered success thresholds** (T1–T5). Do not modify these
+thresholds without filing a new version on the Open Science Framework (the deposit
+is pending; see "Pre-registration" below).
+
+`src/gliostrata/evaluation/thresholds.py` is the authoritative, checksum-frozen
+registry of these thresholds (a test fails on any change to the table), and
+`docs/preregistration.md` is the registered text.
 
 Key thresholds (from `configs/default.yaml`):
 
@@ -265,11 +268,13 @@ mypy src/gliostrata
 make install       # pip install -e .
 make dev-install   # pip install -e ".[dev]"
 make test          # pytest
-make lint          # ruff check
-make format        # black + ruff --fix
-make synthetic     # generate synthetic cohort
-make pipeline      # run pipeline dry-run
-make clean         # remove build artifacts
+make lint             # ruff, full project config (advisory backlog)
+make lint-strict      # ruff, errors only -- the subset CI blocks on
+make verify-partition # check the frozen train/test split still reproduces
+make ci               # everything CI runs, locally
+make synthetic        # generate synthetic cohort
+make pipeline         # run pipeline dry-run
+make clean            # remove build artifacts
 ```
 
 ---
@@ -279,7 +284,7 @@ make clean         # remove build artifacts
 | Source | Modality | Cohort Size | Access |
 |--------|----------|-------------|--------|
 | TCGA-GBM | Bulk WES, RNA-seq, methylation, clinical | ~600 | Open (GDC) |
-| CGGA | Bulk RNA-seq, methylation, clinical | >1,000 | Open (registration) |
+| CGGA | Bulk RNA-seq, methylation, clinical | >1,000 | Open (no registration) |
 | CPTAC-GBM | Proteomics | ~100 | Open (GDC) |
 | Neftel et al. 2019 | scRNA-seq | ~7,000 cells | Open (GEO) |
 | Darmanis et al. 2017 | scRNA-seq | ~3,600 cells | Open (GEO) |
@@ -292,19 +297,38 @@ See `docs/protocol.md` §4 for the full data catalog and harmonization strategy.
 
 ---
 
+## Pre-registration
+
+The evaluation plan is fixed before evaluation, and the repository enforces it:
+
+- `docs/preregistration.md` is the pre-registration. `docs/osf_final_fields.md`
+  holds the paste-ready OSF registration text.
+- `configs/default.yaml` and `src/gliostrata/evaluation/thresholds.py` hold the
+  thresholds T1–T5; a test fails if the threshold table changes.
+- `data/partitions/*.json` are sealed train/test splits. `tcga_gbm_clinical_v2.json`
+  (594 patients) is the current development partition; `tcga_gbm_clinical_v1.json`
+  is a superseded historical record of the 583-patient cohort.
+
+Rules that keep the registration meaningful:
+
+- Run `make verify-partition` before every evaluation. Never re-freeze a sealed
+  manifest to silence a drift warning; if the cohort changes, freeze a new,
+  separately named partition.
+- CGGA is the external validation cohort. Do not read it for model or feature
+  selection (`scripts/download_cgga.py` says the same).
+- Results so far: T2's C-index and Brier criteria are **not met** on CGGA
+  (`docs/cgga_validation.md`). The IDH sensitivity analysis is in
+  `docs/mgmt_idh_calling.md` §6.3.
+
+---
+
 ## Roadmap
 
-See `docs/roadmap.md` for the recommended implementation order. Summary:
-
-1. L0 ingestion — TCGA via `TCGAbiolinks` (R, called via `subprocess`)
-2. L1 harmonization — `ComBat-seq` for batch correction
-3. L2 subtype classifier — random forest ensemble on Verhaak signature genes
-4. L2 state deconvolution — `CIBERSORTx` (web tool) → import results
-5. L3 feature store — already working; just wire up real L2 outputs
-6. L5 survival model — `lifelines.CoxPHFitter` first, then DeepSurv
-7. L4 simulation — install PhysiCell, wrap with `pyMCDS`
-8. L6 Bayesian optimizer — swap random search for `botorch` acquisition
-9. L7 protocol generator — convert JSON output to `.docx` via `python-docx`
+See `docs/roadmap.md` for the per-layer status and the recommended order. In short:
+L0 ingestion is implemented for TCGA (clinical, RNA-seq, IDH, MGMT) and CGGA RNA-seq;
+the expression-based L2 modules, the Cox model (L5) and the GP optimizer (L6) exist
+but are not wired into the pipeline; L1 batch correction, L4 simulation, the BoTorch
+backend and a bench-executable protocol are open.
 
 ---
 

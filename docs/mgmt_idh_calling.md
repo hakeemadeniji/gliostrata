@@ -211,9 +211,13 @@ explicit row with a reason rather than an absent row.
 8. **Coverage differs between the two markers.** IDH and MGMT are testable on
    different subsets of patients (section 6); a model using both sees only
    their intersection.
-9. **Not yet wired into the pipeline.** Neither script is a `dvc.yaml` stage
-   or a Snakemake rule, and the call tables are not under DVC. They exist as
-   scripts with offline tests; integrating them is a separate step.
+9. **Produced by the workflow, not consumed by it.** Both scripts are Snakemake
+   rules (`ingest_tcga_mutations`, `ingest_tcga_methylation`) and `dvc.yaml` stages
+   with the call tables as declared outputs (DVC itself is not initialised; see
+   `docs/reproducibility.md` section 3). No L2-or-later pipeline step reads the
+   call tables. Their consumers are all standalone scripts:
+   `scripts/join_molecular_calls.py`, the sensitivity scripts in section 6.3 and
+   `scripts/validate_cox_cgga.py`.
 
 ---
 

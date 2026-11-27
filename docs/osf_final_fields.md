@@ -45,7 +45,7 @@ Counted on 2026-11-26 from identifiers only (the expression matrix's column name
 its values): 225 patients have an expression column, 218 of them also have a survival time
 and vital status, so 218 patients are eligible (133 in mRNAseq_693, 85 in mRNAseq_325).
 Every eligible patient is held out; the external cohort has no training split. The manifest
-will be sealed after the single T2 read and before any T4 or T5 computation.
+will be sealed after the T2 evaluation (two reads) and before any T4 or T5 computation.
 
 DATA STILL TO BE OBTAINED
 - Microarray expression for the 108 CGGA patients who carry a reference Verhaak subtype
@@ -85,8 +85,8 @@ patients within each platform.
 DURATION
 TCGA-GBM and CGGA were downloaded, filtered and frozen on 2026-11-26. T3 inputs must be in
 hand by 2027-01-15 and calibration complete by 2027-03-01. The external cohort has been
-read once, for the T2 evaluation, and will not be read again for T4 or T5 until the
-external partition is sealed.
+read twice, both for T2 (the C-index row, then the Brier row), and will not be read again
+for T4 or T5 until the external partition is sealed.
 
 KNOWN LIMITATION
 The TCGA ingest queries the live GDC API rather than a pinned data release. The snapshot
@@ -133,9 +133,8 @@ T5 (end-to-end internal consistency; NOT RUN)
   All 218 eligible held-out patients in the sealed external partition (counted on
   2026-11-26 from identifiers; fixed by the seal).
 
-The T4 and T5 partition is sealed after one external read (T2) and before any T4 or T5
-computation. No cohort is equalised across conditions; T4's pairing uses identical patients
-by construction.
+The T4 and T5 partition is sealed after the T2 evaluation (two external reads) and before
+any T4 or T5 computation. No cohort is equalised across conditions by construction.
 ```
 
 ## Sample size rationale
@@ -150,7 +149,7 @@ rules fixed in advance.
    threshold, not a point estimate. Small samples widen the interval; the registered
    verdict for an estimate on the right side with a bound that does not clear is
    INCONCLUSIVE.
-3. One fixed external read per test. There is no sequential look, no sample-size
+3. One fixed external read per registered analysis. There is no sequential look, no sample-size
    re-estimation and no stopping for a favourable result.
 4. Where a size would make a criterion undecidable, that is declared now, not after the
    fact, as follows.
@@ -176,8 +175,9 @@ and is dropped by the signed-rank test. At most 20 tied patients (40% of the 50)
 tolerated; beyond that the p-value is still reported but the comparison is reported as
 INCONCLUSIVE with the tie count disclosed.
 
-T5. Its credibility is bounded by T2, which was not met (external C-index 0.5385, 95% CI
-0.4994 to 0.5807). T5 is therefore reported as an internal consistency check on predicted
+T5. Its credibility is bounded by T2, which was not met: external C-index 0.5385 (95% CI
+0.4994 to 0.5807) and Brier score at 18 months 0.2617 (95% CI 0.2391 to 0.2829, against a
+threshold of 0.25). T5 is therefore reported as an internal consistency check on predicted
 outcomes, not as a confirmatory external validation, and no T5 result may be described as a
 survival benefit.
 ```
@@ -185,40 +185,61 @@ survival benefit.
 ## Starting and stopping rules
 
 ```
-No new data are collected, so these rules govern when each analysis starts and when it is
-closed.
+No new data are collected, so these rules govern when each analysis starts and when
+it is closed. They apply to each of the eleven registered thresholds separately.
 
-PILOT PHASE (synthetic data only; COMPLETE)
-Pilot work ran on a seeded synthetic fixture and on TCGA-GBM development data only. It
-ended when the full test suite passed on the frozen code. One exception is disclosed: the
-T2 evaluation (external C-index 0.5385) was run before this registration.
+PILOT PHASE (COMPLETE)
+Development and pilot work used a seeded synthetic cohort and the TCGA-GBM development
+cohort, including the patients in its held-out test split. It ends at the code commit
+recorded in this registration. Two things happened before the deposit and are
+disclosed: (a) T2 was evaluated on CGGA in two reads (external C-index 0.5385; Brier
+score at 18 months 0.2617), without a sealed external partition, because none existed
+yet; (b) before the first read, CGGA had been characterised at schema level only (row
+counts, missingness, value ranges), with no feature related to any outcome. That
+result changed no threshold. The rules that were still open were fixed before the
+deposit and are logged in the pre-registration's amendment log, which marks what was
+written after the T2 read.
 
 START OF CONFIRMATORY ANALYSIS
-A test starts only when all of the following hold: (1) this registration is deposited;
-(2) its partition manifest is sealed and the verification step passes; (3) every input the
-test needs has been named in advance. A test already run (T2) is reported as conducted and
-is not re-run. Order for the external cohort: seal the partition first, then run T4 and
-T5. For T1, the harmonisation rule is fixed before the microarray expression matrix is
-examined, and it is fixed already.
+A registered test starts only when all of the following hold: (1) this registration
+is deposited and the code commit is recorded; (2) every input the test needs has
+been obtained and named in the pre-registration; (3) where the test is scored on a
+cohort partition, that partition is sealed and the verification step reproduces it
+from (seed, patient_id). This is required for T4 and T5; T1's scoring set and T3's
+datasets are fixed by the registered rules instead.
+Order for the external cohort (CGGA): seal the external partition first, then run T4
+and T5. T1 is scored on the CGGA microarray batch, on the 108 labelled patients fixed
+in advance; its harmonisation rule is fixed and was fixed before the matrix is
+downloaded. T3 is calibrated only after its datasets and their counts are entered in
+the pre-registration. T2 is reported as already conducted and is not re-run.
 
 STOPPING RULES
-1. Single evaluation. Each test is evaluated once on its partition and then closed.
+1. Single evaluation. Each threshold is evaluated once, on its sealed partition, and
+   is then closed. Nothing is re-run after a null, failing or close result.
 2. No interim looks. There is no interim analysis, no early stopping for efficacy or
-   futility, and no extension of a cohort because a result was close.
-3. Fixed cohorts. The TCGA-GBM and CGGA snapshots are closed as of 2026-11-26. A changed
-   source release is frozen as a new, separately named partition; an existing one is never
-   overwritten or topped up.
-4. T3 dates. PDX growth-curve data and in vivo NSC tracking data must be in hand by
-   2027-01-15; calibration must be complete by 2027-03-01. Each criterion is evaluated
-   separately: a criterion whose data are not in hand by its date is closed as NOT
-   EVALUABLE, with the reason stated, and the corresponding simulation layer is presented
-   as uncalibrated. This is distinct from a FAIL.
-5. Minimum n. If fewer than 30 CGGA patients carry a reference subtype label at analysis
-   time, T1 subtype accuracy is closed as NOT EVALUABLE.
-6. Comparator unavailable. T2's comparator criterion is closed as NOT EVALUABLE if the
-   comparator cannot be re-run on identical data.
-7. No further external reads without registration. CGGA has been read once. Any analysis
-   beyond T4 and T5 requires a new pre-registration.
+   futility, no sample-size re-estimation, and no extension of a cohort because a
+   result was close.
+3. Fixed cohorts. The TCGA-GBM and CGGA snapshots are closed as of 2026-11-26. If a
+   source release changes, the new snapshot is frozen as a new, separately named
+   partition; an existing manifest is never overwritten or topped up.
+4. Fixed budget. Computation stops at the pre-declared budget: 60 objective
+   evaluations per patient per method for T4. It is not extended.
+5. T3. PDX growth-curve data must be in hand by 2027-01-15 and calibration must be
+   complete by 2027-03-01. If the data are not in hand by that date, the tumour-growth
+   criterion is closed as NOT EVALUABLE, with the reason stated, and that layer is
+   presented as uncalibrated. The NSC-migration criterion is closed the same way if
+   in vivo tracking data cannot be obtained. NOT EVALUABLE is distinct from FAIL.
+6. Minimum n. If fewer than 30 CGGA patients carry a reference subtype label when T1
+   is run, T1 subtype accuracy is closed as NOT EVALUABLE.
+7. Ties. If more than 20 of the 50 T4 patients are tied, the p-value is still
+   reported but the regret criterion is INCONCLUSIVE whatever its value, and patients
+   are not dropped and re-run to remove the tie.
+8. Comparator unavailable. T2's improvement-over-baseline criterion is NOT EVALUABLE
+   if the comparator cannot be re-run on the identical frozen partition. It is never
+   scored against a number quoted from a paper.
+9. External reads. CGGA has been read twice, both for T2 (its C-index row, then its
+   Brier row). The only further registered reads of CGGA are T1, T4 and T5. Any other
+   analysis of CGGA requires a new pre-registration.
 ```
 
 ## Notes for the person pasting
@@ -229,5 +250,14 @@ STOPPING RULES
 - The two-sided bounds above differ from the decision memo's figures, which were
   one-sided. The pre-registration carries the two-sided bounds.
 - The harmonisation rule is the memo's rule. The sentence attributing it to Verhaak et al.
-  (2010) was removed because that paper standardised each gene across patients
-  (PMC2818769, Methods).
+  (2010) was removed because that paper standardised each gene across patients within
+  each platform (PMC2818769, Methods).
+- "Starting and stopping rules" was revised on 2026-11-26 against the pre-registration.
+  The earlier draft said any CGGA analysis beyond T4 and T5 needs a new pre-registration,
+  which contradicted the registered T1 read of the CGGA microarray batch. It also said
+  pilot work used development data only, without saying that the T2 models were fitted
+  on all eligible TCGA patients, held-out test split included. Both are corrected above.
+- T2's Brier-score row was evaluated on 2026-11-26 (a second read of CGGA) and is not
+  met: 0.2617, 95% CI 0.2391 to 0.2829, against 0.25. Rule 9 lists it among the reads made.
+- Still open: the comparator model in section 2.2 item 2 of the pre-registration is
+  "TO BE COMPLETED BY AUTHOR"; rule 8 governs what happens if it cannot be run.
