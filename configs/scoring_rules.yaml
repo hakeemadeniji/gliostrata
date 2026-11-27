@@ -1,0 +1,38 @@
+# Registry of the registered rules that fix a scoring set for a read of the
+# held-out cohort. Derived from docs/preregistration.md and read by
+# gliostrata.evaluation.read_guard before any value read that cites a rule
+# (Access.scoring_rule) instead of a sealed partition.
+#
+# A value read passes the scoring-rule gate only when all of this holds:
+#   * scoring_rule is a rule id listed here, and the rule lists the analysis;
+#   * the rule names a frozen scoring-set manifest (scoring_set_manifest);
+#   * that manifest's bytes still hash to scoring_set_manifest_sha256.
+# Until a manifest is frozen, the rule refuses every read: the path is closed,
+# not open by citation. Free text ("docs/preregistration.md section 2.2 item
+# 9") has not opened the gate since 2026-11-27.
+#
+# To open it: freeze the manifest with `gliostrata freeze-partition`, copy its
+# SHA-256 here in the same commit, and add a dated row to section 8 of the
+# pre-registration. A manifest without its checksum, or a checksum without a
+# manifest, makes this file invalid and closes the path.
+#
+# Rows fixed another way, and so not listed here: T2's and T4's and T5's
+# scoring sets are the sealed external partition (cgga_external_v1, section
+# 4.5); T1's deconvolution row and both T3 rows are scored on simulated or
+# non-cohort data and read no held-out cohort.
+
+schema_version: 1
+source: docs/preregistration.md
+
+rules:
+  T1_subtype_accuracy_cgga:
+    analyses: [T1_subtype_accuracy_cgga]
+    preregistration: "docs/preregistration.md, section 2.2 item 9 (a) to (e)"
+    scoring_set: >-
+      The CGGA microarray patients that carry a reference Verhaak label (108
+      when the ingest was characterised). The classifier is trained on TCGA
+      RNA-seq and applied to each sample's per-gene z-scored vector (item 9d).
+      The 28 labelled RNA-seq patients are reported descriptively and are not
+      part of the criterion.
+    scoring_set_manifest: null
+    scoring_set_manifest_sha256: null

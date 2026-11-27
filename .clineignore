@@ -1,0 +1,12 @@
+# Cline's workspace ignore file (patterns as in .gitignore). Files that match are
+# hidden from the agent's file listing, reading and search tools.
+#
+# CGGA is the held-out external cohort. Nothing reads it outside a script that
+# has first called gliostrata.evaluation.read_guard.record_access. Workspace-wide
+# tools do not know that rule: on 2026-11-27T05:48:55Z a repository-wide text
+# search opened the five extracted text files under data/raw/cgga/_cache/extracted/
+# (access ledger entries 8 and 9). .gitignore alone did not stop it.
+#
+# Keep these two lines in step with .rgignore.
+data/raw/cgga/
+data/processed/cgga/

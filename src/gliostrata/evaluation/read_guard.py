@@ -11,13 +11,27 @@ module turns that procedure into three things a script cannot skip by accident:
 * **Gates.** An access that inspects values -- any feature or outcome -- is
   refused unless the registration is deposited, the analysis is a registered
   metric or carries its own pre-registration, the partition is sealed or the
-  scoring set is fixed by a registered rule, and this analysis has not been
-  read before.
-* **Checksums.** A value read records the SHA-256 of every file it opens.
+  scoring set is fixed by a registered rule, this analysis has not been read
+  before, and every input's checksum is still the one given for it.
+* **Checksums.** A value read records the SHA-256 of every file it opens, and
+  the guard recomputes each one at read time.
 
 This is a discipline, not a sandbox: a script has to call :func:`record_access`
 before it opens the data. The two T2 scripts predate it and do not; their
 reads are back-filled in the ledger and marked as made before deposit.
+
+The scoring-set rule is an id, not a citation. ``scoring_rule`` must be a rule
+id from the committed registry (``configs/scoring_rules.yaml``, derived from
+the pre-registration), the rule must be registered for the analysis, it must
+name a frozen scoring-set manifest, and that manifest's bytes must still hash
+to the checksum recorded beside it. A rule whose manifest is not frozen yet
+refuses every read.
+
+The ledger also carries lines that are not access declarations: an
+``observation`` (an access seen in file-system metadata, made outside this
+module) and a ``note`` (a dated statement about earlier entries). Both are
+appended with :func:`append_ledger_entry`; neither passes through the gates
+and neither counts as a read.
 
 Typical use, in a script that evaluates a registered test on the external
 cohort::
@@ -31,7 +45,7 @@ cohort::
         purpose="T1 subtype accuracy on the labelled microarray patients",
         script="scripts/validate_subtype_cgga.py",
         inputs=hash_inputs(["data/raw/cgga/clinical_cohort.parquet"]),
-        scoring_rule="docs/preregistration.md section 2.2 item 9",
+        scoring_rule="T1_subtype_accuracy_cgga",
     ))
 """
 from __future__ import annotations
@@ -51,6 +65,7 @@ from gliostrata.evaluation.thresholds import UnregisteredMetricError, get_thresh
 
 LEDGER_PATH = Path("data/access_ledger.jsonl")
 REGISTRATION_PATH = Path("configs/registration.yaml")
+SCORING_RULES_PATH = Path("configs/scoring_rules.yaml")
 LEDGER_SCHEMA_VERSION = 1
 
 #: Cohorts whose data are held out. Everything else is development data.
@@ -62,6 +77,12 @@ SCHEMA = "schema"              # names, dtypes, null counts, marginal distributi
 AVAILABILITY = "availability"  # which patients are evaluable; counts only
 VALUES = "values"              # a model, a metric, or any feature against an outcome
 KINDS = (CHECKSUM, SCHEMA, AVAILABILITY, VALUES)
+
+#: Ledger lines that are not access declarations. They are appended with
+#: :func:`append_ledger_entry`, never through the gates, and never count as a read.
+OBSERVATION = "observation"  # an access seen in file-system metadata, made outside this module
+NOTE = "note"                # a dated statement about earlier entries
+NON_ACCESS_KINDS = (OBSERVATION, NOTE)
 
 EXPLORATORY_PREFIX = "exploratory:"
 _REGISTRATION_FIELDS = ("osf_registration_doi", "deposited_at", "registered_commit")
@@ -81,8 +102,10 @@ class Access:
 
     ``kind`` is one of :data:`KINDS`. For a ``values`` access, ``partition``
     names the sealed manifest the analysis is scored on, or ``scoring_rule``
-    cites the registered rule that fixes the scoring set instead (T1 and T3
-    are fixed by rule; T4 and T5 by the sealed external partition).
+    gives the id of the registered rule that fixes the scoring set instead
+    (T1's accuracy row is fixed by rule; T2, T4 and T5 by the sealed external
+    partition). The id must be in ``configs/scoring_rules.yaml``.
+    ``inputs`` maps each file's path to its SHA-256; the guard recomputes it.
     """
 
     cohort: str
@@ -133,6 +156,65 @@ def is_deposited(state: Mapping[str, Any]) -> bool:
     return isinstance(doi, str) and bool(_DOI_PATTERN.match(doi.strip()))
 
 
+@dataclass(frozen=True)
+class ScoringRule:
+    """One rule of the committed registry (``configs/scoring_rules.yaml``).
+
+    ``analyses`` are the registered metrics the rule fixes a scoring set for.
+    ``manifest`` and ``manifest_sha256`` are ``None`` until the scoring-set
+    manifest is frozen; a rule in that state refuses every read.
+    """
+
+    rule_id: str
+    analyses: tuple[str, ...]
+    preregistration: str
+    scoring_set: str
+    manifest: str | None
+    manifest_sha256: str | None
+
+
+def load_scoring_rules(path: str | Path = SCORING_RULES_PATH) -> dict[str, ScoringRule]:
+    """The committed registry of rules that fix a scoring set, keyed by rule id.
+
+    Raises
+    ------
+    ValueError
+        If the registry is missing or malformed. A registry that cannot be read
+        closes the scoring-rule path; it never opens it.
+    """
+    registry_path = Path(path)
+    if not registry_path.is_file():
+        raise ValueError(f"{registry_path}: the scoring-rule registry does not exist")
+    data = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+    rules = data.get("rules") if isinstance(data, dict) else None
+    if not isinstance(rules, dict) or not rules:
+        raise ValueError(f"{registry_path}: expected a non-empty 'rules' mapping")
+
+    loaded: dict[str, ScoringRule] = {}
+    for rule_id, body in rules.items():
+        if not isinstance(body, dict):
+            raise ValueError(f"{registry_path}: rule {rule_id!r} is not a mapping")
+        manifest = body.get("scoring_set_manifest") or None
+        checksum = body.get("scoring_set_manifest_sha256") or None
+        if (manifest is None) != (checksum is None):
+            raise ValueError(
+                f"{registry_path}: rule {rule_id!r} needs both a manifest and its "
+                "checksum, or neither"
+            )
+        analyses = tuple(str(a) for a in (body.get("analyses") or []))
+        if not analyses:
+            raise ValueError(f"{registry_path}: rule {rule_id!r} lists no analysis")
+        loaded[str(rule_id)] = ScoringRule(
+            rule_id=str(rule_id),
+            analyses=analyses,
+            preregistration=str(body.get("preregistration", "")),
+            scoring_set=str(body.get("scoring_set", "")),
+            manifest=manifest,
+            manifest_sha256=checksum,
+        )
+    return loaded
+
+
 def load_ledger(path: str | Path = LEDGER_PATH) -> list[dict[str, Any]]:
     """Every ledger entry, oldest first. An absent ledger is an empty list."""
     ledger = Path(path)
@@ -150,6 +232,80 @@ def load_ledger(path: str | Path = LEDGER_PATH) -> list[dict[str, Any]]:
                 "append-only; an edited line is a finding, not something to repair."
             ) from exc
     return entries
+
+
+def _scoring_rule_reasons(analysis: str, rule_id: str, root: str | Path) -> list[str]:
+    """Why a value read that cites a scoring-set rule is refused.
+
+    A citation in free text fixes nothing. The rule must be in the committed
+    registry (``configs/scoring_rules.yaml``, derived from the
+    pre-registration), it must be the rule registered for this analysis, it
+    must name a frozen scoring-set manifest, and that manifest's bytes must
+    still hash to the checksum recorded beside it.
+    """
+    rule_id = str(rule_id).strip()
+    try:
+        rules = load_scoring_rules(Path(root) / SCORING_RULES_PATH)
+    except ValueError as exc:
+        return [f"SCORING RULE GATE: {exc}. No scoring-set rule can be verified."]
+    if rule_id not in rules:
+        return [
+            f"SCORING RULE GATE: {rule_id!r} is not a rule id in "
+            f"{SCORING_RULES_PATH.as_posix()}. A rule id from that registry, not a "
+            "citation, fixes the scoring set."
+        ]
+    rule = rules[rule_id]
+    if analysis not in rule.analyses:
+        return [
+            f"SCORING RULE GATE: rule {rule_id} fixes the scoring set of "
+            f"{', '.join(rule.analyses)}, not of {analysis}."
+        ]
+    if rule.manifest is None or rule.manifest_sha256 is None:
+        return [
+            f"SCORING RULE GATE: rule {rule_id} names no frozen scoring-set manifest "
+            f"yet ({SCORING_RULES_PATH.as_posix()}: scoring_set_manifest is empty)."
+        ]
+    manifest_path = Path(root) / rule.manifest
+    if not manifest_path.is_file():
+        return [
+            f"SCORING RULE GATE: the scoring-set manifest of rule {rule_id} is "
+            f"missing ({rule.manifest})."
+        ]
+    actual = file_content_sha256(manifest_path)
+    if actual != rule.manifest_sha256.strip().lower():
+        return [
+            f"SCORING RULE GATE: scoring-set manifest {rule.manifest} does not hash "
+            f"to the checksum recorded for rule {rule_id} (recorded "
+            f"{rule.manifest_sha256[:12]}..., recomputed {actual[:12]}...). It was "
+            "altered after it was frozen."
+        ]
+    if not read_manifest(manifest_path).sealed:
+        return [
+            f"SCORING RULE GATE: scoring-set manifest {rule.manifest} is an "
+            "unsealed draft."
+        ]
+    return []
+
+
+def _input_reasons(inputs: Mapping[str, str], root: str | Path) -> list[str]:
+    """Recompute every input's SHA-256: the ledger records what is on disk now."""
+    reasons: list[str] = []
+    for path, recorded in inputs.items():
+        target = Path(root) / path
+        if not target.is_file():
+            reasons.append(
+                f"INPUT GATE: {path} does not exist under {root}, so its SHA-256 "
+                "cannot be recomputed."
+            )
+            continue
+        actual = file_content_sha256(target)
+        if actual != str(recorded).strip().lower():
+            reasons.append(
+                f"INPUT GATE: {path} no longer hashes to the SHA-256 given for it "
+                f"(given {str(recorded)[:12]}..., recomputed {actual[:12]}...). "
+                "Hash the file in the run that reads it."
+            )
+    return reasons
 
 
 def check_access(
@@ -222,15 +378,19 @@ def check_access(
     elif not (access.scoring_rule or "").strip():
         reasons.append(
             "PARTITION GATE: give the sealed partition the analysis is scored on "
-            "(partition), or the registered rule that fixes its scoring set "
-            "(scoring_rule)."
+            "(partition), or the id of the registered rule that fixes its scoring set "
+            f"(scoring_rule; see {SCORING_RULES_PATH.as_posix()})."
         )
+    else:
+        reasons.extend(_scoring_rule_reasons(access.analysis, access.scoring_rule, root))
 
     if not access.inputs:
         reasons.append(
             "A value read must record the SHA-256 of every file it opens "
             "(inputs=hash_inputs([...]))."
         )
+    else:
+        reasons.extend(_input_reasons(access.inputs, root))
 
     earlier = [
         entry
@@ -286,6 +446,69 @@ def record_access(
     return entry
 
 
+def append_ledger_entry(
+    kind: str,
+    analysis: str,
+    purpose: str,
+    *,
+    cohort: str = HELD_OUT_COHORTS[0],
+    inputs: Mapping[str, str] | None = None,
+    script: str = "",
+    source: str = "",
+    details: Mapping[str, Any] | None = None,
+    ledger_path: str | Path = LEDGER_PATH,
+    registration_path: str | Path = REGISTRATION_PATH,
+) -> dict[str, Any]:
+    """Append an observation or a note to the ledger, and return it.
+
+    Neither is an access declaration, so no gate applies; neither is a read,
+    so neither counts as one. An ``observation`` records an access seen in
+    file-system metadata and made outside this module. A ``note`` is a dated
+    statement about earlier entries: a follow-up, a correction, a closing.
+    The ledger is append-only, so a note is how an earlier entry is ever
+    annotated. Every entry carries a UTC time of day.
+
+    Raises
+    ------
+    ValueError
+        If ``kind`` is neither an observation nor a note, or the text is empty.
+    """
+    if kind not in NON_ACCESS_KINDS:
+        raise ValueError(f"kind {kind!r} is not one of {', '.join(NON_ACCESS_KINDS)}")
+    if not str(analysis).strip() or not str(purpose).strip():
+        raise ValueError(
+            "analysis and purpose are required: every entry says what it is and why"
+        )
+    ledger = load_ledger(ledger_path)
+    now = datetime.now(timezone.utc)
+    entry: dict[str, Any] = {
+        "schema_version": LEDGER_SCHEMA_VERSION,
+        "seq": 1 + max((int(e.get("seq", -1)) for e in ledger), default=-1),
+        "date": now.date().isoformat(),
+        "recorded_at": now.isoformat(timespec="seconds"),
+        "backfilled": False,
+        "before_deposit": not is_deposited(registration_state(registration_path)),
+        "cohort": cohort,
+        "kind": kind,
+        "analysis": str(analysis),
+        "purpose": str(purpose),
+        "script": script,
+        "inputs": dict(inputs or {}),
+        "partition": None,
+        "scoring_rule": None,
+        "exploratory_preregistration": None,
+        "repeat_reason": None,
+        "source": source,
+        "details": dict(details or {}),
+    }
+    json.dumps(entry)  # it must be serialisable before anything is written
+    target = Path(ledger_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(entry, sort_keys=True, ensure_ascii=True) + "\n")
+    return entry
+
+
 def summarize(entries: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Counts a reader needs before opening any entry."""
     rows = list(entries)
@@ -299,6 +522,9 @@ def summarize(entries: Iterable[dict[str, Any]]) -> dict[str, Any]:
         },
         "value_reads": len(value_reads),
         "value_read_analyses": [str(entry.get("analysis")) for entry in value_reads],
+        "non_access_entries": sum(
+            1 for entry in rows if entry.get("kind") in NON_ACCESS_KINDS
+        ),
         "before_deposit": sum(1 for entry in rows if entry.get("before_deposit")),
     }
 
@@ -319,11 +545,18 @@ def format_ledger(entries: Iterable[dict[str, Any]]) -> str:
             flags.append("before deposit")
         if entry.get("backfilled"):
             flags.append("back-filled")
+        if entry.get("kind") in NON_ACCESS_KINDS:
+            flags.append("not an access")
         lines.append(
             f"#{entry.get('seq'):<4}{entry.get('date')}  {str(entry.get('kind')):<13}"
             f"{str(entry.get('analysis')):<44}[{', '.join(flags)}]"
         )
         lines.append(f"      {entry.get('purpose')}")
+        if entry.get("details"):
+            lines.append(
+                "      details: "
+                + json.dumps(entry["details"], sort_keys=True)[:240]
+            )
         if entry.get("source"):
             lines.append(f"      source: {entry['source']}")
     summary = summarize(rows)

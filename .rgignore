@@ -1,0 +1,11 @@
+# ripgrep's ignore file for this repository. Applies to every rg run that keeps
+# ripgrep's default ignore handling (rg itself, and tools built on it).
+#
+# CGGA is the held-out external cohort. See .clineignore for why it is here, and
+# docs/reproducibility.md ("Workspace-wide tools"). The limit of this file: rg
+# --no-ignore and rg -uu skip it. That is why .clinerules also forbids
+# workspace-wide searches in this repository.
+#
+# Keep these two lines in step with .clineignore.
+data/raw/cgga/
+data/processed/cgga/

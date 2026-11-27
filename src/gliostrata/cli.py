@@ -430,8 +430,10 @@ def access_ledger_cmd(ledger_path: str | None) -> None:
     value reads. Run this before any evaluation on the external cohort.
 
     A read that inspects values is refused by gliostrata.evaluation.read_guard
-    until the registration is deposited and, where one applies, the partition
-    is sealed. Verify a partition with:
+    until the registration is deposited, the partition is sealed or the
+    analysis's registered rule names a frozen scoring-set manifest, and every
+    input's checksum is the one on disk. Entries that are observations or notes
+    are marked "not an access". Verify a partition with:
 
         gliostrata freeze-partition --input COHORT --manifest M.json --verify
     """

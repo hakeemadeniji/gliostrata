@@ -1,0 +1,17 @@
+# Standing rules for any AI agent working in this repository. Read before the
+# first tool call. Why they exist: docs/project_record/06_evidence_reports.md,
+# stage R1, and access ledger entries 8 and 9.
+
+1. Never run a workspace-wide search here: no search tool over the whole
+   repository, no `findstr /s`, no `rg` without a path. On 2026-11-27 one such
+   search opened the held-out cohort's files and timed out. Scope every search to
+   named directories: src, tests, scripts, docs, configs, workflow.
+
+2. Treat data/raw/cgga and data/processed/cgga as sealed. Do not open, list into,
+   hash, copy, move or download anything under them, and do not run
+   scripts/validate_*.py, unless the task explicitly asks for a read that goes
+   through gliostrata.evaluation.read_guard.record_access first. File names,
+   sizes and times are the only metadata allowed without that call.
+
+3. Do not change thresholds, bounds, partition manifests, seeds or analysis
+   budgets. They are pre-registered and frozen; see docs/preregistration.md.
