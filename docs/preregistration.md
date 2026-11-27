@@ -385,10 +385,14 @@ corrected separately; exploratory results never change a confirmatory verdict.
 
 ### 3.3 External validation
 
-Final numbers for T1 and T2 are reported on the **frozen external test partitions** of
-CGGA (primary external cohort) and GLASS (longitudinal external cohort), never on
-TCGA-derived data. Internal cross-validation numbers may be reported for context and are
-always labelled as internal. Model selection, hyper-parameter tuning, feature selection,
+Final numbers for T2 are reported on the **frozen external test partitions** of CGGA
+(primary external cohort) and GLASS (longitudinal external cohort), never on
+TCGA-derived data. Final numbers for T1 are reported on the scoring sets that section 2.2
+items 9 and 10 register, not on those partitions: for subtype accuracy, the CGGA
+microarray patients that carry a reference Verhaak label, fixed by rule and frozen as
+their own manifest before the read; for state deconvolution, the 100 pseudo-bulk mixtures
+simulated from the Neftel 2019 atlas. Neither is TCGA-derived. Internal cross-validation
+numbers may be reported for context and are always labelled as internal. Model selection, hyper-parameter tuning, feature selection,
 threshold calibration and architecture choices use **only** the development cohort's
 training split. The external partitions are read exactly once per registered analysis, at
 the point of confirmatory evaluation.
@@ -517,8 +521,16 @@ every patient id. It is produced by the same hash rule as any other partition.
 | --- | --- | --- | --- | --- | --- | --- |
 | `tcga_gbm_clinical_v1` | TCGA-GBM clinical-only | 583 | 419 train / 164 test | 20251126 | **Development.** Internal held-out set for model-selection discipline. **Not** a pre-registered external test. Superseded by `tcga_gbm_clinical_v2`; retained unmodified as the historical record. | Yes (2026-11-26) |
 | `tcga_gbm_clinical_v2` | TCGA-GBM clinical | 594 | 425 train / 169 test | 20251126 | **Development.** Supersedes v1 after the cohort was re-ingested (section 5). Unstratified. | Yes (2026-11-26) |
-| `cgga_external_v1` | CGGA | — | — | — | Primary external test for T1, T2, T4 and T5 | **Not created.** CGGA downloaded (commit e361bed) and read twice for T2 on the ingested cohort as a whole: for the C-index row (commit 7f4bd28) and for the Brier row (same day). Disclosed deviation from section 3.3; see section 2.3. To be created as an all-test seal over the eligible patients of section 2.2 item 7 (at most 218), after the T2 evaluation and before any T4 or T5 computation. |
+| `cgga_external_v1` | CGGA | — | — | — | **Primary external test for T2, T4 and T5.** It is not the scoring set of either T1 row (see the note below the table). | **Not created.** CGGA downloaded (commit e361bed) and read twice for T2 on the ingested cohort as a whole: for the C-index row (commit 7f4bd28) and for the Brier row (same day). Disclosed deviation from section 3.3; see section 2.3. To be created as an all-test seal over the eligible patients of section 2.2 item 7 (at most 218), after the T2 evaluation and before any T4 or T5 computation. |
 | `glass_external_v1` | GLASS | — | — | — | Longitudinal external test | **Not yet created — cohort not downloaded** |
+
+T1 is scored outside this partition, by registered rule. Its subtype-accuracy row uses the
+CGGA microarray patients that carry a reference Verhaak label (108 at ingest; section 2.2
+item 9), fixed by the rule `T1_subtype_accuracy_cgga` in `configs/scoring_rules.yaml` and
+frozen as its own manifest before the read. Of the 108, 28 also have RNA-seq and may also
+be in `cgga_external_v1`; the overlap does not change either scoring set. T1's
+deconvolution row is scored on 100 pseudo-bulk mixtures simulated from the Neftel 2019
+atlas (section 2.2 item 10) and reads no cohort.
 
 Both TCGA partitions are unstratified: the `subtype` column of the clinical cohort file
 is entirely null (see §5). When molecular data lands, the stratified partition must be
@@ -643,6 +655,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-26 | 2.3 (Brier result added); 2.2 item 7, 2.3, 4.5 and 5 ("read once" corrected to two reads) | Recorded the outcome of T2's Brier row (Brier score at 18 months <= 0.25 on CGGA), evaluated on a second read and not met: the transferable model scores 0.2617 (95% CI 0.2391 to 0.2829). The rules for the row (IPCW score, the same patients and models as the C-index row, percentile bootstrap, verdict from the registry) were fixed in `scripts/validate_brier_cgga.py` and its tests before that read. Changes no threshold, no decisive bound, no decision rule and no other test's status. Full account: `docs/cgga_validation.md` section 12; result file: `data/results/cgga/brier18_external.json`. | Records a result rather than a plan. | **Yes.** Written after the second CGGA read and disclosed as such. That read, like the first, ran without a sealed `cgga_external_v1` manifest (section 4.5). |
 | 2026-11-27 | 2.3 (table row 1, the "Where the gap sits" paragraph, section 5 "Models fitted"; wording only) | Stated what variant 1's TCGA fit does with missing data, which the row had shown as a bare 594: 594 passed, 592 modelled; KPS set to the median, 80, for 150, with an indicator (HR 1.57); treatment arm missing for 22 (level, HR 1.20). Scoped "not imputed" to CGGA and to variants 2 and 3. Reframed the two internal contrasts as descriptive: neither carries an interval, and the first bundles three differences (the KPS value, the prognostic missing-KPS indicator, and fit sets of 592 against 570). No threshold, no decisive bound and no decision rule changed. | The independent review of commit `b83f9f7` found the imputation disclosed in one place and contradicted in another, and an attribution drawn from two differences that were never bootstrapped. | **No.** No data was read. CGGA had been read twice for T2 before this entry. |
 | 2026-11-27 | 2.3 (variant 1 internal C-index; note) | The code that computes variant 1's internal C-index imputed KPS with the median of all modelled patients before cross-validation, not the training-fold median its documentation stated. Corrected, and rerun on TCGA only: 0.673544 before and after (95% CI 0.6478 to 0.6994), because every training fold's median KPS is 80; the IDH sensitivity analysis is likewise unchanged (0.665650). The 0.6735 in the table is unchanged. No external number depends on the path: variant 1 is not evaluated on CGGA, and variants 2 and 3 impute nothing. | The review found that the code and its documentation disagreed. | **No.** TCGA only; no CGGA file was read. |
+| 2026-11-27 | 3.3 (first sentence), 4.5 (`cgga_external_v1` role; a note below the table) | Section 4.5 named `cgga_external_v1` the primary external test for T1, T2, T4 and T5, and section 3.3 said final T1 numbers are reported on the frozen external test partitions. Both now say what section 2.2 items 9 and 10 already register: T1's subtype accuracy is scored on the labelled CGGA microarray patients (108 at ingest), fixed by rule and frozen as their own manifest, and T1's deconvolution on 100 mixtures simulated from the Neftel 2019 atlas. `cgga_external_v1` is the primary external test for T2, T4 and T5. No threshold, no decisive bound, no decision rule, no scoring set and no partition changed. | The two sections contradicted items 9 and 10: 80 of the 108 labelled patients have no RNA-seq profile and so fall outside the partition's eligibility (item 7), and the deconvolution row reads no cohort. Found in the stage 3b reconciliation (`docs/project_record/06_evidence_reports.md`, stage 3b, Part A item 2). | **No.** No T1 test data has been read: the CGGA microarray expression matrix has not been downloaded, the Neftel atlas is not on disk, and no T1 computation has been run. CGGA had been read twice for T2 before this entry; the change leaves T2's account as it was. |
 
 ---
 

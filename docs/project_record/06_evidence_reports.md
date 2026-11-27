@@ -870,8 +870,9 @@ CGGA. L4 to L7 have not run on real data.
 3. Neither Snakemake rule of this stage has run here; CI's `workflow-dry-run` job is their
    first run. `dvc repro` on real data still stops at the stub `profile` stage.
 4. `cgga_external_v1` is blocked as Part A item 1 states.
-5. Pre-registration 4.5 and 3.3 misname T1's scoring sets; the proposed text waits for an
-   amendment (`05_future_plan.md` section 5.5).
+5. Pre-registration 4.5 and 3.3 misname T1's scoring sets. **Closed after the stage:** the
+   proposed text was applied on 2026-11-27 at the project lead's request and logged as a
+   dated amendment (pre-registration section 8).
 6. `configs/scoring_rules.yaml` says "per-gene z-scored" where rule 9(d) says per sample,
    across genes.
 7. Whether `treatment_arm`, which reads only the first diagnosis record, misses

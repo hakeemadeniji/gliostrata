@@ -186,7 +186,7 @@ Stage R1 (2026-11-27) added none and removed one, which leaves 170. Stage 3b add
 | Threshold registry | In code, checksum-frozen, tested |
 | Author details, DOI, registered commit | **Placeholders.** To be completed at deposit |
 | Comparator model for T2's improvement row | **Placeholder.** "TO BE COMPLETED BY AUTHOR" |
-| Amendments logged | Seven dated entries: five of 2026-11-26 and two of 2026-11-27 (stage R1, wording and the fold-wise rerun). Four of the 2026-11-26 entries are marked as written after CGGA was read; the T1 harmonisation rule and both 2026-11-27 entries are marked "No" (no data read for them) |
+| Amendments logged | Eight dated entries: five of 2026-11-26 and three of 2026-11-27 (stage R1, wording and the fold-wise rerun; then the T1 scoring sets in sections 3.3 and 4.5, after stage 3b). Four of the 2026-11-26 entries are marked as written after CGGA was read; the T1 harmonisation rule and the three 2026-11-27 entries are marked "No" (no data read for them) |
 | Machine-readable registration state | `configs/registration.yaml`. The OSF DOI is `null` until the deposit; the read guard reads it |
 | Access ledger | `data/access_ledger.jsonl`. 11 entries (0 to 10); 2 are value reads, both T2 and both before deposit; 2 are checksum-only accesses (6 and 7), 4 are schema or availability accesses (0, 1, 3 and 4), and 3 (8 to 10) are an observation and two notes, not accesses |
 

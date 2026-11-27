@@ -286,24 +286,15 @@ Found in stage 3b (2026-11-27), not fixed:
   (`download_tcga_clinical.py`, `flatten_case`). The live GDC lists 136 patients with a
   "Surgery, NOS" record against 39 in the raw file. Whether this changes `treatment_arm`
   was not checked.
-- **Pre-registration section 4.5 names `cgga_external_v1` as the primary external test
-  for T1.** It is not: T1's subtype row is scored on the 108 labelled CGGA microarray
-  patients (2.2 item 9; only 28 of them have RNA-seq, which the partition requires), and
-  its deconvolution row on simulated mixtures (item 10). Section 3.3 has the same error.
-  Not corrected, because stage 3b may not edit the pre-registration. Proposed text, for
-  the next amendment:
-
-  > Role: **Primary external test for T2, T4 and T5.** It is not the scoring set of
-  > either T1 row. **Not created.** … *(status text unchanged)*
-  >
-  > *Note on T1.* T1 is scored outside this partition, by registered rule. Its
-  > subtype-accuracy row uses the CGGA microarray patients that carry a reference Verhaak
-  > label (108 at ingest; section 2.2 item 9). The scoring set is fixed by the rule
-  > `T1_subtype_accuracy_cgga` in `configs/scoring_rules.yaml` and frozen as its own
-  > manifest before the read. Of the 108, 28 also have RNA-seq and may also be in
-  > `cgga_external_v1`. The overlap does not change either scoring set. T1's
-  > deconvolution row is scored on 100 pseudo-bulk mixtures simulated from the Neftel
-  > 2019 atlas (item 10) and reads no cohort.
+- **Corrected on 2026-11-27, after stage 3b: pre-registration sections 3.3 and 4.5 named
+  `cgga_external_v1` as T1's test partition.** It is not: T1's subtype row is scored on
+  the 108 labelled CGGA microarray patients (2.2 item 9; only 28 of them have RNA-seq,
+  which the partition requires), and its deconvolution row on simulated mixtures (item
+  10). Found in stage 3b (Part A item 2), which could not edit the pre-registration;
+  applied afterwards at the project lead's request, with the proposed text, and logged
+  as a dated amendment (section 8). No threshold, bound, rule, scoring set or partition
+  changed. The OSF form text predates it, like the other corrections (section 5.1,
+  step 6).
 
   And in section 3.3: "Final numbers for T2 are reported on the frozen external test
   partitions; T1 is scored on the sets fixed in section 2.2 items 9 and 10."

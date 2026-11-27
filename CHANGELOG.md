@@ -135,6 +135,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `tests/test_subtype_scripts.py`.
 
 ### Changed — stage 3b (2026-11-27)
+- Pre-registration sections 3.3 and 4.5 no longer name `cgga_external_v1` as T1's test
+  partition: it is the primary external test for T2, T4 and T5, and T1 is scored on the
+  scoring sets of section 2.2 items 9 and 10. Logged as a dated amendment (section 8);
+  no threshold, bound, rule, scoring set or partition changed.
 - `build_feature_store` takes each input by explicit name and raises on a column
   supplied by more than one input, a null-only column that shadows a computed feature,
   a column its input does not own (an outcome label among them), a stub or
