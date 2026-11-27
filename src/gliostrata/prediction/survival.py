@@ -13,7 +13,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
 # Baseline log-hazard coefficients (illustrative — calibrated to make the stub
 # produce survival in the right range. Real implementation learns these from data.)
 HAZARD_COEFFS = {

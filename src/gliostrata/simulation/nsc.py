@@ -13,7 +13,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
 # Cell-type-specific migration parameters (illustrative, calibrated to literature order-of-magnitude)
 CELL_MIGRATION_PARAMS = {
     "iPSC-NSC":      {"velocity_um_per_h": 45, "tropism_score": 0.85, "half_life_h": 48},

@@ -4,7 +4,6 @@ Standalone script — equivalent to `gliostrata synthetic-data`.
 Useful when you want to generate data without invoking the CLI.
 """
 import argparse
-from pathlib import Path
 
 from gliostrata.data.ingest import generate_synthetic_cohort
 from gliostrata.utils.io import write_parquet
@@ -22,9 +21,9 @@ def main() -> None:
     written = write_parquet(df, args.out)
     print(f"Generated {len(df)} synthetic patients → {written}")
     print(f"Columns: {list(df.columns)}")
-    print(f"\nSubtype distribution:")
+    print("\nSubtype distribution:")
     print(df["subtype"].value_counts())
-    print(f"\nOverall survival summary (months):")
+    print("\nOverall survival summary (months):")
     print(df["overall_survival_months"].describe())
 
 

@@ -8,7 +8,6 @@ These wrap standard formulas -- kept here so all tests use the same implementati
 from __future__ import annotations
 
 import numpy as np
-from scipy import stats
 
 
 def bootstrap_ci(

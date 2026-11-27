@@ -1,10 +1,7 @@
 """Tests for L3 (feature store)."""
 from __future__ import annotations
 
-import pandas as pd
-import pytest
-
-from gliostrata.features.store import FEATURE_COLUMNS, build_feature_store, feature_matrix
+from gliostrata.features.store import FEATURE_COLUMNS, feature_matrix
 
 
 class TestFeatureStore:

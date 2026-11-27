@@ -9,7 +9,6 @@ without waiting for real harmonization to be implemented.
 """
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
 

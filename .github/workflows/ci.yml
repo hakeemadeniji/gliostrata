@@ -2,10 +2,10 @@ name: CI
 
 # No job in this workflow may reach the GDC or CGGA. The test suite was
 # verified to pass with all outbound sockets blocked (tests load scripts/ by
-# path and drive them with synthetic fixtures), and the three tests that read
-# the real TCGA cohort are guarded by
-# `@pytest.mark.skipif(not REAL_COHORT.exists())` — data/raw/** is gitignored,
-# so they skip in CI by construction.
+# path and drive them with synthetic fixtures). The tests that read the real
+# TCGA or CGGA data are guarded by `skipif` / `skip` conditions on files under
+# data/raw/ and data/processed/ — both are gitignored, so they skip in CI by
+# construction.
 #
 # The workflow pipeline job runs with `--config source=synthetic`, which is the
 # only L0 entry point that does not touch the network.
@@ -43,9 +43,9 @@ jobs:
         run: pip install "ruff>=0.1"
 
       - name: ruff check (blocking — real errors only)
-        # Deliberately narrow. The repo currently has ~96 findings under the
-        # project's own ruff config (90 in src+tests, 6 in scripts), dominated
-        # by N806 non-lowercase-variable-in-function — which is arguable in
+        # Deliberately narrow. The repo currently has ~171 findings under the
+        # project's own ruff config (164 in src+tests, 7 in scripts), dominated
+        # by N806/N803 naming rules — which is arguable in
         # statistical code where `X`, `X_train` and `N` are the conventional
         # names. Making the full rule set blocking today would land a red CI on
         # commit 1 and teach everyone to ignore it.

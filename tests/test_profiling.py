@@ -30,11 +30,14 @@ class TestSubtype:
     def test_argmax_matches_input_subtype(self, small_cohort):
         """Stub: classifier trusts the input subtype. Highest prob should match it."""
         out = classify_subtypes(small_cohort, seed=42)
-        for _, row in out.iterrows():
-            prob_cols = {f"subtype_prob_{st}": st for st in SUBTYPES}
-            argmax_st = max(prob_cols, key=lambda c: row[c])
-            # Allow for noise in the stub: the argmax should match within ~80% of cases
-            # (since we add gaussian noise to probabilities)
+        prob_cols = {f"subtype_prob_{st}": st for st in SUBTYPES}
+        # Allow for noise in the stub: the argmax should match within ~80% of cases
+        # (since we add gaussian noise to probabilities)
+        n_match = sum(
+            prob_cols[max(prob_cols, key=lambda c: row[c])] == row["subtype"]
+            for _, row in out.iterrows()
+        )
+        assert n_match / len(out) >= 0.80
         # Just check all subtypes are in the expected set
         assert set(out["subtype"]).issubset(set(SUBTYPES))
 

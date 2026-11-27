@@ -536,7 +536,7 @@ def read_probe_values(path, probes=MGMT_PROBES) -> tuple[dict, int]:
     wanted = set(probes)
     values: dict = {}
     n_lines = 0
-    with open(path, "r", encoding="ascii", errors="replace") as handle:
+    with open(path, encoding="ascii", errors="replace") as handle:
         for line in handle:
             n_lines += 1
             probe, sep, value = line.partition("\t")

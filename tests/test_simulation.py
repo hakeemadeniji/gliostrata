@@ -1,7 +1,6 @@
 """Tests for L4 (simulation) and L5 (survival prediction)."""
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import pytest
 

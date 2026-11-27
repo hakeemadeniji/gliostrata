@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import pandas as pd
 
-
 # Feature columns used by L5 (survival model) and L6 (optimizer) as input.
 # Anything not in this list is treated as metadata, not a model feature.
 FEATURE_COLUMNS = [

@@ -1,8 +1,10 @@
 """L0 — Public data ingestion.
 
-Currently a stub: real TCGA/CGGA/CPTAC ingestion requires TCGAbiolinks (R) called
-via subprocess, or direct HTTP download. The `generate_synthetic_cohort` function
-below is fully working and powers all CLI dry-runs and tests.
+Only `generate_synthetic_cohort` is implemented in this module; it is fully
+working and powers all CLI dry-runs and tests. The `download_*` functions are
+stubs that raise. Real ingestion lives in standalone scripts:
+scripts/download_tcga_{clinical,expression,mutations,methylation}.py (GDC REST
+API) and scripts/download_cgga.py.
 
 See docs/roadmap.md for implementation order.
 """
@@ -125,25 +127,35 @@ def generate_synthetic_cohort(n: int = 50, seed: int = 42) -> pd.DataFrame:
 
 
 def download_tcga(out_dir: str, *, n_samples: int = 600) -> None:
-    """STUB — download TCGA-GBM data.
+    """STUB — this CLI entry point does not download anything.
 
-    Real implementation:
-      1. Use TCGAbiolinks (R) via subprocess.run(["Rscript", ...]) to query GDC.
-      2. Save raw RNA-seq (FPKM), methylation, and clinical data to out_dir.
-      3. Requires R + TCGAbiolinks installed. Controlled-access data needs
-         dbGaP API key in .env.
+    The real TCGA-GBM ingestion lives in standalone scripts, which talk to the
+    GDC REST API directly (no R, no TCGAbiolinks):
 
-    See docs/roadmap.md for the implementation plan.
+      * scripts/download_tcga_clinical.py      clinical table (L0a)
+      * scripts/download_tcga_expression.py    bulk RNA-seq (L0b)
+      * scripts/download_tcga_mutations.py     IDH calls (L0c)
+      * scripts/download_tcga_methylation.py   MGMT calls (L0d)
+
+    Run them directly, or through `make ingest`. Use generate_synthetic_cohort()
+    for development without network access.
     """
     raise NotImplementedError(
-        "TCGA ingestion is a stub. Use generate_synthetic_cohort() for development. "
-        "See docs/roadmap.md."
+        "TCGA ingestion is not part of the CLI. Use the scripts under scripts/ "
+        "(download_tcga_*.py) or generate_synthetic_cohort() for development."
     )
 
 
 def download_cgga(out_dir: str) -> None:
-    """STUB — download CGGA data."""
-    raise NotImplementedError("CGGA ingestion is a stub. See docs/roadmap.md.")
+    """STUB — this CLI entry point does not download anything.
+
+    The real CGGA ingestion is scripts/download_cgga.py. CGGA is the
+    pre-registered external validation cohort: see docs/cgga_ingestion.md and
+    docs/preregistration.md before running it.
+    """
+    raise NotImplementedError(
+        "CGGA ingestion is not part of the CLI. Use scripts/download_cgga.py."
+    )
 
 
 def download_cptac(out_dir: str) -> None:

@@ -48,8 +48,6 @@ def _score_configurations(
     Returns a long-format DataFrame: one row per (patient, config), with the
     predicted survival with that configuration + survival gain vs Stupp.
     """
-    # Build a flat config DataFrame repeated for each patient
-    n_patients = len(feature_store)
     rows = []
     for cid, cfg in enumerate(configs):
         for pid in feature_store["patient_id"]:

@@ -6,7 +6,6 @@ intermediate outputs to data/ so you can inspect them.
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 
 from gliostrata.data.harmonize import harmonize
 from gliostrata.data.ingest import generate_synthetic_cohort

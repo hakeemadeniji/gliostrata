@@ -56,7 +56,7 @@ class TestHarmonize:
         assert "harmonization_version" in out.columns
         assert "batch_corrected" in out.columns
         # Stub: batch correction not applied yet
-        assert (out["batch_corrected"] == False).all()
+        assert not out["batch_corrected"].any()
 
     def test_requires_columns(self):
         bad = pd.DataFrame({"foo": [1, 2]})

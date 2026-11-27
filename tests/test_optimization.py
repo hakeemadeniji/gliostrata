@@ -5,18 +5,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from gliostrata.handoff.protocol import generate_protocols, protocols_to_json
 from gliostrata.optimization.bayesian import (
     evaluate_personalization,
     optimize_configurations,
 )
 from gliostrata.optimization.config_space import (
     CELL_TYPES,
-    Configuration,
     DOSE_MAX,
     DOSE_MIN,
     PAYLOADS,
     SCHEDULES,
+    Configuration,
     configuration_space_summary,
     sample_random_configuration,
 )

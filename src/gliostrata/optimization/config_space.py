@@ -15,8 +15,6 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-import pandas as pd
-
 
 CELL_TYPES = ["iPSC-NSC", "MSC", "HB1_F3_line"]
 PAYLOADS = ["CRAd", "prodrug_enzyme", "CAR", "combo"]

@@ -83,15 +83,15 @@ def pipeline_dry_run(config_path: str | None, n: int, out_path: str | None) -> N
     click.echo(f"Loaded config: {cfg.project_name} v{cfg.version}, seed={cfg.seed}")
     click.echo("Running end-to-end pipeline on synthetic data...\n")
 
-    from gliostrata.data.ingest import generate_synthetic_cohort
     from gliostrata.data.harmonize import harmonize
-    from gliostrata.profiling.subtype import classify_subtypes
-    from gliostrata.profiling.states import deconvolve_states
-    from gliostrata.profiling.tme import deconvolve_tme
+    from gliostrata.data.ingest import generate_synthetic_cohort
     from gliostrata.features.store import build_feature_store
-    from gliostrata.prediction.survival import predict_survival
-    from gliostrata.optimization.bayesian import optimize_configurations
     from gliostrata.handoff.protocol import generate_protocols
+    from gliostrata.optimization.bayesian import optimize_configurations
+    from gliostrata.prediction.survival import predict_survival
+    from gliostrata.profiling.states import deconvolve_states
+    from gliostrata.profiling.subtype import classify_subtypes
+    from gliostrata.profiling.tme import deconvolve_tme
 
     # L0
     cohort = generate_synthetic_cohort(n=n, seed=cfg.seed)
@@ -126,8 +126,8 @@ def pipeline_dry_run(config_path: str | None, n: int, out_path: str | None) -> N
                    "Run with --out DIR to write the artifacts.")
         return
 
-    from gliostrata.utils.io import ensure_dir, write_json, write_parquet
     from gliostrata.handoff.protocol import protocols_to_json
+    from gliostrata.utils.io import ensure_dir, write_json, write_parquet
 
     out_dir = ensure_dir(out_path)
     write_parquet(cohort, out_dir / "cohort.parquet")
@@ -154,9 +154,9 @@ def pipeline_dry_run(config_path: str | None, n: int, out_path: str | None) -> N
 def ingest(source: str, out_path: str, n: int) -> None:
     """L0 — ingest data from a public source.
 
-    NOTE: TCGA/CGGA/CPTAC ingestion is a STUB. Only --source synthetic works.
-    Real ingestion requires TCGAbiolinks (R) for TCGA, direct download for CGGA.
-    See docs/roadmap.md.
+    NOTE: only --source synthetic is implemented here. TCGA and CGGA ingestion
+    are real, but they live in standalone scripts that talk to the GDC and CGGA
+    directly: scripts/download_tcga_*.py and scripts/download_cgga.py.
     """
     from gliostrata.utils.io import write_parquet
 
@@ -169,8 +169,9 @@ def ingest(source: str, out_path: str, n: int) -> None:
         write_parquet(df, out)
         click.echo(f"Ingested synthetic cohort ({len(df)} patients) -> {out}")
     else:
-        click.echo(f"STUB: ingestion of {source} is not yet implemented. "
-                   f"Use --source synthetic for now. See docs/roadmap.md.")
+        click.echo(f"STUB: ingestion of {source} is not implemented in the CLI. "
+                   f"Use scripts/download_tcga_*.py (TCGA) or scripts/download_cgga.py "
+                   f"(CGGA) directly, or --source synthetic.")
 
 
 @cli.command("harmonize")
@@ -178,8 +179,8 @@ def ingest(source: str, out_path: str, n: int) -> None:
 @click.option("--out", "out_path", required=True, type=click.Path())
 def harmonize_cmd(in_path: str, out_path: str) -> None:
     """L1 — harmonize ingested data (stub)."""
-    from gliostrata.utils.io import read_parquet, write_parquet
     from gliostrata.data.harmonize import harmonize
+    from gliostrata.utils.io import read_parquet, write_parquet
 
     df = read_parquet(in_path)
     out = harmonize(df)
@@ -197,10 +198,10 @@ def profile(in_path: str, out_path: str) -> None:
     state/TME fractions, profiling metadata). The output schema is always a
     superset of the input schema — L3 assembly happens in `build-feature-store`.
     """
-    from gliostrata.utils.io import read_parquet, write_parquet
-    from gliostrata.profiling.subtype import classify_subtypes
     from gliostrata.profiling.states import deconvolve_states
+    from gliostrata.profiling.subtype import classify_subtypes
     from gliostrata.profiling.tme import deconvolve_tme
+    from gliostrata.utils.io import read_parquet, write_parquet
 
     df = read_parquet(in_path)
     profiled = df.copy()
@@ -219,11 +220,11 @@ def profile(in_path: str, out_path: str) -> None:
 @click.option("--out", "out_path", required=True, type=click.Path())
 def build_feature_store_cmd(in_path: str, out_path: str) -> None:
     """L3 — assemble the unified patient feature store."""
-    from gliostrata.utils.io import read_parquet, write_parquet
-    from gliostrata.profiling.subtype import classify_subtypes
-    from gliostrata.profiling.states import deconvolve_states
-    from gliostrata.profiling.tme import deconvolve_tme
     from gliostrata.features.store import build_feature_store
+    from gliostrata.profiling.states import deconvolve_states
+    from gliostrata.profiling.subtype import classify_subtypes
+    from gliostrata.profiling.tme import deconvolve_tme
+    from gliostrata.utils.io import read_parquet, write_parquet
 
     df = read_parquet(in_path)
     feature_store = build_feature_store(
@@ -249,9 +250,9 @@ def optimize(in_path: str, out_path: str, n_top: int, seed: int) -> None:
 
     Generates a ranked set of therapeutic configurations per patient.
     """
-    from gliostrata.utils.io import read_parquet, ensure_dir, write_parquet
-    from gliostrata.prediction.survival import predict_survival
     from gliostrata.optimization.bayesian import optimize_configurations
+    from gliostrata.prediction.survival import predict_survival
+    from gliostrata.utils.io import ensure_dir, read_parquet, write_parquet
 
     feature_store = read_parquet(in_path)
     survival_pred = predict_survival(feature_store, seed=seed)
@@ -270,9 +271,9 @@ def optimize(in_path: str, out_path: str, n_top: int, seed: int) -> None:
               help="Output directory for protocol JSON documents.")
 def generate_protocol_cmd(in_path: str, fs_path: str, out_path: str) -> None:
     """L7 — generate wet-lab handoff protocol documents."""
-    from gliostrata.utils.io import read_parquet, ensure_dir, write_json
-    from gliostrata.prediction.survival import predict_survival
     from gliostrata.handoff.protocol import generate_protocols, protocols_to_json
+    from gliostrata.prediction.survival import predict_survival
+    from gliostrata.utils.io import ensure_dir, read_parquet, write_json
 
     configs = read_parquet(in_path)
     feature_store = read_parquet(fs_path)
