@@ -13,6 +13,21 @@ preview), and a **CSV** of its own numbers.
 | `t4t5_dose_response` | the registered dose-response per payload, with ED50 and the registered dose range | `configs/response_surface_v1.yaml` |
 | `t4t5_survival_gain` | what an RMST gain is the area of | parameter file |
 | `t4t5_rehearsal_gains` | per-patient gains from the item 11(o) rehearsal against T5's thresholds | `docs/dry_runs/t4t5_controls.json` |
+| `t1_deconvolution` | estimated against realised state fraction over the 100 registered mixtures; registered **PASS** | `data/results/t1/neftel_mixture_deconvolution*` |
+| `t2_external_validation` | each variant's discrimination and calibration on CGGA against their thresholds; registered **FAIL** on both rows | `data/results/cgga/*.json` |
+
+T1 and T2 are **results**; the T4/T5 figures are rehearsals and say so on their face.
+
+Generate the T1/T2 pair with `python scripts/t1t2_figures.py all`.
+
+### A provenance gap closed here
+
+The four T1/T2 source files were **untracked** when these figures were written, although the
+pre-registration cites all four by path — including in two section 8 amendment rows. A
+registration that names a file must ship it, or the citation cannot be checked. They are now
+committed as narrow exceptions to the `data/results/**` ignore; everything else there stays
+ignored. They are summary statistics already published in sections 2.3 and 2.4, plus 100
+simulated mixtures, with no patient-level data.
 
 ## The visual system
 
@@ -39,8 +54,11 @@ rests on colour alone in print, under colour-blindness, or in a photocopy.
 
 - Categorical hues are assigned **in fixed order and never cycled**. A fourth payload would
   need a facet, not a generated hue — `payload_style` raises rather than inventing one.
-- **Colour follows the entity.** Blue means CRAd everywhere. The rehearsal-gains figure is
-  deliberately *not* on the payload palette, because its rows are runs, not payloads.
+- **Colour follows the entity.** Blue means CRAd in every T4/T5 payload figure. The
+  rehearsal-gains figure is deliberately *not* on the payload palette, because its rows are
+  runs, not payloads. The payload palette is specific to T4/T5; T1 and T2 have their own
+  entities (one hue across T1's small multiples; internal versus external for T2), and no
+  figure reuses a hue for a different kind of thing within its own test.
 - **One axis.** No chart here has two y-scales.
 - Grid and axis rules are **solid hairlines**. Dashing is reserved for a real threshold —
   T5's 3-month bar, the harm line, the no-effect line — where it carries meaning.

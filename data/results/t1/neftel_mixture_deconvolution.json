@@ -1,0 +1,220 @@
+{
+  "constants": {
+    "cells_per_mixture": 500,
+    "ci_level": 0.95,
+    "dirichlet_alpha": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "n_bootstrap": 1000,
+    "n_mixtures": 100,
+    "seed_bootstrap": 42,
+    "seed_mixtures": 131928,
+    "states": [
+      "NPC",
+      "OPC",
+      "AC",
+      "MES"
+    ]
+  },
+  "counts": {
+    "cell_tpm_sum_min_max": [
+      999850.625,
+      1000099.125
+    ],
+    "cells_per_state": {
+      "AC": 1928,
+      "MES": 1608,
+      "NPC": 1985,
+      "OPC": 1047
+    },
+    "markers_in_atlas": {
+      "AC-like": [
+        16,
+        16
+      ],
+      "MES-like": [
+        14,
+        14
+      ],
+      "NPC-like": [
+        15,
+        15
+      ],
+      "OPC-like": [
+        14,
+        14
+      ]
+    },
+    "n_annotated_cells": 7930,
+    "n_cells_used": 6568,
+    "n_genes": 23686,
+    "n_malignant_with_all_scores": 6568,
+    "n_tied_not_assigned": 0,
+    "n_tumours": 26
+  },
+  "dry_run": false,
+  "inputs": {
+    "annotation": {
+      "bytes": 888416,
+      "path": "data/external/neftel2019_3ca/Meta-data_Neftel2019_Brain.tar.gz",
+      "sha256": "df01ad311ddf152e08c7ebb3c2c6c9fcf22b119f5a4a9744aa0e81a37c7a7b80"
+    },
+    "expression": {
+      "bytes": 310775398,
+      "path": "data/external/neftel2019_geo/GSM3828672_Smartseq2_GBM_IDHwt_processed_TPM.tsv.gz",
+      "sha256": "73be3319fb0b026dcae9dc33582ced9fef00a8e6470f63df3a7cbbf7daf960f5"
+    }
+  },
+  "metric_key": "T1_state_deconvolution_pearson_r",
+  "mixture_checks": {
+    "mixture_tpm_sum_min_max": [
+      999998.1862072668,
+      1000000.7723489566
+    ],
+    "weights_sum_max_abs_dev": 2.220446049250313e-16
+  },
+  "outputs": {
+    "mixture_table": {
+      "path": "data/results/t1/neftel_mixture_deconvolution_mixtures.parquet",
+      "sha256": "a17c8459ae34b646cf56149b69818fe16678f0f1cbbc5bdf03f960e0ea9296ce"
+    }
+  },
+  "primary": {
+    "bootstrap": {
+      "mean_r": {
+        "clipped": false,
+        "lower": 0.9430418483296613,
+        "upper": 0.9589378131264376
+      },
+      "n_resamples": 1000,
+      "n_undefined_dropped": 0,
+      "per_state": {
+        "AC": {
+          "clipped": false,
+          "lower": 0.8884517272566336,
+          "upper": 0.9446850541497727
+        },
+        "MES": {
+          "clipped": false,
+          "lower": 0.9574431001868358,
+          "upper": 0.9797328854489303
+        },
+        "NPC": {
+          "clipped": false,
+          "lower": 0.9472374039075974,
+          "upper": 0.9768053377961073
+        },
+        "OPC": {
+          "clipped": false,
+          "lower": 0.929036295023543,
+          "upper": 0.9682476796387349
+        }
+      }
+    },
+    "estimator": "deconvolve_states_expression, defaults (ssgsea, softmax_z, temperature 1.0)",
+    "mean_r": 0.9520993839447193,
+    "per_state_r": {
+      "AC": 0.9204392006412851,
+      "MES": 0.9705130277019749,
+      "NPC": 0.9646642706831616,
+      "OPC": 0.9527810367524551
+    },
+    "per_state_r_against_realised_fractions": {
+      "AC": 0.9251585064402748,
+      "MES": 0.9745289752554318,
+      "NPC": 0.9712116399001874,
+      "OPC": 0.9565861323012739
+    },
+    "pooled_r_descriptive": 0.9506189786107665,
+    "rmse_per_state": {
+      "AC": 0.07054562768656521,
+      "MES": 0.04792061116493538,
+      "NPC": 0.04867779170150007,
+      "OPC": 0.054163325815186986
+    }
+  },
+  "run_before_deposit": true,
+  "secondary_descriptive": {
+    "bootstrap": {
+      "mean_r": {
+        "clipped": false,
+        "lower": 0.8358335403839139,
+        "upper": 0.8750343324574373
+      },
+      "n_resamples": 1000,
+      "n_undefined_dropped": 0,
+      "per_state": {
+        "AC": {
+          "clipped": false,
+          "lower": 0.7154698888328378,
+          "upper": 0.8763268829701684
+        },
+        "MES": {
+          "clipped": false,
+          "lower": 0.8732820095359599,
+          "upper": 0.9379538028005336
+        },
+        "NPC": {
+          "clipped": false,
+          "lower": 0.8032248423643205,
+          "upper": 0.8803872773065908
+        },
+        "OPC": {
+          "clipped": false,
+          "lower": 0.82084159097686,
+          "upper": 0.9134280097252836
+        }
+      }
+    },
+    "estimator": "deconvolve_states_expression, fraction_method='proportional'; pre-declared, descriptive, cannot change the verdict",
+    "mean_r": 0.8540515862421105,
+    "per_state_r": {
+      "AC": 0.7946834415105112,
+      "MES": 0.9064577383082162,
+      "NPC": 0.8419726918739292,
+      "OPC": 0.8730924732757859
+    },
+    "per_state_r_against_realised_fractions": {
+      "AC": 0.7926493923416668,
+      "MES": 0.9102201005341835,
+      "NPC": 0.8462750473057636,
+      "OPC": 0.8729228154618428
+    },
+    "pooled_r_descriptive": 0.638124209753521,
+    "rmse_per_state": {
+      "AC": 0.16980037003724996,
+      "MES": 0.17324731895444984,
+      "NPC": 0.15703824280270332,
+      "OPC": 0.1561596519311013
+    }
+  },
+  "software": {
+    "gliostrata": "0.1.0",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "python": "3.14.3"
+  },
+  "spec": "docs/t1_deconvolution_spec.md",
+  "verdict": {
+    "auxiliary_requirement": null,
+    "auxiliary_satisfied": null,
+    "ci_bound": "lower",
+    "ci_lower": 0.9430418483296613,
+    "ci_upper": 0.9589378131264376,
+    "decisive_value": 0.9430418483296613,
+    "direction": "gte",
+    "interval_widened_to_include_point": false,
+    "justification": "CIBERSORTx-class deconvolution typically achieves r 0.70-0.85.",
+    "metric": "State deconvolution Pearson r",
+    "metric_key": "T1_state_deconvolution_pearson_r",
+    "point_estimate": 0.9520993839447193,
+    "reason": "PASS: 95% CI lower bound 0.943042 >= 0.75.",
+    "status": "PASS",
+    "test_id": "T1",
+    "threshold": 0.75
+  },
+  "what": "T1 state-deconvolution row: Neftel 2019 pseudo-bulk mixtures"
+}

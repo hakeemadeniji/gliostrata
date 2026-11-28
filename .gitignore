@@ -119,3 +119,19 @@ Thumbs.db
 
 # Office lock/temp files
 ~$*
+
+# The result files the pre-registration cites by path. They are summary statistics already
+# published in sections 2.3 and 2.4 plus 100 SIMULATED mixtures, with no patient-level data,
+# and a registration that names a file must ship it or the citation is unverifiable.
+# Everything else under data/results/ stays ignored.
+#
+# The two directory negations are required, not decorative: git will not re-include a file
+# whose parent directory is excluded, and `data/results/**` excludes the directories too.
+!data/results/cgga/
+!data/results/t1/
+data/results/cgga/**
+data/results/t1/**
+!data/results/cgga/cox_external_validation.json
+!data/results/cgga/brier18_external.json
+!data/results/t1/neftel_mixture_deconvolution.json
+!data/results/t1/neftel_mixture_deconvolution_mixtures.parquet

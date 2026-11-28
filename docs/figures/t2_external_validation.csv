@@ -1,0 +1,8 @@
+variant,metric,point,ci_lower,ci_upper,threshold,clears
+variant_1_baseline_committed,internal C-index,0.673544,,,,
+variant_2_transferable,external C-index,0.538548,0.499378,0.580698,0.65,False
+variant_2_transferable,internal C-index,0.652039,,,,
+variant_2_transferable,Brier @ 18 months,0.261677,0.23905,0.282882,0.25,False
+variant_3_molecular,external C-index,0.591538,0.547716,0.634062,0.65,False
+variant_3_molecular,internal C-index,0.6606,,,,
+variant_3_molecular,Brier @ 18 months,0.247177,0.222629,0.272915,0.25,False

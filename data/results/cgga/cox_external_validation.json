@@ -1,0 +1,137 @@
+{
+  "variant_1_baseline_committed": {
+    "features": [
+      "age",
+      "sex",
+      "kps",
+      "treatment_arm"
+    ],
+    "n_tcga_fit": 594,
+    "internal_cindex": 0.673544,
+    "internal_cindex_matches_committed": true,
+    "external_evaluable": false,
+    "external_reason": "CGGA has zero KPS records; the committed baseline cannot be externally validated",
+    "n_tcga_modelled": 592,
+    "n_tcga_events": 491,
+    "committed_internal_cindex": 0.6735,
+    "internal_tolerance": 0.005,
+    "absent_in_cgga": [
+      "kps"
+    ],
+    "cgga_feature_availability": {
+      "age": 305,
+      "sex": 305,
+      "kps": 0,
+      "treatment_arm": 284
+    },
+    "tcga_hazard_ratios": {
+      "age": 1.0299,
+      "sex_F": 0.7489,
+      "kps_missing": 1.5691,
+      "kps": 0.9818,
+      "treatment_arm_MonoTherapy": 1.4972,
+      "treatment_arm_NoAdjuvant": 0.6412,
+      "treatment_arm_missing": 1.2017
+    }
+  },
+  "variant_2_transferable": {
+    "features": [
+      "age",
+      "sex",
+      "treatment_arm"
+    ],
+    "n_tcga_fit": 570,
+    "n_cgga_eval": 283,
+    "internal_cindex": 0.652039,
+    "external_cindex": 0.538548,
+    "external_ci_lower": 0.499378,
+    "external_ci_upper": 0.580698,
+    "clears_t2_threshold": false,
+    "external_evaluable": true,
+    "n_tcga_events": 472,
+    "n_cgga_deaths": 239,
+    "n_cgga_excluded": {
+      "n_input": 305,
+      "n_dropped_missing_feature": 21,
+      "n_dropped_missing_outcome": 1,
+      "n_dropped_category_unseen_in_tcga": 0
+    },
+    "tcga_hazard_ratios": {
+      "age": 1.0326,
+      "sex_F": 0.8136,
+      "treatment_arm_MonoTherapy": 1.533,
+      "treatment_arm_NoAdjuvant": 0.5836
+    },
+    "internal_cindex_method": "5-fold stratified CV on the same complete-case TCGA rows, pooled out-of-fold Harrell C-index (internal, not a T2 number)",
+    "bootstrap": {
+      "method": "percentile bootstrap of the evaluated CGGA patients around the fixed TCGA model; the model is not refitted",
+      "n_resamples_requested": 1000,
+      "n_resamples_valid": 1000,
+      "seed": 42,
+      "level": 0.95
+    }
+  },
+  "variant_3_molecular": {
+    "features": [
+      "age",
+      "sex",
+      "treatment_arm",
+      "idh_mutated",
+      "mgmt_methylated"
+    ],
+    "n_tcga_fit": 298,
+    "n_cgga_eval": 241,
+    "internal_cindex": 0.6606,
+    "external_cindex": 0.591538,
+    "external_ci_lower": 0.547716,
+    "external_ci_upper": 0.634062,
+    "clears_t2_threshold": false,
+    "harmonisation_caveat": "CGGA IDH/MGMT calling method is not necessarily identical to TCGA's; see docs/mgmt_idh_calling.md and docs/cgga_ingestion.md",
+    "external_evaluable": true,
+    "n_tcga_events": 220,
+    "n_cgga_deaths": 204,
+    "n_cgga_excluded": {
+      "n_input": 305,
+      "n_dropped_missing_feature": 44,
+      "n_dropped_missing_outcome": 0,
+      "n_dropped_category_unseen_in_tcga": 20
+    },
+    "tcga_hazard_ratios": {
+      "age": 1.0314,
+      "sex_F": 0.5342,
+      "treatment_arm_MonoTherapy": 1.6206,
+      "idh_mutated": 0.5025,
+      "mgmt_methylated": 0.8292
+    },
+    "internal_cindex_method": "5-fold stratified CV on the same complete-case TCGA rows, pooled out-of-fold Harrell C-index (internal, not a T2 number)",
+    "bootstrap": {
+      "method": "percentile bootstrap of the evaluated CGGA patients around the fixed TCGA model; the model is not refitted",
+      "n_resamples_requested": 1000,
+      "n_resamples_valid": 1000,
+      "seed": 42,
+      "level": 0.95
+    }
+  },
+  "t2_threshold": 0.65,
+  "t2_verdict": "not met - best variant falls short",
+  "t2_verdict_explanation": "The transferable model (age, sex, treatment_arm) reaches an external C-index 0.5385 (95% CI 0.4994 to 0.5807, n = 283); the point estimate is below 0.65. The committed baseline itself cannot be evaluated on CGGA because KPS is absent.",
+  "internal_sanity_ok": true,
+  "headline_variant": "variant_2_transferable",
+  "pre_specification": {
+    "variants_fixed_before_first_cgga_evaluation": true,
+    "evaluation_unit": "one row per patient (first row in stored order)",
+    "missing_data": "complete cases on features and outcome in both cohorts; nothing imputed",
+    "unseen_category": "a categorical value absent from the TCGA fit set excludes the patient (counted)",
+    "verdict_rule": "decided by the headline variant; true only if the point estimate and the CI lower bound are >= 0.65"
+  },
+  "cgga_cohort": {
+    "n_rows_ingested": 333,
+    "n_unique_patients": 305,
+    "n_duplicate_rows_dropped": 28,
+    "n_with_survival_and_vital_status": 297
+  },
+  "scope": [
+    "Evaluates the C-index row of T2 only; the improvement-over-2024-baseline and Brier rows are not evaluated here.",
+    "Not a read of a sealed cgga_external_v1 partition, which does not exist yet; this is the single evaluation on the ingested cohort."
+  ]
+}
