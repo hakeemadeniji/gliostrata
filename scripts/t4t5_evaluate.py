@@ -348,10 +348,10 @@ def evaluate(args) -> None:
     delivery.load_tropism_reference()  # refuses a reference that names CGGA
     manifest = read_manifest(args.manifest)
     patient_ids = sorted(str(p) for p in manifest.test_ids)
-    inputs = [args.expression, args.clinical, args.manifest, params.path,
+    inputs = [*args.expression, args.clinical, args.manifest, params.path,
               delivery.DEFAULT_REFERENCE]
 
-    record_access(Access(
+    entry = record_access(Access(
         cohort="cgga", kind=VALUES, analysis=ANALYSIS,
         purpose=("T4 and T5 end-to-end evaluation (pre-registration 2.2 items 4, 5, 7 and "
                  "11). Reads CGGA expression for the tropism score and the patient "
@@ -363,14 +363,38 @@ def evaluate(args) -> None:
         scoring_rule=ANALYSIS,
     ), ledger_path=args.ledger)
 
-    raise SystemExit(
-        "The cohort-reading body of `evaluate` is intentionally not implemented yet.\n"
-        "Everything above it is: the refusals, the access record and the metric code, which\n"
-        "the dry run exercises end to end. What remains is the loader that turns CGGA's own\n"
-        "expression and clinical files into per-patient baselines and modifiers, and that is\n"
-        "written against the real column names, which cannot be read until the DOI unlocks\n"
-        "a values access. Writing it against guessed names would be the worse error.\n"
-        "See docs/project_record/07_timeline_2026_11_28.md section 7.2.")
+    from gliostrata.evaluation import t4t5_cohort
+
+    module = _load("validate_cox_cgga", ROOT / "scripts" / "validate_cox_cgga.py")
+    tcga = module.load_tcga(
+        pd.read_parquet(args.tcga_clinical),
+        pd.read_parquet(args.tcga_calls, columns=["patient_id", *module.CALL_COLUMNS]))
+    controls = _controls()
+
+    scorers, provenance = t4t5_cohort.load(
+        list(args.expression), args.clinical, patient_ids, params, module, tcga,
+        controls.PatientScorer)
+    print(f"loaded {provenance['n_patients']} patients; modifiers from the clinical table "
+          f"for {provenance['n_modifiers_from_clinical_table']}, deconvolved for "
+          f"{provenance['n_modifiers_deconvolved']}", flush=True)
+
+    # Item 7: the T4 fifty are the FIRST FIFTY BY SORTED PATIENT ID, so the selection cannot
+    # depend on an outcome. T5 scores every patient in the partition.
+    t4 = run_t4(scorers, patient_ids[:N_T4])
+    t5 = run_t5(scorers, patient_ids)
+
+    document = _assemble(params, t4, t5, synthetic=False, sources={
+        "partition": args.manifest.as_posix(),
+        "clinical": args.clinical.as_posix(),
+        "expression": [p.as_posix() for p in args.expression],
+        "ledger_seq": entry["seq"],
+        **provenance,
+    })
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(document, indent=1, default=str) + "\n",
+                        encoding="utf-8", newline="\n")
+    print(f"\nWrote {args.out}")
+    print(json.dumps({k: v["status"] for k, v in document["verdicts"].items()}, indent=1))
 
 
 def main(argv=None) -> None:
@@ -384,7 +408,12 @@ def main(argv=None) -> None:
 
     e = sub.add_parser("evaluate", help="the one registered read")
     e.add_argument("--params", type=Path, default=Path("configs/response_surface_v1.yaml"))
-    e.add_argument("--expression", type=Path, required=True)
+    e.add_argument("--expression", type=Path, nargs="+", required=True,
+                   help="the CGGA RSEM FPKM archives; a partition spans both batches")
+    e.add_argument("--tcga-clinical", type=Path,
+                   default=Path("data/raw/tcga_gbm/clinical_cohort.parquet"))
+    e.add_argument("--tcga-calls", type=Path,
+                   default=Path("data/processed/tcga_gbm/molecular_calls_joined.parquet"))
     e.add_argument("--clinical", type=Path, required=True)
     e.add_argument("--manifest", type=Path, default=PARTITION)
     e.add_argument("--dry-run-out", type=Path, default=DRY_RUN_OUT)
