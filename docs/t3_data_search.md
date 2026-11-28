@@ -19,6 +19,15 @@ confirmed.
   written. I did not change the pre-registration. A decision on this belongs to the
   lead, and any change must be a dated, declared amendment made before the data are
   seen. Otherwise the row closes NOT EVALUABLE, which the protocol already permits.
+- **Decided 2026-11-27 by the lead, and amended the same day (pre-registration section 8).**
+  Item 3(b) now requires at least three of the four Verhaak subtypes, with at least two
+  curves per represented subtype and the ten-curve minimum unchanged; any absent subtype is
+  named in section 8 when the data arrive, and the coverage limit is reported with T3's
+  verdict. Both T3 rows are decided on 2027-01-08, independently of each other, so that the
+  T4/T5 freeze is made knowing whether the simulation layer is calibrated. The amendment was
+  made before any source was contacted and before any T3 data was obtained. Both named
+  candidates now clear the subtype clause on what they publish; what remains open for each is
+  the per-time-point control volumes.
 - Best growth path: ask the Mayo Clinic Brain Tumor PDX National Resource (Table S3B of
   Vaubel et al. holds per-line growth data, and RNA-seq is public under PRJNA548556) and
   the Alcaniz/Hoffmann group (Charite/EPO Berlin; per-time-point control volumes are
@@ -75,12 +84,12 @@ The searches were limited in number, so absence is not proven.
 
 | By | Action |
 |---|---|
-| 2026-11-30 | Lead decides the four-subtype issue (accept 3-class panels by dated amendment, or accept NOT EVALUABLE). |
+| ~~2026-11-30~~ | **Done 2026-11-27.** Lead accepted 3-class panels by dated amendment (pre-registration section 8); a per-subtype floor of two curves was added with it. |
 | 2026-12-01 | Send email A (Mayo) and email B (Alcaniz group). |
 | 2026-12-01 | Send email C (NSC data request: Rust 2022 corresponding author, copy to Aboody lab). |
 | 2026-12-04 | Retry CancerModels.org API and PDMR portal; check PDMR for GBM models with growth curves. |
 | 2026-12-15 | Chase non-replies once. |
-| 2027-01-08 | Go/no-go: if no per-time-point control curves from at least 10 models, record NOT EVALUABLE in section 8. |
+| 2027-01-08 | **Registered decision date** (pre-registration item 8). Each T3 row independently: a qualifying source secured, or that row is declared NOT EVALUABLE in section 8 on this date. For the growth row that means per-time-point control curves from at least 10 models over at least three subtypes, two or more per subtype. |
 | 2027-01-15 | Registered deadline. Data entered in section 8 before any calibration. |
 
 If the Mayo resource supplies per-animal volumes, 10 or more curves is likely reachable

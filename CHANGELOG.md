@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — T3 data rule (2026-11-27, after the OSF submission)
+- Pre-registration item 3(b): a qualifying PDX source must now span at least three of the
+  four Verhaak subtypes, with at least two curves per represented subtype, instead of all
+  four. Modern panels label with the Wang 2017 scheme, which has no Neural class, so no
+  obtainable dataset could meet the clause as written (`docs/t3_data_search.md`). Any absent
+  subtype is named in section 8 when the data arrive, and the coverage limit is reported with
+  T3's verdict.
+- Pre-registration items 3(e) and 8: both T3 rows are decided on 2027-01-08, independently.
+  A row without a secured qualifying source by that date is declared NOT EVALUABLE then, so
+  that the T4/T5 freeze is made knowing whether the simulation layer is calibrated.
+- Neither T3 threshold changed, nor the RMSE normalisation, nor the bootstrap unit. The
+  amendment was made before any T3 source was contacted and before any T3 data was obtained.
+
 ### Deposit readiness (2026-11-27)
 - Pre-registration header complete except the OSF DOI and the deposit date; the registered
   commit is the tag `prereg-deposit`. Repository: https://github.com/hakeemadeniji/gliostrata

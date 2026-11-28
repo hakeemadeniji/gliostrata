@@ -227,13 +227,23 @@ resolutions are pre-registered rather than chosen after the data is seen.
    time point, with at least three time points; the number of curves is the sample
    size. (b) *Qualifying rule:* a source is usable only if it gives longitudinal
    volumes, a control arm, and a subtype call or RNA-seq for every model, and it must
-   span the four Verhaak subtypes with at least ten curves. (c) *Candidates, none
+   carry at least ten curves spanning **at least three of the four Verhaak subtypes,
+   with at least two curves per represented subtype**. (The requirement was four
+   subtypes until 2026-11-27, when it was loosened to three with a per-subtype floor;
+   see section 8. Any absent subtype is named in section 8 on the day the data are
+   obtained, and the coverage limit is stated wherever T3's verdict is reported, so
+   that no claim is made for a subtype that was never calibrated.) (c) *Candidates, none
    verified:* the Mayo Clinic Brain Tumor PDX National Resource and the Alcaniz 2023
    panel. (d) *How the unknowns are fixed:* the dataset and its curve count are
    entered in section 8 on the day the data are obtained, before any model is
-   calibrated. (e) *Dates:* data in hand by 2027-01-15; calibration complete by
-   2027-03-01. If the data are not in hand by that date, this criterion is NOT
-   EVALUABLE (item 8) and the tumour-growth layer is presented as uncalibrated.
+   calibrated. (e) *Dates:* a qualifying source must be **secured by 2027-01-08** — an
+   open release verified against (b), or a custodian's written agreement to supply one.
+   If none is secured by that date, this criterion is declared NOT EVALUABLE on that
+   date (item 8) and the tumour-growth layer is presented as uncalibrated; the
+   declaration is not deferred past it, because the T4 and T5 freeze (item 11) has to
+   know whether the simulation layer is calibrated. If a source is secured: data in
+   hand by 2027-01-15; calibration complete by 2027-03-01. If the data are not in hand
+   by 2027-01-15, this criterion is likewise NOT EVALUABLE.
 4. **T4 personalisation variance is a count with no sampling distribution.** "≥ 3 distinct
    configs in top-5 across 50 patients" over one fixed cohort has no CI unless the cohort
    is itself resampled. *Registered resolution:* patients are bootstrap-resampled and the
@@ -292,7 +302,16 @@ resolutions are pre-registered rather than chosen after the data is seen.
    vivo tracking data that is published only in aggregate form in some sources. If the
    required data cannot be obtained, T3 is reported as **not evaluable**, with the reason
    stated, and the framework's simulation layer is presented as uncalibrated. This is
-   distinct from a FAIL.
+   distinct from a FAIL. *Decision date, registered 2026-11-27:* both T3 rows are
+   decided on **2027-01-08**. By that date each row must have a qualifying source
+   secured — for the tumour-growth row as item 3(b) and 3(e) define it, for the
+   NSC-migration row in vivo tracking data giving per-animal or per-region distances
+   rather than a single aggregate — or that row is declared NOT EVALUABLE on that date.
+   The two rows are decided independently: one may be calibrated while the other is
+   not. The date is earlier than item 3's data deadline on purpose, so that the T4 and
+   T5 freeze (item 11) is made knowing T3's status, and it is not extended, because an
+   open-ended search would let the decision be taken after seeing which answer suited
+   the framework.
 9. **T1 subtype accuracy: which CGGA patients are scored, with which interval, and
    below which n the criterion cannot be decided.** CGGA's reference Verhaak labels
    exist only in its microarray batch, so the scoring set decides whether the 0.88
@@ -985,6 +1004,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.2 item 5 (aggregate added) | Registered how T4's percentage regret reduction is aggregated: 100 x (1 - mean regret under GP-EI / mean regret under random search) over the 50 patients, with a patient-bootstrap CI. No threshold, bound or rule changed. | The registration defined regret per patient but not its aggregate; chosen by the project lead. | **Yes**, as for the entries above. T4 has not been run. |
 | 2026-11-27 | 2.2 item 9 (scoring set frozen; input file named); 5 | **Made after the OSF submission of the registered commit `c7d7a95` (tag `prereg-deposit`), while approval was pending.** Froze T1's subtype scoring set by its registered rule. All 108 eligible CGGA mRNA_array_301 patients carry a reference label and have an expression column; they are sealed all-test as `data/partitions/cgga_t1_subtype_v1.json` (SHA-256 `7adfc09f068b793fa60fed0d191b34a39dc44c2f5b14cf4cc865d84c25d94049`), and `configs/scoring_rules.yaml` now names it. The classifier's input is CGGA's gene-level release (CGGA.mRNA_array_301_gene_level.20200506; SHA-256 in `data/provenance/cgga_microarray_sources.json`); the registered rule matches genes by symbol. No threshold, bound or rule changed. | Section 3.3 and item 9 require the scoring set to be frozen as a manifest before the read. | **No** T1 data read. The microarray file was fetched and hashed (ledger entries 19 to 21; the first attempt failed with HTTP 500). The freeze read only sample ids and whether a label is present, never a label or an expression value (entry 22). |
 | 2026-11-27 | 2.2 item 9(d) (input scale decided; two format contingencies) | **Made after the OSF submission of `c7d7a95`, before any microarray value was read.** Decided the input scale from documentation, as registered: log2(x + 1), because CGGA's sources say only that intensities were normalised with GeneSpring GX 11.0. Added two format contingencies so that the one read cannot fail on format: a negative value means the data are already log-scale and are used as distributed; a missing value drops that gene for that sample. No threshold, bound, scoring set or classifier changed. | Item 9(d) requires the scale to be decided from documentation before the read. A read that crashes on an unexpected format would waste the one registered read. | **No.** No T1 value was read: the matrix has been opened only for its header (sample ids). |
+| 2026-11-27 | 2.2 item 3(b), 3(e); 2.2 item 8 (decision date added) | **Made after the OSF submission of `c7d7a95`, before any T3 data was obtained or any T3 source was contacted.** Two changes to T3's data rule. (1) The qualifying rule required a source spanning all four Verhaak subtypes; it now requires at least three of the four, with at least two curves per represented subtype and the ten-curve minimum unchanged. Any absent subtype is named in this section when the data arrive, and the coverage limit is stated wherever T3's verdict is reported. (2) Both T3 rows are decided on 2027-01-08: by that date each row must have a qualifying source secured (a verified open release, or a custodian's written agreement), or that row is declared NOT EVALUABLE on that date. The rows are decided independently. Neither T3 threshold (RMSE <= 15%, migration r >= 0.65), nor the RMSE normalisation, nor the bootstrap unit, nor any decisive bound or decision rule changed. | The four-subtype requirement was written without a verified source in hand, and the registered search (`docs/t3_data_search.md`) found no public panel that pairs longitudinal control-arm volumes with subtype calls across all four. Both candidates classify three classes (classical, mesenchymal, proneural) under the Wang 2017 scheme, which has no Neural class at all, so the missing subtype is a property of how modern panels are labelled rather than of any one panel; Wang 2017 dropped it because its signal tracked normal-brain contamination. The ten-curve minimum is unaffected: the Mayo panel's published counts are 31, 21 and 16. A rule that no obtainable dataset can satisfy makes NOT EVALUABLE the only reachable verdict, which is not a finding about the model. The per-subtype floor of two is added at the same time so that the loosened rule cannot be met by a panel that is nominally three-subtype and effectively one. The decision date exists because item 11 freezes the T4 and T5 model before 2027-06-30, and that freeze must be made knowing whether the simulation layer is calibrated; an open-ended search would let T3's status be settled after its convenience was known. Chosen by the project lead. | **No** T3 data read, and none obtained: no PDX growth curve and no NSC-tracking series is on disk, no custodian has been contacted, and the loosened rule was fixed before any request was sent. CGGA had been read twice for T2 and for the availability and checksum accesses of ledger entries 11, 13, 16, 17 and 19 to 22 before this entry; none of them touches T3. |
 
 ---
 
