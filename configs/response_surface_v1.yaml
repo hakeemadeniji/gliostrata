@@ -1,0 +1,260 @@
+# T4/T5 response surface, delivery module and toxicity term: every numeric parameter.
+#
+# Registered by pre-registration section 2.2 item 11(n). This file is the single place the
+# numbers live; the module reads them and holds none of its own. At the freeze (item 11(m),
+# by 2027-02-28) its SHA-256 is entered in pre-registration section 8 together with the
+# survival model's, and after that it does not change.
+#
+# STATUS OF THIS FILE: DRAFT. Not frozen, not checksummed, and no T4 or T5 read may use it
+# until the freeze amendment is entered. Three entries are marked `open: true` and are
+# decisions the project lead has still to make; see `open_questions` at the foot of the file.
+#
+# Every entry carries:
+#   value        the number the module uses
+#   status       fitted_tcga | published | assumed | derived_by_rule
+#   source       PMID or the fit it comes from; "none" only where status is assumed
+#   range        the sensitivity range of pre-registration section 3.6 (exploratory only)
+#
+# Structure: docs/t4t5_model_design.md, Design A. The model is
+#   S_c,i(t) = S_stupp,i(t) ^ exp(-E_i(c) + T_i(c))
+#   RMST_i(c) = integral of S_c,i over [0, tau]; gain_i(c) = RMST_i(c) - RMST_i(Stupp)
+
+schema_version: 1
+registered_under: "docs/preregistration.md section 2.2 item 11 (g) to (o)"
+design_document: "docs/t4t5_model_design.md (Design A)"
+frozen: false
+
+# ---------------------------------------------------------------------------------------
+# Horizon and integration
+# ---------------------------------------------------------------------------------------
+horizon:
+  tau_months:
+    value: 24
+    status: published          # registered, not assumed: item 11(b)
+    source: "pre-registration section 2.2 item 11(b)"
+    range: "fixed"
+  grid_step_months:
+    value: 0.1
+    status: assumed
+    source: "none; trapezoid rule on a fixed grid, item 11(b)"
+    range: "0.05 to 0.2 (numerical check only, not a sensitivity parameter)"
+
+# ---------------------------------------------------------------------------------------
+# Survival model (L5). Variant 2: age, sex, arm. Item 11(g).
+# ---------------------------------------------------------------------------------------
+survival_model:
+  variant: 2
+  covariates: [age, sex, arm]
+  estimator: "gliostrata.prediction.cox.CoxPHModel (Breslow)"
+  fitted_on: "TCGA, all complete-case patients with an outcome"
+  baseline_arm: "RT+TMZ"       # item 11(a): the Stupp baseline
+  external_validation:
+    c_index: 0.5385
+    c_index_ci: [0.4994, 0.5807]
+    brier_18mo: 0.2617
+    verdict: FAIL
+    recorded_in: "pre-registration section 2.3"
+  # Item 11(g): neither IDH nor MGMT appears here or anywhere below. Item 11(l) states
+  # the cost: IDH-mutant baselines are modelled as IDH-wild-type.
+
+# ---------------------------------------------------------------------------------------
+# Delivery module (L4-lite). Item 11(h). Declared uncalibrated.
+# ---------------------------------------------------------------------------------------
+delivery:
+  calibrated: false            # item 11(h): stands whatever T3 returns
+  tropism_genes:
+    iPSC-NSC: [CXCL12, VEGFA, PLAU, CCL2]
+    HB1_F3_line: [CXCL12, VEGFA, PLAU, CCL2]
+    MSC: [TGFB1]
+  tropism_reference:
+    # The standardisation of the tropism score uses a frozen TCGA mean and SD, never a
+    # CGGA cohort statistic, so that the sealed cohort cannot leak into the transform.
+    source: "TCGA log2 CPM, frozen; written at the freeze"
+    file: "configs/response_surface_v1_tropism_reference.json"
+    present: false
+
+  # f_k: fraction of injected cells surviving to act.
+  cell_fraction_acting:
+    iPSC-NSC: {value: 0.5, status: assumed, source: "none (evidence gap 1)", range: "0.1 to 1.0"}
+    HB1_F3_line: {value: 0.5, status: assumed, source: "none (evidence gap 1)", range: "0.1 to 1.0"}
+    MSC: {value: 0.3, status: assumed, source: "none (evidence gap 1)", range: "0.1 to 1.0"}
+
+  # N_eff = N * f_k * logistic(a_k + g_k * z_i,k)
+  tropism_logit_intercept:
+    value: 0.0
+    status: assumed
+    source: "none"
+    range: "-1 to 1"
+  tropism_logit_slope_per_sd:
+    value: 0.5
+    status: assumed
+    source: "direction only: PMID 23365134 (TGF-beta, MSC); PMID 23109183 (CXCL12, NSC, in vitro)"
+    range: "0 to 1"
+
+  # Spatial coverage: Cov(n) = 1 - exp(-n / n0)
+  coverage_saturation_sites:
+    value: 3.0
+    status: assumed
+    source: "none"
+    range: "1.5 to 6"
+
+  # Schedule factor sigma(s)
+  schedule_factor:
+    single: {value: 1.00, status: published, source: "reference level", range: "fixed"}
+    fractionated_x2: {value: 1.10, status: assumed, source: "direction only: PMID 34944938", range: "1.0 to 1.3"}
+    fractionated_x3: {value: 1.15, status: assumed, source: "direction only: PMID 34944938", range: "1.0 to 1.3"}
+
+# ---------------------------------------------------------------------------------------
+# Response surface. Item 11(i) for Emax, item 11(j) for combo.
+# ---------------------------------------------------------------------------------------
+response:
+  # E_i(c) = Emax_p * m_p(i) * sigma(s) * Cov(n) * N_eff^h / (N_eff^h + ED50_p^h)
+  dose_response:
+    ed50_cells:
+      value: 2.5e7
+      status: assumed
+      source: "clinically tested ranges 1e7 to 5e7 (PMID 27979915) and 5e7 to 1.5e8 (PMID 34214495); CAR MTD 2.5e7 (PMID 40451950)"
+      range: "5e6 to 1e8"
+    hill_h:
+      value: 1.0
+      status: assumed
+      source: "none"
+      range: "0.5 to 2"
+
+  # Emax_p by the registered rule: Emax_p = 0.5 * ln(ratio_p), ratio_p the treated-to-control
+  # median-survival ratio of the nearest published preclinical study. 0.5 is the translation
+  # factor, assumed, and declared as assumed wherever a T4 or T5 number is reported.
+  emax:
+    translation_factor:
+      value: 0.5
+      status: assumed
+      source: "none; item 11(i)"
+      range: "0.25 to 1.0"
+
+    CRAd:
+      value: 0.1425894                 # 0.5 * ln(1.33); hazard ratio 0.8671
+      ratio_used: 1.33
+      status: derived_by_rule
+      source: "PMID 42179969, mouse median-survival ratios 1.33 to 1.48; the skeptical end is used"
+      range: "hazard ratio 1.0 to 0.60"
+      caveat: >-
+        The nearest published study is in ovarian cancer, not glioma. It is the nearest
+        there is; human randomised data for oncolytic adenovirus are null (hazard ratio
+        1.06, PMID 33119048). Stated wherever a CRAd number is reported.
+
+    prodrug_enzyme:
+      open: true                       # see open_questions.prodrug_survival_ratio
+      value: null
+      status: open
+      source: "PMID 23658244 reports a tumour-volume ratio of about 1/3, not a median-survival ratio"
+      range: "hazard ratio 1.0 to 0.60"
+
+    CAR:
+      open: true                       # see open_questions.car_pessimistic_end
+      value: null
+      status: open
+      source: "no efficacy in newly diagnosed glioblastoma (PMID 38216766); 8% objective response (PMID 40451950)"
+      range: "hazard ratio 1.0 to 0.70"
+
+  # Patient modifier m_p(i) = exp(w_p' u_i), u_i standardised on the frozen TCGA reference.
+  patient_modifier:
+    immune_tme_slope_per_sd:
+      value: 0.1
+      status: assumed
+      source: "none; sign assumed"
+      range: "0 to 0.3"
+      applies_to: [CRAd, CAR]          # mechanistic: the prodrug payloads do not act through the immune TME
+    mes_like_slope_per_sd:
+      value: 0.1
+      status: assumed
+      source: "none; sign assumed"
+      range: "0 to 0.3"
+      applies_to: [CRAd, prodrug_enzyme, CAR]
+    # No MGMT modifier: 5-FU and SN-38 act through antimetabolite and topoisomerase
+    # mechanisms, not through MGMT (a mechanistic argument, not a measured effect).
+    # No IDH modifier and no MGMT modifier anywhere: item 11(l).
+
+  # Item 11(j): "combo" is the two payloads each carrier may carry. Item 4 excludes
+  # HB1_F3_line x CAR and MSC x CRAd, so no uniform pair is possible.
+  combo:
+    pairs:
+      iPSC-NSC: [CRAd, prodrug_enzyme]     # compatible with all three; this pairing is a declared choice
+      MSC: [prodrug_enzyme, CAR]           # CRAd excluded by item 4
+      HB1_F3_line: [CRAd, prodrug_enzyme]  # CAR excluded by item 4
+    interaction: bliss_independence        # E_combo = (E_a + E_b) * synergy
+    synergy:
+      value: 1.0
+      status: assumed
+      source: "none"
+      range: "0.8 to 1.3"
+
+# ---------------------------------------------------------------------------------------
+# Toxicity and delay. Item 11(k). The only source of harm in the model.
+# ---------------------------------------------------------------------------------------
+toxicity:
+  # T_i(c) = tau_p * (N / dose_reference)^q * (1 + eta * (n - 1)) + delta_delay
+  dose_reference_cells:
+    value: 5.0e7
+    status: published
+    source: "the registered dose maximum (item 4)"
+    range: "fixed"
+  tau_payload:
+    CRAd: {value: 0.02, status: assumed, source: "direction: PMID 34214495 (1 of 12 grade 3 meningitis)", range: "x0.5 to x3"}
+    prodrug_enzyme: {value: 0.01, status: assumed, source: "none", range: "x0.5 to x3"}
+    CAR: {value: 0.05, status: assumed, source: "direction: PMID 40451950 (56% grade 3 neurotoxicity)", range: "x0.5 to x3"}
+    combo: sum_of_pair                 # item 11(j): the sum of the carrier's two payloads
+  dose_exponent_q:
+    value: 2.0
+    status: assumed
+    source: "none"
+    range: "1 to 3"
+  site_penalty_eta:
+    value: 0.05
+    status: assumed
+    source: "none"
+    range: "0 to 0.15"
+  delay_cost_log_hr:
+    value: 0.02
+    status: assumed
+    source: "delay of 10 to 14 days to starting Stupp, PMID 34214495"
+    range: "0 to 0.08"
+  # A larger CAR-derived toxicity prior was rejected as not transferable to carrier-cell
+  # delivery (item 11(k)); it is the top of tau_CAR's range instead.
+
+# ---------------------------------------------------------------------------------------
+# Pre-read controls. Item 11(o). A control that misses its stated answer stops the read.
+# ---------------------------------------------------------------------------------------
+controls:
+  no_modifier:
+    description: "every patient modifier set to zero"
+    must_yield: "distinct-configuration count of exactly 1"
+  null_payload:
+    description: "Emax = 0 for every payload"
+    must_yield: "gain of exactly 0 for every patient; harm equal to the toxicity term alone"
+  synthetic_dry_run:
+    description: "the whole pipeline on synthetic files (section 3.8)"
+    must_yield: "completes, and writes a verdict of the registered shape"
+  tcga_rehearsal:
+    description: "the whole T4 and T5 pipeline on the held-out TCGA split, before any CGGA read"
+    must_yield: "completes without error; numbers are not reported as results"
+
+# ---------------------------------------------------------------------------------------
+# Still to decide. None of these three follows mechanically from the registered rule.
+# ---------------------------------------------------------------------------------------
+open_questions:
+  prodrug_survival_ratio: >-
+    Item 11(i)'s rule needs a treated-to-control median-survival ratio. The nearest study
+    for prodrug_enzyme, PMID 23658244, reports a tumour-volume ratio of about 1/3 instead,
+    and no conversion from volume to median survival is published. Either borrow CRAd's
+    1.33 as a declared substitute (adds no new number), or read PMID 23658244's full text
+    for a survival curve, or declare a volume-to-survival conversion (adds an assumption).
+  car_pessimistic_end: >-
+    Item 11(i) sets CAR "at the pessimistic end" of its range. Read literally that is
+    hazard ratio 1.0, so Emax_CAR = 0 exactly: CAR then carries toxicity and no benefit,
+    the optimiser never selects it, and MSC's combo is strictly worse than MSC's prodrug
+    alone. That is a defensible reading of PMID 38216766, but "never selected" is a strong
+    consequence to register, so it is put to the lead rather than assumed.
+  crad_anchor_is_ovarian: >-
+    CRAd's anchor study is in ovarian cancer. Recorded as a caveat above and proposed to be
+    reported with every CRAd number; confirm that this is the disclosure wanted rather than
+    a reason to widen the range.
