@@ -1,0 +1,27 @@
+{
+ "extractor": "A",
+ "n_records": 40,
+ "n_with_both_medians": 7,
+ "n_with_ratio_only": 1,
+ "n_needs_full_text": 36,
+ "by_payload": {
+  "CRAd": {
+   "n": 7,
+   "n_with_both_medians": 1,
+   "n_with_ratio_only": 0,
+   "n_needs_full_text": 6
+  },
+  "prodrug_enzyme": {
+   "n": 23,
+   "n_with_both_medians": 5,
+   "n_with_ratio_only": 0,
+   "n_needs_full_text": 21
+  },
+  "CAR": {
+   "n": 10,
+   "n_with_both_medians": 1,
+   "n_with_ratio_only": 1,
+   "n_needs_full_text": 9
+  }
+ }
+}

@@ -243,7 +243,11 @@ controls:
     must_yield: "distinct-configuration count of exactly 1"
   null_payload:
     description: "Emax = 0 for every payload"
-    must_yield: "gain of exactly 0 for every patient; harm equal to the toxicity term alone"
+    must_yield: >-
+      benefit term E of exactly 0 for every patient and configuration, and a gain equal to
+      the one the toxicity term alone implies -- negative wherever that term is positive.
+      Not "gain of exactly 0": the toxicity term stays in the primary surface under item
+      11(k), so a zero gain is unreachable. Corrected 2026-11-27; see section 8.
   synthetic_dry_run:
     description: "the whole pipeline on synthetic files (section 3.8)"
     must_yield: "completes, and writes a verdict of the registered shape"
