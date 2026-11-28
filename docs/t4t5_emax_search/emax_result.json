@@ -1,6 +1,6 @@
 {
  "registered_under": "docs/preregistration.md 2.2 item 11 (i.1) to (i.7)",
- "computed_at_utc": "2026-11-28T06:25:32Z",
+ "computed_at_utc": "2026-11-28T09:33:21Z",
  "translation_factor": 0.5,
  "translation_factor_status": "assumed, declared as assumed wherever reported",
  "n_rows": 40,
@@ -44,6 +44,19 @@
    },
    "n_dropped_by_narrowing": 1,
    "control_arm_rule": "narrowed",
+   "thin_primary_set": false,
+   "exploratory_admitting_p2_excluded": {
+    "n": 3,
+    "ratios": [
+     1.1015625,
+     1.125,
+     1.6545893719806763
+    ],
+    "ratio": 1.125,
+    "emax": 0.05889151782819173,
+    "hazard_ratio": 0.9428090415820634,
+    "studies_admitted": []
+   },
    "emax": 0.05889151782819173,
    "ratio": 1.125,
    "hazard_ratio": 0.9428090415820634,
@@ -109,6 +122,26 @@
    },
    "n_dropped_by_narrowing": 2,
    "control_arm_rule": "narrowed",
+   "thin_primary_set": false,
+   "exploratory_admitting_p2_excluded": {
+    "n": 10,
+    "ratios": [
+     1.1578947368421053,
+     1.2058823529411764,
+     1.2523364485981308,
+     1.2941176470588236,
+     1.5,
+     1.58,
+     1.75,
+     1.8108108108108107,
+     2.0833333333333335,
+     2.4893617021276597
+    ],
+    "ratio": 1.54,
+    "emax": 0.21589120821276891,
+    "hazard_ratio": 0.8058229640253803,
+    "studies_admitted": []
+   },
    "emax": 0.21589120821276891,
    "ratio": 1.54,
    "hazard_ratio": 0.8058229640253803,
@@ -160,6 +193,20 @@
    },
    "n_dropped_by_narrowing": 3,
    "control_arm_rule": "narrowed",
+   "thin_primary_set": true,
+   "exploratory_admitting_p2_excluded": {
+    "n": 2,
+    "ratios": [
+     1.25,
+     2.6912751677852347
+    ],
+    "ratio": 1.9706375838926173,
+    "emax": 0.33917856851680883,
+    "hazard_ratio": 0.7123552335136919,
+    "studies_admitted": [
+     "25962108"
+    ]
+   },
    "emax": 0.49500756068055496,
    "ratio": 2.6912751677852347,
    "hazard_ratio": 0.6095662985428263,

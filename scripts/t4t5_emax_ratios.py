@@ -42,6 +42,10 @@ OUT_MD = SEARCH_DIR / "emax_result.md"
 PARAMS = Path("configs/response_surface_v1.yaml")
 PAYLOADS = ("CRAd", "prodrug_enzyme", "CAR")
 PRIMARY_CONTROL_KINDS = frozenset({"untreated", "vehicle", "mock_or_reporter_vector"})
+# Item 11(i.7): a payload whose primary set rests on fewer than this many studies has its
+# thinness stated with the number, and the broader readings reported beside it under 3.6.
+# It is a REPORTING trigger only: it never changes which studies the primary set contains.
+THIN_SET_BELOW = 3
 # The two articles item 11(i.8) records as unobtainable. They fail P3 and are counted and
 # reported, but they are *closed*, not outstanding: they must not make the result provisional,
 # or it would stay provisional for ever.
@@ -149,6 +153,18 @@ def compute() -> dict:
         else:
             chosen, rule = {"n": 0, "ratio": None, "emax": 0.0, "hazard_ratio": 1.0}, "unevidenced"
 
+        # Item 11(i.7) reporting: the set obtained by admitting this payload's P2-excluded
+        # studies. Exploratory only; it never feeds `emax` above.
+        p2_excluded = [r for r in mine
+                       if r.get("p2_intracranial") != "yes"
+                       and _ratio(r) is not None
+                       and not r.get("arm_is_combination")
+                       and r.get("p4_payload_match") == "yes"
+                       and r.get("control_arm_kind") in PRIMARY_CONTROL_KINDS]
+        with_p2 = _summarise(
+            [r for r in primary if r is not None]
+            + [_ratio(r) for r in p2_excluded], factor)
+
         result["payloads"][payload] = {
             "n_carried": len(mine),
             "n_eligible_p1_to_p5": len(eligible),
@@ -162,6 +178,9 @@ def compute() -> dict:
             "exploratory_literal": literal_summary,
             "n_dropped_by_narrowing": literal_summary["n"] - primary_summary["n"],
             "control_arm_rule": rule,
+            "thin_primary_set": primary_summary["n"] < THIN_SET_BELOW,
+            "exploratory_admitting_p2_excluded": {
+                **with_p2, "studies_admitted": sorted(r["pmid"] for r in p2_excluded)},
             "emax": chosen["emax"],
             "ratio": chosen["ratio"],
             "hazard_ratio": chosen["hazard_ratio"],
@@ -239,6 +258,44 @@ def _markdown(result: dict) -> str:
         p, e = info["primary_narrowed"], info["exploratory_literal"]
         lines.append(f"| {payload} | {p['n']} | {_fmt(p['hazard_ratio'])} | "
                      f"{e['n']} | {_fmt(e['hazard_ratio'])} |")
+    thin = [p for p, i in result["payloads"].items() if i.get("thin_primary_set")]
+    if thin:
+        lines += [
+            "", "## Payloads whose primary set is thin (item 11(i.7))", "",
+            f"**{', '.join(thin)}** rest{'s' if len(thin) == 1 else ''} on fewer than "
+            f"{THIN_SET_BELOW} studies. The registered value is unchanged; the broader "
+            "readings below are exploratory under section 3.6, and are reported beside it so "
+            "the thinness is visible with the number rather than only in a limitations "
+            "section.", "",
+            "| Payload | Registered n | Registered HR | Literal (i.3) n | Literal HR | "
+            "Admitting P2-excluded n | That HR |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        for payload in thin:
+            info = result["payloads"][payload]
+            lit, p2 = info["exploratory_literal"], info["exploratory_admitting_p2_excluded"]
+            lines.append(
+                f"| {payload} | {info['primary_narrowed']['n']} | "
+                f"{_fmt(info['hazard_ratio'])} | {lit['n']} | {_fmt(lit['hazard_ratio'])} | "
+                f"{p2['n']} | {_fmt(p2['hazard_ratio'])} |")
+        most_favourable = all(
+            result["payloads"][p]["hazard_ratio"] is not None
+            and all(alt["hazard_ratio"] is None
+                    or alt["hazard_ratio"] >= result["payloads"][p]["hazard_ratio"]
+                    for alt in (result["payloads"][p]["exploratory_literal"],
+                                result["payloads"][p]["exploratory_admitting_p2_excluded"]))
+            for p in thin)
+        lines += [
+            "",
+            ("**The registered reading is the most favourable of the three for every thin "
+             "payload.** Every broader reading of the evidence moves it further from T5's "
+             "bar, not closer, so the thinness confers no advantage. Stated here so that no "
+             "reader has to discover it."
+             if most_favourable else
+             "**A broader reading is more favourable than the registered one for at least one "
+             "thin payload.** That is reported here rather than left to be found, and it is "
+             "a reason to read the registered value with the alternatives in view."), "",
+        ]
     lines += [
         "", "## How each payload's set was reduced", "",
     ]

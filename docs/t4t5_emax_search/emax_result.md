@@ -1,6 +1,6 @@
 # Emax, computed under item 11(i)
 
-Computed 2026-11-28T06:25:32Z from `docs/t4t5_emax_search/screening/extraction_final.jsonl`.
+Computed 2026-11-28T09:33:21Z from `docs/t4t5_emax_search/screening/extraction_final.jsonl`.
 
 > ## The evidence base is CLOSED
 >
@@ -25,6 +25,17 @@ Computed 2026-11-28T06:25:32Z from `docs/t4t5_emax_search/screening/extraction_f
 | CRAd | 3 | 0.9428 | 4 | 0.8483 |
 | prodrug_enzyme | 10 | 0.8058 | 12 | 0.8187 |
 | CAR | 1 | 0.6096 | 4 | 0.6529 |
+
+## Payloads whose primary set is thin (item 11(i.7))
+
+**CAR** rests on fewer than 3 studies. The registered value is unchanged; the broader readings below are exploratory under section 3.6, and are reported beside it so the thinness is visible with the number rather than only in a limitations section.
+
+| Payload | Registered n | Registered HR | Literal (i.3) n | Literal HR | Admitting P2-excluded n | That HR |
+|---|---|---|---|---|---|---|
+| CAR | 1 | 0.6096 | 4 | 0.6529 | 2 | 0.7124 |
+
+**The registered reading is the most favourable of the three for every thin payload.** Every broader reading of the evidence moves it further from T5's bar, not closer, so the thinness confers no advantage. Stated here so that no reader has to discover it.
+
 
 ## How each payload's set was reduced
 

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Disclosed — CAR's primary set rests on one study (2026-11-28, no value changed)
+- The project lead asked for a second CAR study in the evidence base. **There is none to
+  add.** P2 excludes CAR's only other inert-controlled study (25962108, subcutaneous), P3
+  excludes three whose medians are not obtainable, and the (i.7) narrowing excludes five whose
+  controls are irrelevant-specificity CAR products or are never described. Admitting one would
+  mean relaxing a criterion, not fetching a paper.
+- **No minimum-n rule added, no registered value changed.** Such a rule would be
+  payload-neutral in wording but CAR-only in effect, composed with CAR's count and Emax both
+  visible.
+- Item 11(i.7) and §8 now record the thinness, and `emax_result.md` reports the broader
+  readings beside the registered one, computed rather than typed: CAR n=1 HR 0.6096
+  (registered), n=4 HR 0.6529 (literal), n=2 HR 0.7124 (admitting P2-excluded).
+- The report also derives, rather than asserts, that **the registered reading is the most
+  favourable of the three** — every broader reading moves CAR further from T5's bar, so the
+  thinness confers no advantage.
+
 ### Disclosed — T4's regret threshold cannot fail (2026-11-28, nothing changed)
 - Item 5 gains a dated note, and §8 a row, recording that T4's regret metric **saturates**:
   regret is measured against the best value found by either method, so a method attaining
