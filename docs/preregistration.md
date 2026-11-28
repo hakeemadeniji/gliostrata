@@ -429,20 +429,61 @@ resolutions are pre-registered rather than chosen after the data is seen.
     require them and are not deferred for them. No PDE or agent-based simulator is built
     under this registration.
 
-    (i) *Efficacy prior.* Emax_p is fixed by a **rule declared before any read**, never by a
-    value chosen with a threshold in view: Emax_p = 0.5 x ln(ratio_p), where ratio_p is the
-    treated-to-control median-survival ratio of the nearest published preclinical study for
-    payload p, and 0.5 is a translation factor on the log scale. The factor is **assumed**,
-    and is declared as assumed in every table that reports a T4 or T5 number. The nearest
-    study per payload, and the single value the rule yields, are recorded with their PMIDs in
-    the parameter file of (n): CRAd from PMID 42179969 (ratios 1.33 to 1.48; the skeptical
-    end, 1.33, is used), prodrug_enzyme from PMID 23658244, and CAR at the pessimistic end of
-    its range because human CAR data in glioblastoma are uniformly poor (PMID 38216766, PMID
-    40451950). *Consequence, stated in advance:* this rule places T5 below its 3-month bar by
-    construction — the bar needs a hazard ratio near 0.59, and the rule yields about 0.82 to
-    0.87 — so T5's expected verdict is a FAIL that reflects the state of the evidence, not a
-    property of the framework. The break-even effect size is reported alongside it as an
-    exploratory analysis (section 3.6).
+    (i) *Efficacy prior.* Emax_p is fixed by a rule declared **before any read and before the
+    literature search that feeds it**, never by a value chosen with a threshold in view.
+    (Revised 2026-11-27, before the search was run; see section 8. The first wording named
+    three studies taken from `docs/t4t5_model_design.md`, none of which satisfies "the
+    nearest published preclinical study": one is in ovarian cancer, one reports a
+    tumour-volume ratio rather than a survival ratio, and the third was shortcut to "the
+    pessimistic end" of an assumed range.)
+
+    (i.1) *The quantity.* Emax_p = 0.5 x ln(ratio_p), a log-hazard reduction, where 0.5 is a
+    mouse-to-human translation factor on the log scale. The factor is **assumed** and is
+    declared as assumed in every table that reports a T4 or T5 number.
+
+    (i.2) *The ratio.* ratio_p is the **median of the treated-to-control median-survival
+    ratios across every qualifying study** for payload p — not one study chosen by hand. If
+    exactly one study qualifies, ratio_p is its ratio. Every extracted ratio is logged with
+    its PMID and the sentence it came from.
+
+    (i.3) *Qualifying study.* **P1** peer-reviewed and in vivo. **P2** an orthotopic or
+    intracranial rodent glioma or glioblastoma model. **P3** median survival reported for
+    both a control arm and an arm receiving the payload, in the text or readable from a
+    survival curve. **P4** the payload class matches p: for CRAd a conditionally replicative
+    oncolytic adenovirus; for prodrug_enzyme an enzyme-prodrug pair (cytosine deaminase with
+    5-FC, HSV thymidine kinase with ganciclovir, carboxylesterase with CPT-11, or equivalent);
+    for CAR a chimeric antigen receptor T-cell or NK-cell product. **P5** the payload need
+    *not* be delivered by a cell carrier, because the delivery module of (h) models carriage
+    separately; a carrier-delivered study qualifies on the same terms as a direct one.
+
+    (i.4) *The search.* One PubMed search per payload, the query fixed here and **run once**,
+    on a date recorded in the log. No year limit: preclinical evidence of any year qualifies.
+    Titles and abstracts are screened twice independently and disagreements adjudicated, as
+    for the comparator search of item 2. The queries, the record counts, every screening
+    decision and every extracted ratio are committed to `docs/t4t5_emax_search/` before any
+    value enters the parameter file of (n). The registered queries are:
+
+        CRAd:    ("oncolytic adenovirus"[tiab] OR CRAd[tiab] OR "conditionally replicative
+                 adenovirus"[tiab]) AND (glioma[tiab] OR glioblastoma[tiab]) AND "median
+                 survival"[tiab]
+        prodrug: ("cytosine deaminase"[tiab] OR "thymidine kinase"[tiab] OR HSV-TK[tiab] OR
+                 carboxylesterase[tiab] OR prodrug[tiab]) AND (glioma[tiab] OR
+                 glioblastoma[tiab]) AND "median survival"[tiab]
+        CAR:     ("chimeric antigen receptor"[tiab] OR CAR-T[tiab] OR CAR-NK[tiab]) AND
+                 (glioma[tiab] OR glioblastoma[tiab]) AND "median survival"[tiab]
+
+    (i.5) *Fallback.* If no study qualifies for a payload, **P2 is dropped for that payload
+    only** and the same rule is applied to the nearest tumour type available; the disease
+    mismatch is then reported with every number for that payload. If still nothing qualifies,
+    Emax_p = 0 and that payload is reported as unevidenced, with the consequence stated: it
+    carries toxicity and no benefit, so the optimiser never selects it.
+
+    (i.6) *Consequence, stated in advance.* On the evidence in hand the rule is expected to
+    place T5 below its 3-month bar — the bar needs a hazard ratio near 0.59, and ratios of
+    about 1.3 to 1.5 give 0.82 to 0.87 — so T5's expected verdict is a FAIL that reflects the
+    state of the preclinical evidence, not a property of the framework. The break-even effect
+    size is reported alongside it as an exploratory analysis (section 3.6). **Nothing in
+    (i.1) to (i.5) may be revised once the search has been run.**
 
     (j) *What "combo" combines.* The registered payload "combo" is defined **per carrier**,
     as the two payloads that carrier is registered as able to carry (item 4 excludes
@@ -1100,6 +1141,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.2 item 9(d) (input scale decided; two format contingencies) | **Made after the OSF submission of `c7d7a95`, before any microarray value was read.** Decided the input scale from documentation, as registered: log2(x + 1), because CGGA's sources say only that intensities were normalised with GeneSpring GX 11.0. Added two format contingencies so that the one read cannot fail on format: a negative value means the data are already log-scale and are used as distributed; a missing value drops that gene for that sample. No threshold, bound, scoring set or classifier changed. | Item 9(d) requires the scale to be decided from documentation before the read. A read that crashes on an unexpected format would waste the one registered read. | **No.** No T1 value was read: the matrix has been opened only for its header (sample ids). |
 | 2026-11-27 | 2.2 item 3(b), 3(e); 2.2 item 8 (decision date added) | **Made after the OSF submission of `c7d7a95`, before any T3 data was obtained or any T3 source was contacted.** Two changes to T3's data rule. (1) The qualifying rule required a source spanning all four Verhaak subtypes; it now requires at least three of the four, with at least two curves per represented subtype and the ten-curve minimum unchanged. Any absent subtype is named in this section when the data arrive, and the coverage limit is stated wherever T3's verdict is reported. (2) Both T3 rows are decided on 2027-01-08: by that date each row must have a qualifying source secured (a verified open release, or a custodian's written agreement), or that row is declared NOT EVALUABLE on that date. The rows are decided independently. Neither T3 threshold (RMSE <= 15%, migration r >= 0.65), nor the RMSE normalisation, nor the bootstrap unit, nor any decisive bound or decision rule changed. | The four-subtype requirement was written without a verified source in hand, and the registered search (`docs/t3_data_search.md`) found no public panel that pairs longitudinal control-arm volumes with subtype calls across all four. Both candidates classify three classes (classical, mesenchymal, proneural) under the Wang 2017 scheme, which has no Neural class at all, so the missing subtype is a property of how modern panels are labelled rather than of any one panel; Wang 2017 dropped it because its signal tracked normal-brain contamination. The ten-curve minimum is unaffected: the Mayo panel's published counts are 31, 21 and 16. A rule that no obtainable dataset can satisfy makes NOT EVALUABLE the only reachable verdict, which is not a finding about the model. The per-subtype floor of two is added at the same time so that the loosened rule cannot be met by a panel that is nominally three-subtype and effectively one. The decision date exists because item 11 freezes the T4 and T5 model before 2027-06-30, and that freeze must be made knowing whether the simulation layer is calibrated; an open-ended search would let T3's status be settled after its convenience was known. Chosen by the project lead. | **No** T3 data read, and none obtained: no PDX growth curve and no NSC-tracking series is on disk, no custodian has been contacted, and the loosened rule was fixed before any request was sent. CGGA had been read twice for T2 and for the availability and checksum accesses of ledger entries 11, 13, 16, 17 and 19 to 22 before this entry; none of them touches T3. |
 | 2026-11-27 | 2.2 item 11 (g) to (o) added | **Made after the OSF submission of `c7d7a95`, before any T4 or T5 computation and before any CGGA value was read for either.** Adopted Design A of `docs/t4t5_model_design.md` and fixed the nine choices that document left open, as decided by the project lead. (g) The frozen survival model is variant 2 (age, sex, arm), not variant 3: variant 3 needs an IDH and an MGMT call for every patient, which item 7's eligibility rule never required, so T5 would score fewer than the 218 its scoring set registers. (h) The simulator is a closed-form delivery module, declared uncalibrated whatever T3 returns. (i) The efficacy prior is a rule — Emax_p = 0.5 x ln(treated-to-control median-survival ratio of the nearest preclinical study) — which places T5 below its bar by construction, stated in advance. (j) "combo" is defined per carrier, as the two payloads that carrier may carry, with Bliss independence and synergy 1.0. (k) The toxicity and delay term is in the primary surface, because it is the only source of harm and T5's harm row could not otherwise fail. (l) All 218 patients, no exclusion by IDH status, and neither IDH nor MGMT anywhere in the frozen model; the resulting mis-modelling of IDH-mutant baselines is disclosed and reported in section 3.6. (m) The freeze amendment is entered by 2027-02-28. (n) Parameters live in `configs/response_surface_v1.yaml`, checksummed here at the freeze. (o) Four pre-read controls are added to section 3.8, any failure of which stops the read. No threshold, decisive bound, decision rule, partition or scoring set changed; item 4's configuration space, its two exclusions, its 10 pairs and its 240 combinations are untouched, as are (a) to (f) of item 11. | Item 11(e) requires the model to be frozen by amendment before any T4 or T5 read, and a model cannot be frozen while nine of its choices are open. Each choice is one that could otherwise be made after seeing the data. Three are recorded against the design document's own recommendation, with the reason given in the text: variant 2 over variant 3 (the 218-patient scoring set), the per-carrier "combo" over a uniform one (all three options in the document contradict item 4's exclusion list or its distinctness rule), and IDH and MGMT in no part of the model rather than as invented modifiers. This entry fixes the design; the numeric values and their checksum follow in the freeze amendment under (e) and (m). | **No.** No T4 or T5 computation has been run, and no CGGA value has been read for either: the response surface and the delivery module are stubs, and `configs/response_surface_v1.yaml` does not yet exist. CGGA had been read twice for T2 and for the availability and checksum accesses of ledger entries 11, 13, 16, 17 and 19 to 22 before this entry. The external C-index and Brier values quoted in (g) are T2's, already recorded in section 2.3. |
+| 2026-11-27 | 2.2 item 11(i) (rewritten as (i.1) to (i.6)) | **Made after the OSF submission of `c7d7a95`, before the registered search was run, and before any T4 or T5 computation.** Item 11(i) set Emax_p from "the nearest published preclinical study" and then named three studies carried over from `docs/t4t5_model_design.md`. None of the three satisfies the rule: the CRAd anchor (PMID 42179969) is in ovarian cancer, the prodrug anchor (PMID 23658244) reports a tumour-volume ratio of about 1/3 rather than a median-survival ratio, and CAR was shortcut to "the pessimistic end" of an assumed range. The rule is now mechanical and the named studies are removed. ratio_p is the **median of the treated-to-control median-survival ratios across every qualifying study** for that payload, not one study chosen by hand. Qualifying is fixed by P1 to P5 (peer-reviewed and in vivo; orthotopic or intracranial rodent glioma; median survival for a control arm and a payload arm; payload class matched; carrier delivery neither required nor disqualifying). One PubMed search per payload, each query written out in (i.4) and run once, with no year limit, dual independent screening, adjudication, and the whole log committed to `docs/t4t5_emax_search/` before any value enters `configs/response_surface_v1.yaml`. If a payload has no qualifying glioma study, P2 is dropped for that payload alone and the disease mismatch is reported with every number for it; if nothing qualifies at all, Emax_p = 0 and the payload is reported as unevidenced. (i.1), the translation factor of 0.5, is unchanged and still declared as assumed. No threshold, decisive bound or decision rule changed, and (i.6) restates in advance that the rule is expected to place T5 below its bar. | The rule has to be mechanical before the search, or "nearest" is a discretion exercised after seeing which study gives which number. Taking the median across all qualifying studies removes the choice of study entirely and uses all of the evidence rather than one paper. Glioma is nearer to this project than ovarian cancer, so applying P2 is what the original word "nearest" should have meant. Chosen by the project lead from a written set of options, which included keeping the three citations as they were. | **No.** The search had not been run when this entry was committed, no record had been screened, no ratio had been extracted, and `configs/response_surface_v1.yaml` carried the three Emax entries as `open` with no value. No T4 or T5 computation has been run. CGGA had been read twice for T2 and for the availability and checksum accesses of ledger entries 11, 13, 16, 17 and 19 to 22 before this entry; none of them touches T4 or T5. |
 
 ---
 

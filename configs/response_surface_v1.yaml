@@ -121,40 +121,53 @@ response:
       source: "none"
       range: "0.5 to 2"
 
-  # Emax_p by the registered rule: Emax_p = 0.5 * ln(ratio_p), ratio_p the treated-to-control
-  # median-survival ratio of the nearest published preclinical study. 0.5 is the translation
-  # factor, assumed, and declared as assumed wherever a T4 or T5 number is reported.
+  # Emax_p by the registered rule of item 11 (i.1) to (i.6):
+  #   Emax_p = 0.5 * ln(ratio_p)
+  #   ratio_p = the MEDIAN of the treated-to-control median-survival ratios across EVERY
+  #             study qualifying under P1 to P5, not one study chosen by hand.
+  # All three values are therefore pending the registered search of (i.4), which has not been
+  # run. They are filled from docs/t4t5_emax_search/ and from nowhere else.
   emax:
     translation_factor:
       value: 0.5
       status: assumed
-      source: "none; item 11(i)"
+      source: "none; item 11 (i.1)"
       range: "0.25 to 1.0"
 
     CRAd:
-      value: 0.1425894                 # 0.5 * ln(1.33); hazard ratio 0.8671
-      ratio_used: 1.33
-      status: derived_by_rule
-      source: "PMID 42179969, mouse median-survival ratios 1.33 to 1.48; the skeptical end is used"
+      open: true
+      value: null
+      status: pending_registered_search
+      source: "item 11 (i.4), CRAd query; not yet run"
       range: "hazard ratio 1.0 to 0.60"
-      caveat: >-
-        The nearest published study is in ovarian cancer, not glioma. It is the nearest
-        there is; human randomised data for oncolytic adenovirus are null (hazard ratio
-        1.06, PMID 33119048). Stated wherever a CRAd number is reported.
+      note: >-
+        The design document's anchor (PMID 42179969, mouse median-survival ratios 1.33 to
+        1.48) is in ovarian cancer and no longer satisfies P2. It qualifies only through the
+        (i.5) fallback, if the glioma search returns nothing. Human randomised data for
+        oncolytic adenovirus are null (hazard ratio 1.06, PMID 33119048) and are reported
+        alongside whatever the search yields.
 
     prodrug_enzyme:
-      open: true                       # see open_questions.prodrug_survival_ratio
+      open: true
       value: null
-      status: open
-      source: "PMID 23658244 reports a tumour-volume ratio of about 1/3, not a median-survival ratio"
+      status: pending_registered_search
+      source: "item 11 (i.4), prodrug query; not yet run"
       range: "hazard ratio 1.0 to 0.60"
+      note: >-
+        The design document's anchor (PMID 23658244) reports a tumour-volume ratio of about
+        1/3, not a median survival, so it fails P3 whatever the search returns.
 
     CAR:
-      open: true                       # see open_questions.car_pessimistic_end
+      open: true
       value: null
-      status: open
-      source: "no efficacy in newly diagnosed glioblastoma (PMID 38216766); 8% objective response (PMID 40451950)"
+      status: pending_registered_search
+      source: "item 11 (i.4), CAR query; not yet run"
       range: "hazard ratio 1.0 to 0.70"
+      note: >-
+        The "pessimistic end" shortcut is removed: CAR goes through the same rule as the
+        other two. The poor human evidence (no efficacy in newly diagnosed glioblastoma,
+        PMID 38216766; 8% objective response, PMID 40451950) is reported alongside the
+        preclinical ratio, not substituted for it.
 
   # Patient modifier m_p(i) = exp(w_p' u_i), u_i standardised on the frozen TCGA reference.
   patient_modifier:
@@ -242,19 +255,15 @@ controls:
 # Still to decide. None of these three follows mechanically from the registered rule.
 # ---------------------------------------------------------------------------------------
 open_questions:
-  prodrug_survival_ratio: >-
-    Item 11(i)'s rule needs a treated-to-control median-survival ratio. The nearest study
-    for prodrug_enzyme, PMID 23658244, reports a tumour-volume ratio of about 1/3 instead,
-    and no conversion from volume to median survival is published. Either borrow CRAd's
-    1.33 as a declared substitute (adds no new number), or read PMID 23658244's full text
-    for a survival curve, or declare a volume-to-survival conversion (adds an assumption).
-  car_pessimistic_end: >-
-    Item 11(i) sets CAR "at the pessimistic end" of its range. Read literally that is
-    hazard ratio 1.0, so Emax_CAR = 0 exactly: CAR then carries toxicity and no benefit,
-    the optimiser never selects it, and MSC's combo is strictly worse than MSC's prodrug
-    alone. That is a defensible reading of PMID 38216766, but "never selected" is a strong
-    consequence to register, so it is put to the lead rather than assumed.
-  crad_anchor_is_ovarian: >-
-    CRAd's anchor study is in ovarian cancer. Recorded as a caveat above and proposed to be
-    reported with every CRAd number; confirm that this is the disclosure wanted rather than
-    a reason to widen the range.
+  emax_values: >-
+    All three Emax values are pending the registered search of item 11 (i.4), which has not
+    been run. They are the only values in this file that are not settled; everything else is
+    final subject to the freeze. The three questions that were open when this file was first
+    drafted (prodrug reporting the wrong quantity, CAR's "pessimistic end" shortcut, CRAd's
+    ovarian anchor) are all resolved the same way: item 11(i) was rewritten on 2026-11-27,
+    before the search, so that ratio_p is the median across every qualifying glioma study
+    under P1 to P5 rather than one study chosen by hand. See pre-registration section 8.
+  tropism_reference: >-
+    configs/response_surface_v1_tropism_reference.json does not exist yet. It holds the
+    frozen TCGA mean and SD used to standardise the tropism score, and is written and
+    checksummed at the freeze. It must never be computed from a CGGA statistic.

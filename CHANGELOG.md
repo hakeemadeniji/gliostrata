@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — the T4/T5 efficacy prior is now mechanical (2026-11-27, after the OSF submission)
+- Pre-registration item 11(i) is rewritten as (i.1) to (i.6), **before the search it governs
+  was run**. None of the three studies the design document named satisfied "the nearest
+  published preclinical study": CRAd's anchor is in ovarian cancer, prodrug's reports a
+  tumour-volume ratio rather than a median-survival ratio, and CAR was shortcut to "the
+  pessimistic end" of an assumed range.
+- `ratio_p` is now the **median of the treated-to-control median-survival ratios across every
+  qualifying study**, with qualifying fixed by P1 to P5 and one PubMed query per payload
+  written out in (i.4) and run once. Dual independent screening, adjudication, and the whole
+  log committed to `docs/t4t5_emax_search/` before any value enters the parameter file.
+- Fallback if a payload has no qualifying glioma study: P2 is dropped for that payload alone
+  and the disease mismatch is reported with every number for it.
+- All three Emax entries in `configs/response_surface_v1.yaml` are therefore
+  `pending_registered_search` with no value. The translation factor of 0.5 is unchanged and
+  still declared as assumed.
+
 ### Added — T4/T5 model design registered (2026-11-27, after the OSF submission)
 - Pre-registration item 11 gains (g) to (o): the nine choices `docs/t4t5_model_design.md`
   left to the project lead are decided and registered. Design A is adopted. Frozen survival
