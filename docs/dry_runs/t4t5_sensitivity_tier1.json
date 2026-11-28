@@ -1,0 +1,396 @@
+{
+ "what": "T4/T5 sensitivity, tier 1 (re-scoring)",
+ "tier": 1,
+ "exploratory": true,
+ "changes_no_verdict": true,
+ "plan": "docs/t4t5_sensitivity_plan.md",
+ "registered_under": "docs/preregistration.md section 3.6",
+ "run_at_utc": "2026-11-28T20:57:41Z",
+ "synthetic": true,
+ "parameter_sha256": "6e36e1b63683953a9b3dd9b3548d9a331f406010150cb938f4cc7ffb3b0c6a18",
+ "cannot_produce": "T4's distinct-configuration count and regret reduction: both are properties of the optimiser, not of a fixed configuration, and belong to tier 2",
+ "n_patients": 60,
+ "tornado": [
+  {
+   "central": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.25,
+    "mean_gain_months": 0.12194087102323439
+   }
+  },
+  {
+   "parameter": "ed50_cells",
+   "central_value": 25000000.0,
+   "low": 5000000.0,
+   "high": 100000000.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.0,
+    "mean_gain_months": 0.7693829123310276
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 1.0,
+    "mean_gain_months": -0.1341762954279944
+   },
+   "swing_mean_gain": 0.903559207759022,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "hill_h",
+   "central_value": 1.0,
+   "low": 0.5,
+   "high": 2.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.05,
+    "mean_gain_months": 0.416116305218922
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.9,
+    "mean_gain_months": -0.12169892575401088
+   },
+   "swing_mean_gain": 0.5378152309729329,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "delay_cost",
+   "central_value": 0.02,
+   "low": 0.0,
+   "high": 0.08,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.016666666666666666,
+    "mean_gain_months": 0.2546155541900602
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.9166666666666666,
+    "mean_gain_months": -0.2799469188897845
+   },
+   "swing_mean_gain": 0.5345624730798447,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "f_MSC",
+   "central_value": 0.3,
+   "low": 0.1,
+   "high": 1.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.55,
+    "mean_gain_months": 0.013122033343532161
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.23333333333333334,
+    "mean_gain_months": 0.3646640452354228
+   },
+   "swing_mean_gain": 0.3515420118918906,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "tropism_intercept",
+   "central_value": 0.0,
+   "low": -1.0,
+   "high": 1.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.6333333333333333,
+    "mean_gain_months": -0.016370825784483324
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.16666666666666666,
+    "mean_gain_months": 0.23795939560054544
+   },
+   "swing_mean_gain": 0.25433022138502875,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "coverage_n0",
+   "central_value": 3.0,
+   "low": 1.5,
+   "high": 6.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.18333333333333332,
+    "mean_gain_months": 0.20158371407146503
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.5,
+    "mean_gain_months": 0.011326271725170844
+   },
+   "swing_mean_gain": 0.1902574423462942,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "synergy",
+   "central_value": 1.0,
+   "low": 0.8,
+   "high": 1.3,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.43333333333333335,
+    "mean_gain_months": 0.04926139066713144
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.18333333333333332,
+    "mean_gain_months": 0.23039806556448067
+   },
+   "swing_mean_gain": 0.18113667489734922,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "f_iPSC-NSC",
+   "central_value": 0.5,
+   "low": 0.1,
+   "high": 1.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.5166666666666667,
+    "mean_gain_months": 0.02865587407130897
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.18333333333333332,
+    "mean_gain_months": 0.19490191290296366
+   },
+   "swing_mean_gain": 0.16624603883165467,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "tau_CAR",
+   "central_value": 0.05,
+   "low": 0.025,
+   "high": 0.15,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.23333333333333334,
+    "mean_gain_months": 0.14423344057254925
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.36666666666666664,
+    "mean_gain_months": 0.031713071932855615
+   },
+   "swing_mean_gain": 0.11252036863969364,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "tau_CRAd",
+   "central_value": 0.02,
+   "low": 0.01,
+   "high": 0.06,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.23333333333333334,
+    "mean_gain_months": 0.14021583815704194
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.4666666666666667,
+    "mean_gain_months": 0.04853997302873943
+   },
+   "swing_mean_gain": 0.09167586512830252,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "f_HB1_F3_line",
+   "central_value": 0.5,
+   "low": 0.1,
+   "high": 1.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.4166666666666667,
+    "mean_gain_months": 0.07257319488321201
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.18333333333333332,
+    "mean_gain_months": 0.16382815062244716
+   },
+   "swing_mean_gain": 0.09125495573923514,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "dose_exponent_q",
+   "central_value": 2.0,
+   "low": 1.0,
+   "high": 3.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.43333333333333335,
+    "mean_gain_months": 0.06616313011606485
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.2,
+    "mean_gain_months": 0.1494817910670437
+   },
+   "swing_mean_gain": 0.08331866095097885,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "tau_prodrug",
+   "central_value": 0.01,
+   "low": 0.005,
+   "high": 0.03,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.23333333333333334,
+    "mean_gain_months": 0.13554976859137924
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.4,
+    "mean_gain_months": 0.0673853281542927
+   },
+   "swing_mean_gain": 0.06816444043708654,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "site_penalty_eta",
+   "central_value": 0.05,
+   "low": 0.0,
+   "high": 0.15,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.23333333333333334,
+    "mean_gain_months": 0.13875185097179019
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.31666666666666665,
+    "mean_gain_months": 0.08823787628179706
+   },
+   "swing_mean_gain": 0.05051397468999312,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "mes_slope",
+   "central_value": 0.1,
+   "low": 0.0,
+   "high": 0.3,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.23333333333333334,
+    "mean_gain_months": 0.11657062359449935
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.31666666666666665,
+    "mean_gain_months": 0.14242391958592632
+   },
+   "swing_mean_gain": 0.025853295991426967,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "immune_slope",
+   "central_value": 0.1,
+   "low": 0.0,
+   "high": 0.3,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.25,
+    "mean_gain_months": 0.12282283974278879
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.25,
+    "mean_gain_months": 0.12635758914822517
+   },
+   "swing_mean_gain": 0.0035347494054363826,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "tropism_slope",
+   "central_value": 0.5,
+   "low": 0.0,
+   "high": 1.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.26666666666666666,
+    "mean_gain_months": 0.12024877585114553
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.35,
+    "mean_gain_months": 0.11856437424250824
+   },
+   "swing_mean_gain": 0.0016844016086372954,
+   "swing_success": 0.0
+  },
+  {
+   "parameter": "translation_factor",
+   "central_value": 0.5,
+   "low": 0.25,
+   "high": 1.0,
+   "at_low": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.25,
+    "mean_gain_months": 0.12194087102323439
+   },
+   "at_high": {
+    "success_fraction": 0.0,
+    "harm_fraction": 0.25,
+    "mean_gain_months": 0.12194087102323439
+   },
+   "swing_mean_gain": 0.0,
+   "swing_success": 0.0
+  }
+ ],
+ "hypercube": {
+  "n_draws": 1000,
+  "seed": 42,
+  "mean_gain_months": {
+   "median": 0.013775685125944263,
+   "p2.5": -0.5913003171112685,
+   "p97.5": 0.9936600225362304
+  },
+  "success_fraction": {
+   "median": 0.0,
+   "p2.5": 0.0,
+   "p97.5": 0.05
+  },
+  "harm_fraction": {
+   "median": 0.6166666666666667,
+   "p2.5": 0.0,
+   "p97.5": 1.0
+  },
+  "fraction_of_draws_meeting_t5": 0.0,
+  "spearman_rank_index_on_mean_gain": {
+   "ed50_cells": -0.7056962736962737,
+   "delay_cost": -0.40767957567957575,
+   "hill_h": -0.27328337728337726,
+   "tropism_intercept": 0.2388858948858949,
+   "f_MSC": 0.2236354636354637,
+   "synergy": 0.18506602106602107,
+   "coverage_n0": -0.16618055818055819,
+   "tau_CAR": -0.08291938691938693,
+   "site_penalty_eta": -0.07134537534537536,
+   "dose_exponent_q": 0.06564316164316164,
+   "tau_CRAd": -0.06284875484875485,
+   "f_iPSC-NSC": 0.04547507747507748,
+   "f_HB1_F3_line": 0.044468240468240466,
+   "translation_factor": -0.039187899187899194,
+   "tropism_slope": 0.028584964584964588,
+   "tau_prodrug": -0.022532290532290535,
+   "mes_slope": 0.009574737574737577,
+   "immune_slope": 0.005103125103125103
+  },
+  "top_two_movers": [
+   "ed50_cells",
+   "delay_cost"
+  ]
+ },
+ "breakeven": {
+  "reached": true,
+  "multiplier": 11.746870379220333,
+  "implied_hazard_ratio_crad": 0.5006785370947867,
+  "note": "the common multiplier on every Emax at which the T5 success fraction first reaches 0.50, holding each patient's chosen configuration fixed"
+ }
+}

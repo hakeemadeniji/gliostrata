@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — tier 1 of the sensitivity plan, run at full scale (2026-11-28)
+- `scripts/t4t5_sensitivity.py`, and `docs/dry_runs/t4t5_sensitivity_tier1.json`: 60
+  synthetic patients, 18 swept parameters, 1000 Latin-hypercube draws. **14.1 s**, against a
+  measured projection of 14.3 s and the plan's stated "~1 min".
+- Not a result: synthetic patients with randomly drawn configurations, so the gains are lower
+  than optimiser-chosen ones would be. It validates the machinery at the scale it will run.
+- `ed50_cells` dominates both the tornado (0.90-month swing) and the rank indices (ρ −0.71),
+  ahead of `delay_cost` and `hill_h`. Under the plan's rule those top two movers select two
+  of tier 2's twelve re-optimised settings — chosen by a rule fixed before any of it ran.
+- The break-even multiplier is **11.7×** on this synthetic set: the modelled effect would have
+  to be about twelve times larger for half the patients to clear three months.
+- I had assumed the earlier smoke test was slow without timing it. Measuring first showed
+  parameter copying was negligible (0.1 s of 14.3 s) and no optimisation was warranted.
+
 ### Fixed — the patient modifiers had no frozen reference (2026-11-28)
 - A schema read of CGGA (ledger entry 23, names and dtypes only, no values) was taken to
   write the T4/T5 loader against real column names rather than guesses. It showed the
