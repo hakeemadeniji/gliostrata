@@ -89,3 +89,29 @@ Does the treated arm actually use this row's payload type?
 Save the CSV in place and tell me. I'll validate it (units, ranges, quotes present where
 numbers are), fold it into `extraction_final.jsonl`, and recompute. Any row I can't validate
 comes back to you as a question rather than being quietly fixed.
+
+## Correction, 2026-11-27: two wrong DOIs, two wrong PDFs
+
+`pdf_filename` is now pre-filled for **17 of the 19** papers, each confirmed by matching the
+paper's recorded title against the text of the PDF — not by its DOI, for the reason below.
+Those 17 rows are ready to fill in.
+
+**Two rows have no usable PDF, and that is my error.** The `doi` field in `records.jsonl` was
+read from the last `<ArticleId IdType="doi">` in each PubMed record, which for any article
+carrying a reference list is a *cited* paper's DOI rather than the article's own. PMID
+37420122 contains 40 such identifiers, 39 of them references. 37 of the 108 search records
+were affected; two of them were in the download list, so two of the PDFs retrieved are the
+wrong papers:
+
+| Row | DOI I gave | Correct DOI | What was downloaded instead |
+|---|---|---|---|
+| 37420122 | `10.1158/1078-0432.CCR-09-0155` | `10.1007/s13402-023-00842-5` | Candolfi 2009, HMGB1 release in glioma killing (`4401.pdf`) |
+| 22996231 | `10.2174/156652309788488569` | `10.1007/s13311-012-0144-7` | Tas 2009, NF-κB gene therapy in inflammatory disease (`0002Q.pdf`) |
+
+Neither downloaded paper is among the 108 search records, so **neither may be used** —
+they are outside the evidence base item 11(i.8) closed over.
+
+The DOI field was never used by any screening or extraction decision: screening ran on titles
+and abstracts, and matching ran on titles. So the only consequence is the two wasted
+retrievals. All DOIs in `records.jsonl` and in this sheet are now corrected, and
+`scripts/t4t5_emax_search.py fix-dois` plus `doi_correction.json` record every change.

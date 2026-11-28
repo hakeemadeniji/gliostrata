@@ -80,10 +80,20 @@ def _efetch(pmids: list[str]) -> list[dict]:
             abstract = " ".join(
                 "".join(piece.itertext()).strip()
                 for piece in art.iter("AbstractText")).strip()
+            # The article's OWN doi, never one from its reference list. `art.iter` walks the
+            # whole PubmedArticle, including <ReferenceList>, where every cited paper carries
+            # its own <ArticleId IdType="doi">: PMID 37420122 has 40 of them, 39 of which are
+            # references. Taking the last match gave that record a 2009 DOI for a 2023 paper.
+            # <ELocationID EIdType="doi"> lives inside <Article> and cannot be a reference;
+            # the ArticleIdList fallback is scoped to <PubmedData>, outside ReferenceList.
             doi = ""
-            for ident in art.iter("ArticleId"):
-                if ident.get("IdType") == "doi":
-                    doi = (ident.text or "").strip()
+            eloc = art.find(".//Article/ELocationID[@EIdType='doi']")
+            if eloc is not None and eloc.text:
+                doi = eloc.text.strip()
+            else:
+                ident = art.find("./PubmedData/ArticleIdList/ArticleId[@IdType='doi']")
+                if ident is not None and ident.text:
+                    doi = ident.text.strip()
             records.append({
                 "pmid": _text(art, ".//PMID"),
                 "title": _text(art, ".//ArticleTitle"),
@@ -160,9 +170,50 @@ def search() -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("step", choices=("search",))
-    parser.parse_args(argv)
-    search()
+    parser.add_argument("step", choices=("search", "fix-dois"))
+    args = parser.parse_args(argv)
+    (search if args.step == "search" else fix_dois)()
+
+
+
+
+def fix_dois(ledger_unused=None) -> None:
+    """Re-fetch the `doi` field of the committed records and correct it in place.
+
+    The first run took each record's doi from the LAST `<ArticleId IdType="doi">` in its
+    PubmedArticle element, which for any record carrying a reference list is a cited paper's
+    doi rather than its own. Nothing else in the record is touched: the search, its queries,
+    its counts, its PMIDs and every screening decision stand, because none of them used the
+    doi field. Only the identifier printed for a human to look the paper up was wrong.
+    """
+    path = OUT / "records.jsonl"
+    records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()
+               if line.strip()]
+    pmids = sorted({r["pmid"] for r in records})
+    print(f"re-fetching dois for {len(pmids)} unique PMIDs")
+    corrected = {r["pmid"]: r["doi"] for r in _efetch(pmids)}
+
+    changed = []
+    for rec in records:
+        was, now = rec["doi"], corrected.get(rec["pmid"], rec["doi"])
+        if was != now:
+            changed.append({"pmid": rec["pmid"], "was": was, "now": now})
+            rec["doi"] = now
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        for rec in records:
+            handle.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    report = OUT / "doi_correction.json"
+    report.write_text(json.dumps({
+        "corrected_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "cause": ("the doi was read from the last <ArticleId IdType='doi'> in the "
+                  "PubmedArticle element, which for a record with a reference list is a "
+                  "cited paper's doi, not the article's own"),
+        "scope": ("the doi field only; queries, counts, PMIDs and every screening and "
+                  "extraction decision are unaffected, none having used the doi"),
+        "n_records": len(records), "n_changed": len(changed), "changes": changed,
+    }, indent=1) + "\n", encoding="utf-8", newline="\n")
+    print(f"corrected {len(changed)} of {len(records)} records; wrote {report}")
 
 
 if __name__ == "__main__":

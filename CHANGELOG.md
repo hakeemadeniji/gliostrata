@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — DOIs were read from reference lists (2026-11-27)
+- `scripts/t4t5_emax_search.py` took each record's DOI from the last `<ArticleId IdType="doi">`
+  in its PubmedArticle element. For any article with a reference list that is a *cited* paper's
+  DOI: PMID 37420122 carries 40 of them, 39 being references. Now read from
+  `<Article><ELocationID EIdType="doi">`, which cannot be a reference, with an ArticleIdList
+  fallback scoped outside `<ReferenceList>`.
+- **37 of 108 records had the wrong DOI.** Corrected in place by a new `fix-dois` step, with
+  every change recorded in `docs/t4t5_emax_search/doi_correction.json`.
+- No screening or extraction decision used the DOI field, so no decision changes. But two of
+  the affected records were in the manual download list, so **two of the 19 retrieved PDFs are
+  the wrong papers** (PMID 37420122 and 22996231). Neither downloaded paper is among the 108
+  search records, so neither may be used.
+- PDF-to-record matching was therefore redone against recorded **titles**, not DOIs: 17 of 19
+  confirmed, each to exactly one file, and the two that fail are exactly the two bad DOIs.
+
 ### Registered — the Emax evidence base is closed (2026-11-27, item 11(i.8))
 - The project lead retrieved the paywalled articles manually (19 PDF files). PMID 23969884
   and PMID 21390812 could not be obtained; they fail P3 for inaccessibility and are reported.
