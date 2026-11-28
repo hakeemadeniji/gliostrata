@@ -430,6 +430,13 @@ seal (the manifest is sealed after T2's two reads and before any T4/T5 computati
 
 ## 5. Sensitivity-analysis plan (exploratory, section 3.6)
 
+> **Split into two tiers on 2026-11-28, before any of it ran:**
+> `docs/t4t5_sensitivity_plan.md`. This section says *what* to vary but never whether a draw
+> re-scores the configuration already chosen or re-optimises to find a new one. Measured, the
+> difference is **225,000x** per patient-setting, so item 2's 1000 draws are either 0.7 minutes
+> or 103 days. Items 1, 2, 3 and part of 6 re-score; items 4, 5 and the rest of 6 re-optimise.
+
+
 All analyses are labelled exploratory in every table and caption, never change a verdict,
 and run only on the data of the registered T4/T5 read (section 3.6 scope: "They use the same
 data ... An analysis that would need a further read of CGGA is not run"). Before the read,
