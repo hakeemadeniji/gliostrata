@@ -1,0 +1,21 @@
+{
+ "registered_under": "docs/preregistration.md section 2.2 item 11(o)",
+ "run_at_utc": "2026-11-28T07:44:35Z",
+ "parameter_file": "configs/response_surface_v1.yaml",
+ "parameter_sha256": "bd18201156bf5dec8b01bda89a74776cae260eade9c997798da402b3d3786469",
+ "frozen": false,
+ "controls": [
+  {
+   "control": "null_payload",
+   "must_yield": "benefit exactly 0; gain equal to the toxicity term's alone, negative wherever that term is positive",
+   "n_patients": 20,
+   "n_configs": 120,
+   "max_abs_benefit": 0.0,
+   "n_gain_mismatches": 0,
+   "max_gain": -0.11110911244965394,
+   "min_gain": -0.7230232836846184,
+   "passed": true
+  }
+ ],
+ "all_passed": true
+}

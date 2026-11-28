@@ -153,39 +153,51 @@ response:
       range: "0.25 to 1.0"
 
     CRAd:
-      open: true
-      value: null
-      status: pending_registered_search
-      source: "item 11 (i.4), CRAd query; not yet run"
+      value: 0.05889151782819173                 # 0.5 * ln(1.125); hazard ratio 0.9428
+      ratio_used: 1.125
+      n_studies: 3
+      studies: ["21629227", "21718006", "23821758"]
+      control_arm_rule: narrowed
+      status: derived_by_rule
+      source: "item 11 (i.2) and (i.7); docs/t4t5_emax_search/emax_result.md"
       range: "hazard ratio 1.0 to 0.60"
       note: >-
-        The design document's anchor (PMID 42179969, mouse median-survival ratios 1.33 to
-        1.48) is in ovarian cancer and no longer satisfies P2. It qualifies only through the
-        (i.5) fallback, if the glioma search returns nothing. Human randomised data for
-        oncolytic adenovirus are null (hazard ratio 1.06, PMID 33119048) and are reported
-        alongside whatever the search yields.
+        The median over 3 qualifying studies, all vehicle-controlled. Its two newly extracted
+        studies give ratios of 1.125 and 1.102, so the modelled effect is close to none. That
+        agrees with the null human randomised data for oncolytic adenovirus (hazard ratio
+        1.06, PMID 33119048), which is reported alongside it.
 
     prodrug_enzyme:
-      open: true
-      value: null
-      status: pending_registered_search
-      source: "item 11 (i.4), prodrug query; not yet run"
+      value: 0.21589120821276891                 # 0.5 * ln(1.54); hazard ratio 0.8058
+      ratio_used: 1.54
+      n_studies: 10
+      studies: ["17409449", "22996231", "28148846", "29660022", "30257000", "31909530", "32093290", "32439343", "33463272", "35017150"]
+      control_arm_rule: narrowed
+      status: derived_by_rule
+      source: "item 11 (i.2) and (i.7); docs/t4t5_emax_search/emax_result.md"
       range: "hazard ratio 1.0 to 0.60"
       note: >-
-        The design document's anchor (PMID 23658244) reports a tumour-volume ratio of about
-        1/3, not a median survival, so it fails P3 whatever the search returns.
+        The best-evidenced of the three payloads: 10 qualifying studies, with untreated,
+        vehicle and reporter-vector controls. One study dropped by the (i.7) narrowing.
 
     CAR:
-      open: true
-      value: null
-      status: pending_registered_search
-      source: "item 11 (i.4), CAR query; not yet run"
+      value: 0.49500756068055496                 # 0.5 * ln(2.6912751677852347); hazard ratio 0.6096
+      ratio_used: 2.6912751677852347
+      n_studies: 1
+      studies: ["26640245"]
+      control_arm_rule: narrowed
+      status: derived_by_rule
+      source: "item 11 (i.2) and (i.7); docs/t4t5_emax_search/emax_result.md"
       range: "hazard ratio 1.0 to 0.70"
       note: >-
-        The "pessimistic end" shortcut is removed: CAR goes through the same rule as the
-        other two. The poor human evidence (no efficacy in newly diagnosed glioblastoma,
-        PMID 38216766; 8% objective response, PMID 40451950) is reported alongside the
-        preclinical ratio, not substituted for it.
+        KNOWN WEAKNESS, reported and not patched: this rests on a SINGLE study, and it is the
+        largest Emax of the three. Three of CAR's four eligible studies have `uncertain`
+        controls (irrelevant-specificity CAR products, or comparators the papers never
+        describe). The registered rule sets no minimum n, and adding one after seeing that
+        CAR's n is 1 and its Emax the largest is the change the registration exists to
+        prevent. The poor human CAR evidence in glioblastoma (no efficacy in newly diagnosed
+        disease, PMID 38216766; 8% objective response, PMID 40451950) is reported with every
+        CAR number.
 
   # Patient modifier m_p(i) = exp(w_p' u_i), u_i standardised on the frozen TCGA reference.
   patient_modifier:

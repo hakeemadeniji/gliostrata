@@ -6,6 +6,7 @@ on small synthetic inputs. Every test names the registered clause it holds the c
 
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 
@@ -78,13 +79,39 @@ def test_the_draft_file_refuses_a_registered_read(committed):
         committed.require_frozen("T5")
 
 
-def test_pending_emax_raises_rather_than_returning_zero(committed):
-    assert sorted(committed.pending()) == ["CAR", "CRAd", "prodrug_enzyme"]
-    for payload in ("CRAd", "prodrug_enzyme", "CAR"):
-        with pytest.raises(ParameterError, match=PENDING):
-            committed.emax(payload)
+def test_a_pending_emax_raises_rather_than_returning_zero(committed):
+    """Whatever the committed file holds, a pending entry must never read as zero."""
+    import copy
+
+    doc = copy.deepcopy(committed.doc)
+    doc["response"]["emax"]["CRAd"] = {"value": None, "status": PENDING, "open": True}
+    waiting = ParameterSet(doc=doc, path=committed.path, sha256="test-fixture")
+    assert waiting.pending() == ["CRAd"]
+    with pytest.raises(ParameterError, match=PENDING):
+        waiting.emax("CRAd")
     # The only zero available is the control's, and it has to be asked for by name.
-    assert committed.null_payload_emax() == 0.0
+    assert waiting.null_payload_emax() == 0.0
+
+
+def test_the_committed_emax_values_are_entered_and_exact(committed):
+    """Each value must equal factor * ln(ratio) exactly, not a rounded transcription."""
+    assert committed.pending() == [], "a payload is still waiting on the search"
+    factor = committed.translation_factor
+    for payload in ("CRAd", "prodrug_enzyme", "CAR"):
+        entry = committed.doc["response"]["emax"][payload]
+        assert entry["status"] == "derived_by_rule"
+        assert entry["n_studies"] >= 1
+        assert committed.emax(payload) == pytest.approx(
+            factor * math.log(entry["ratio_used"]), abs=1e-15)
+
+
+def test_the_committed_values_match_the_result_file(committed):
+    """The parameter file must carry what the computation produced, not a retyping of it."""
+    result = json.loads(
+        (ROOT / "docs/t4t5_emax_search/emax_result.json").read_text(encoding="utf-8"))
+    for payload, info in result["payloads"].items():
+        assert committed.emax(payload) == info["emax"], (
+            f"{payload}: the parameter file and emax_result.json disagree")
 
 
 def test_emax_refuses_combo_because_combo_is_assembled_per_carrier(committed):
