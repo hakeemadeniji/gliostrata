@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — the Emax evidence base, computed but PROVISIONAL (2026-11-27)
+- Full-text stage complete for the 18 open-access articles. Dual independent extraction with
+  **zero** disagreements on any median across all 18 rows, and one control-arm-kind
+  disagreement between two inert kinds, which does not change eligibility.
+- `scripts/t4t5_emax_finalise.py` adjudicates the two passes by rules fixed in code before
+  they saw a disagreement: a number survives only where both extractors read the same number;
+  the control arm resolves conservatively; P2 and P4 must be affirmed twice; a record without
+  full text keeps its abstract reading and an `uncertain` control.
+- `scripts/t4t5_emax_ratios.py` computes `ratio_p`, Emax and the implied hazard ratio for the
+  primary and the literal set side by side, with both registered fallbacks. 24 tests.
+- **Provisional result**, not registrable: CRAd `narrowed` HR 0.777 (n=1), prodrug_enzyme
+  `narrowed` HR 0.840 (n=4), CAR `literal_fallback` HR 0.562 (primary set empty). **22 of 40
+  rows still have no full text**, so nothing may be entered in
+  `configs/response_surface_v1.yaml` yet.
+- **Item 11(i.6)'s advance expectation — that the rule places T5 below its bar — no longer
+  holds for CAR** on the evidence so far (0.562 against a bar near 0.59). Recorded as it
+  stands, with the three reasons it is premature to call it refuted reported alongside it.
+
+### Withdrawn — the direction claim in item 11(i.7) (2026-11-27)
+- Item 11(i.7) claimed the deviation's effect had a known direction: that an active comparator
+  yields a smaller ratio, so narrowing to inert controls would lower Emax and widen T5's
+  failure. **Withdrawn as unsound.** The reasoning is a non sequitur — removing the smaller
+  ratios raises a median — and the premise is empty: of 40 extracted rows **none** was
+  classified `active_therapeutic`, so the narrowing excludes only `uncertain` controls, whose
+  survival could be anything. The direction is indeterminate a priori.
+- The narrowing rule, its structural inclusion test, its fallback and the requirement to
+  report both sets are unchanged. Only the advance claim is removed. It had been offered as
+  part of why the deviation was acceptable, so withdrawing it weakens that defence; the
+  deviation now rests on its disclosure and its structural test alone.
+
 ### Deviation — P3's control arm narrowed (2026-11-27, disclosed; after the OSF submission)
 - Pre-registration item 11(i.7) records a **disclosed deviation** from (i.3), not an amendment
   to it: (i.6) closed (i.1) to (i.6) when the search ran, and they are unchanged.

@@ -92,12 +92,15 @@ def _summarise(ratios: list[float], factor: float) -> dict:
         return {"n": 0, "ratio": None, "emax": None, "hazard_ratio": None}
     ratio = statistics.median(ratios)
     emax = factor * math.log(ratio)
+    # Full precision, not rounded: this value goes into the registered parameter file, and a
+    # reader recomputing factor * ln(ratio) must get exactly what is recorded. Rounding is a
+    # presentation concern and happens in the markdown only.
     return {
         "n": len(ratios),
-        "ratios": sorted(round(r, 4) for r in ratios),
-        "ratio": round(ratio, 6),
-        "emax": round(emax, 6),
-        "hazard_ratio": round(math.exp(-emax), 6),
+        "ratios": sorted(ratios),
+        "ratio": ratio,
+        "emax": emax,
+        "hazard_ratio": math.exp(-emax),
     }
 
 
@@ -110,6 +113,7 @@ def compute() -> dict:
         "translation_factor": factor,
         "translation_factor_status": "assumed, declared as assumed wherever reported",
         "n_rows": len(rows),
+        "n_abstract_only": sum(1 for r in rows if r.get("source") == "abstract_only"),
         "payloads": {},
         "t5_break_even_hazard_ratio_for_context": T5_BREAK_EVEN_HR,
     }
@@ -159,11 +163,34 @@ def compute() -> dict:
     return result
 
 
+def _fmt(value: float | None, places: int = 4) -> str:
+    """Round for display only. The JSON keeps full precision."""
+    return "—" if value is None else f"{value:.{places}f}"
+
+
 def _markdown(result: dict) -> str:
+    blocked = result.get("n_abstract_only", 0)
     lines = [
         "# Emax, computed under item 11(i)", "",
         f"Computed {result['computed_at_utc']} from "
         "`docs/t4t5_emax_search/screening/extraction_final.jsonl`.", "",
+    ]
+    if blocked:
+        lines += [
+            "> ## PROVISIONAL — not the registered value",
+            ">",
+            f"> **{blocked} of {result['n_rows']} extracted rows have no full text yet**, so "
+            "their control arms are `uncertain` and they cannot enter the primary set. Item "
+            "11(i.2) defines `ratio_p` as the median over *every* qualifying study; this is "
+            "the median over those qualifying so far.",
+            ">",
+            "> Nothing here may be entered in `configs/response_surface_v1.yaml`. That is the "
+            "freeze step of item 11(e) and (m), and it happens once, when the evidence base "
+            "is closed — either because the outstanding full texts have been obtained or "
+            "because they have been recorded as unobtainable. See "
+            "`manual_download_needed.md`.", "",
+        ]
+    lines += [
         "`Emax_p = f * ln(ratio_p)`, with `f = "
         f"{result['translation_factor']}` — **assumed**, and declared as assumed wherever a "
         "T4 or T5 number is reported. `ratio_p` is the **median** over qualifying studies, "
@@ -179,9 +206,8 @@ def _markdown(result: dict) -> str:
         hr = info["hazard_ratio"]
         lines.append(
             f"| {payload} | {info['control_arm_rule']} | {info['primary_narrowed']['n']} | "
-            f"{info['ratio'] if info['ratio'] is not None else '—'} | "
-            f"{info['emax'] if info['emax'] is not None else '—'} | "
-            f"{hr if hr is not None else '—'} | {info['n_dropped_by_narrowing']} |")
+            f"{_fmt(info['ratio'])} | {_fmt(info['emax'])} | {_fmt(hr)} | "
+            f"{info['n_dropped_by_narrowing']} |")
     lines += [
         "", "## Both sets side by side", "",
         "| Payload | Primary n | Primary HR | Exploratory n | Exploratory HR |",
@@ -189,8 +215,8 @@ def _markdown(result: dict) -> str:
     ]
     for payload, info in result["payloads"].items():
         p, e = info["primary_narrowed"], info["exploratory_literal"]
-        lines.append(f"| {payload} | {p['n']} | {p['hazard_ratio'] or '—'} | "
-                     f"{e['n']} | {e['hazard_ratio'] or '—'} |")
+        lines.append(f"| {payload} | {p['n']} | {_fmt(p['hazard_ratio'])} | "
+                     f"{e['n']} | {_fmt(e['hazard_ratio'])} |")
     lines += [
         "", "## How each payload's set was reduced", "",
     ]
@@ -204,11 +230,37 @@ def _markdown(result: dict) -> str:
             lines.append(f"  - control arms: {info['control_arm_kinds']}")
         lines.append(f"  - studies used: {', '.join(info['studies']) or 'none'}")
         lines.append("")
+    bar = result["t5_break_even_hazard_ratio_for_context"]
     lines += [
+        "## Against the advance expectation of item 11(i.6)", "",
         f"For context only, the 3-month gain bar of item 11(c) sits near a hazard ratio of "
-        f"{result['t5_break_even_hazard_ratio_for_context']}. Nothing above is compared "
-        "against it to decide anything: T5's verdict comes from the registry in section 6, "
-        "on the sealed cohort, after the freeze.", "",
+        f"{bar}. Item 11(i.6) states in advance that the rule is expected to place T5 below "
+        "that bar.", "",
+    ]
+    at_or_past = [p for p, info in result["payloads"].items()
+                  if info["hazard_ratio"] is not None and info["hazard_ratio"] <= bar]
+    if at_or_past:
+        lines += [
+            f"**On the evidence so far that expectation no longer holds for: "
+            f"{', '.join(at_or_past)}.** This is recorded as it stands, not smoothed over: a "
+            "pre-registered expectation that the data contradicts is a result, and the point "
+            "of stating it in advance was so that this could be seen.", "",
+            "Three reasons it is premature to call (i.6) refuted, each of which must be "
+            "reported alongside it:", "",
+            "1. The evidence base is open — see the provisional notice above.",
+            "2. A payload on `literal_fallback` has an **empty** primary set, so its figure "
+            "rests on studies whose control arms could not be classified.",
+            f"3. An implied hazard ratio is not a verdict. T5 turns on a {bar} hazard ratio "
+            "being reached *at the configuration chosen for a patient*, after the toxicity "
+            "term of item 11(k) is subtracted — and CAR carries the largest toxicity "
+            "coefficient of the three payloads. Nothing here is compared against the bar to "
+            "decide anything.", "",
+        ]
+    else:
+        lines += ["On the evidence so far that expectation holds for every payload.", ""]
+    lines += [
+        "T5's verdict comes from the registry in section 6, on the sealed cohort, after the "
+        "freeze. It is not computable yet and nothing above anticipates it.", "",
     ]
     return "\n".join(lines)
 
@@ -223,7 +275,8 @@ def main(argv=None) -> None:
     for payload, info in result["payloads"].items():
         print(f"{payload:>15}  rule={info['control_arm_rule']:<17} "
               f"n={info['primary_narrowed']['n']}/{info['exploratory_literal']['n']}  "
-              f"ratio={info['ratio']}  Emax={info['emax']}  HR={info['hazard_ratio']}")
+              f"ratio={_fmt(info['ratio'])}  Emax={_fmt(info['emax'])}  "
+              f"HR={_fmt(info['hazard_ratio'])}")
     print(f"\nWrote {OUT_JSON} and {OUT_MD}")
     print("Nothing was written to configs/response_surface_v1.yaml: entering a value there "
           "is the freeze step of item 11(e) and (m).")

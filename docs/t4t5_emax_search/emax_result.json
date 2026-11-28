@@ -1,0 +1,139 @@
+{
+ "registered_under": "docs/preregistration.md 2.2 item 11 (i.1) to (i.7)",
+ "computed_at_utc": "2026-11-28T04:54:28Z",
+ "translation_factor": 0.5,
+ "translation_factor_status": "assumed, declared as assumed wherever reported",
+ "n_rows": 40,
+ "n_abstract_only": 22,
+ "payloads": {
+  "CRAd": {
+   "n_carried": 7,
+   "n_eligible_p1_to_p5": 2,
+   "n_excluded": 5,
+   "exclusions": [
+    "P2: not confirmed",
+    "P3: no treated-and-control median survival obtainable"
+   ],
+   "control_arm_kinds": {
+    "uncertain": 1,
+    "vehicle": 1
+   },
+   "primary_narrowed": {
+    "n": 1,
+    "ratios": [
+     1.6545893719806763
+    ],
+    "ratio": 1.6545893719806763,
+    "emax": 0.25177643221845547,
+    "hazard_ratio": 0.7774185243765391
+   },
+   "exploratory_literal": {
+    "n": 2,
+    "ratios": [
+     1.6545893719806763,
+     1.7857142857142858
+    ],
+    "ratio": 1.720151828847481,
+    "emax": 0.27120627975765554,
+    "hazard_ratio": 0.7624592002830636
+   },
+   "n_dropped_by_narrowing": 1,
+   "control_arm_rule": "narrowed",
+   "emax": 0.25177643221845547,
+   "ratio": 1.6545893719806763,
+   "hazard_ratio": 0.7774185243765391,
+   "studies": [
+    "21718006"
+   ]
+  },
+  "prodrug_enzyme": {
+   "n_carried": 23,
+   "n_eligible_p1_to_p5": 4,
+   "n_excluded": 19,
+   "exclusions": [
+    "P2: not an intracranial rodent glioma model",
+    "P2: not confirmed",
+    "P3: no treated-and-control median survival obtainable",
+    "treated arm is a combination, not the payload alone"
+   ],
+   "control_arm_kinds": {
+    "mock_or_reporter_vector": 3,
+    "untreated": 1
+   },
+   "primary_narrowed": {
+    "n": 4,
+    "ratios": [
+     1.1578947368421053,
+     1.2523364485981308,
+     1.58,
+     1.8108108108108107
+    ],
+    "ratio": 1.4161682242990654,
+    "emax": 0.17397739534308235,
+    "hazard_ratio": 0.8403158924961971
+   },
+   "exploratory_literal": {
+    "n": 4,
+    "ratios": [
+     1.1578947368421053,
+     1.2523364485981308,
+     1.58,
+     1.8108108108108107
+    ],
+    "ratio": 1.4161682242990654,
+    "emax": 0.17397739534308235,
+    "hazard_ratio": 0.8403158924961971
+   },
+   "n_dropped_by_narrowing": 0,
+   "control_arm_rule": "narrowed",
+   "emax": 0.17397739534308235,
+   "ratio": 1.4161682242990654,
+   "hazard_ratio": 0.8403158924961971,
+   "studies": [
+    "28148846",
+    "32093290",
+    "33463272",
+    "35017150"
+   ]
+  },
+  "CAR": {
+   "n_carried": 10,
+   "n_eligible_p1_to_p5": 2,
+   "n_excluded": 8,
+   "exclusions": [
+    "P2: not an intracranial rodent glioma model",
+    "P2: not confirmed",
+    "P3: no treated-and-control median survival obtainable"
+   ],
+   "control_arm_kinds": {
+    "uncertain": 2
+   },
+   "primary_narrowed": {
+    "n": 0,
+    "ratio": null,
+    "emax": null,
+    "hazard_ratio": null
+   },
+   "exploratory_literal": {
+    "n": 2,
+    "ratios": [
+     2.7465753424657535,
+     3.588235294117647
+    ],
+    "ratio": 3.1674053182917,
+    "emax": 0.576456370572889,
+    "hazard_ratio": 0.5618859584580144
+   },
+   "n_dropped_by_narrowing": 2,
+   "control_arm_rule": "literal_fallback",
+   "emax": 0.576456370572889,
+   "ratio": 3.1674053182917,
+   "hazard_ratio": 0.5618859584580144,
+   "studies": [
+    "26640245",
+    "42573529"
+   ]
+  }
+ },
+ "t5_break_even_hazard_ratio_for_context": 0.59
+}

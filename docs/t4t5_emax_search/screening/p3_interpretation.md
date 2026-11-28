@@ -18,8 +18,14 @@
 >
 > The reasoning below is kept **unedited**, because it is the record of what was decided
 > first and why. Where it says the literal reading is primary, read item 11(i.7) instead.
-> The reversal was taken openly, with its effect on the verdict unknown but its direction
-> known and against the project's own hypothesis. See section 8.
+>
+> **One claim made when the reversal was registered has since been withdrawn.** It was said
+> that the narrowing's *direction* was known in advance and ran against the project's own
+> hypothesis. It does not: no extracted row turned out to be `active_therapeutic`, so the
+> narrowing excludes only `uncertain` controls, whose survival could be anything, and the
+> direction is indeterminate a priori. See section 8 and `../emax_result.md` for what it did
+> in the event. The deviation rests on its disclosure and on its structural inclusion test,
+> not on a predicted direction.
 
 **Status: an interpretation of a closed criterion, not a revision of it.** Pre-registration
 item 11(i.6) says that nothing in (i.1) to (i.5) may be revised once the search has been run.

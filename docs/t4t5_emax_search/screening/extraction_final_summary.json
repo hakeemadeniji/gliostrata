@@ -1,0 +1,48 @@
+{
+ "registered_under": "docs/preregistration.md 2.2 item 11 (i.4) and (i.7)",
+ "adjudicated_at_utc": "2026-11-28T04:51:41Z",
+ "adjudication_rules": [
+  "a number survives only where both extractors read the same number",
+  "the control arm's kind resolves to uncertain or active_therapeutic if either extractor says so; two different inert kinds do not change eligibility",
+  "P2 and P4 are 'yes' only where both extractors affirm them",
+  "a record without full text keeps its abstract reading and an uncertain control"
+ ],
+ "n_rows": 40,
+ "n_from_fulltext": 18,
+ "n_abstract_only": 22,
+ "n_fulltext_median_disagreements": 0,
+ "n_fulltext_control_kind_disagreements": 1,
+ "control_arm_kinds": {
+  "vehicle": 5,
+  "uncertain": 27,
+  "mock_or_reporter_vector": 4,
+  "untreated": 4
+ },
+ "control_arm_kinds_fulltext_only": {
+  "vehicle": 5,
+  "uncertain": 5,
+  "mock_or_reporter_vector": 4,
+  "untreated": 4
+ },
+ "disagreements": [
+  {
+   "pmid": "38023712",
+   "payload": "CAR",
+   "a": {
+    "treated_median": 19,
+    "control_median": null,
+    "control_arm_kind": "untreated"
+   },
+   "b": {
+    "treated_median": 19,
+    "control_median": null,
+    "control_arm_kind": "vehicle"
+   },
+   "resolved_to": {
+    "treated_median": 19,
+    "control_median": null,
+    "control_arm_kind": "untreated"
+   }
+  }
+ ]
+}
