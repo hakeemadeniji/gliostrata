@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — publication figures on one validated visual system (2026-11-28)
+- `src/gliostrata/reporting/figures.py` holds the style; `scripts/t4t5_figures.py` draws
+  four figures from committed result files, never from numbers typed into the script.
+  Each ships a PDF (vector), a PNG at 300 dpi, and a CSV of its own numbers.
+- The palette is validated, not chosen: colour-vision separation PASS (worst pair ΔE 12.6
+  deutan, target ≥ 8), normal-vision floor PASS (ΔE 23.0, floor ≥ 15), contrast WARN (orange
+  2.88, aqua 2.54, below 3:1). The WARN obligates direct labels **and** a table view; both
+  ship, plus a distinct marker per series so identity never rests on colour alone.
+- Four layout defects found by rendering and looking, which no palette check catches: median
+  labels at the bottom of their block; CAR's single-study median rule rendering as an
+  arrowhead; an ED50 label colliding with a curve label; both survival labels stacked where
+  the curves are closest.
+- The rehearsal-gains figure was rebuilt after review — two means is not a chart, and it had
+  used the payload palette for rows that are not payloads. It now plots per-patient gains as
+  a distribution in a single hue, which required the controls to persist per-patient values.
+- That distribution shows what the mean concealed: all 60 rehearsal patients fall between
+  0.27 and 1.37 months, nowhere near T5's 3-month bar and nowhere near harm.
+
 ### Disclosed — CAR's primary set rests on one study (2026-11-28, no value changed)
 - The project lead asked for a second CAR study in the evidence base. **There is none to
   add.** P2 excludes CAR's only other inert-controlled study (25962108, subcutaneous), P3
