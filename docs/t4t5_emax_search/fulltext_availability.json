@@ -1,0 +1,269 @@
+{
+ "registered_under": "docs/preregistration.md section 2.2 item 11 (i.4) and (i.7)",
+ "resolved_at_utc": "2026-11-28T04:36:31Z",
+ "n_unique_pmids": 39,
+ "n_with_pmcid": 29,
+ "n_without_pmcid": 10,
+ "pmcid_by_pmid": {
+  "36077380": "PMC9456411",
+  "31432139": "PMC6713431",
+  "23926209": "PMC3754466",
+  "23821758": "PMC3699440",
+  "21718006": "PMC3185211",
+  "21629227": "PMC3182345",
+  "19920199": "PMC2789204",
+  "39286083": "PMC11403485",
+  "37420122": "PMC12974676",
+  "35017150": "PMC8753448",
+  "33463272": "PMC8035708",
+  "33400737": "PMC7747859",
+  "32439343": null,
+  "32332014": "PMC7415674",
+  "32109370": "PMC7132621",
+  "32093290": "PMC7073086",
+  "31909530": null,
+  "30257000": "PMC6410949",
+  "29660022": "PMC6140787",
+  "28148846": "PMC6719790",
+  "28129117": "PMC5363306",
+  "27166379": "PMC5035524",
+  "24501391": "PMC3959570",
+  "23969884": null,
+  "22996231": "PMC3480576",
+  "21505426": "PMC3188756",
+  "17409449": null,
+  "15072465": null,
+  "21390812": null,
+  "9195489": null,
+  "42573529": "PMC13640953",
+  "41495049": "PMC12877024",
+  "39095594": null,
+  "38626338": null,
+  "38023712": "PMC10658508",
+  "34031054": "PMC9012394",
+  "31485480": "PMC6713854",
+  "26640245": null,
+  "25962108": "PMC4428685"
+ },
+ "without_pmcid": [
+  "15072465",
+  "17409449",
+  "21390812",
+  "23969884",
+  "26640245",
+  "31909530",
+  "32439343",
+  "38626338",
+  "39095594",
+  "9195489"
+ ],
+ "fetched": {
+  "19920199": {
+   "pmcid": "PMC2789204",
+   "http": 200,
+   "body_chars": 25531,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/19920199_PMC2789204.xml"
+  },
+  "21505426": {
+   "pmcid": "PMC3188756",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "21629227": {
+   "pmcid": "PMC3182345",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "21718006": {
+   "pmcid": "PMC3185211",
+   "http": 200,
+   "body_chars": 52980,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/21718006_PMC3185211.xml"
+  },
+  "22996231": {
+   "pmcid": "PMC3480576",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "23821758": {
+   "pmcid": "PMC3699440",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "23926209": {
+   "pmcid": "PMC3754466",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "24501391": {
+   "pmcid": "PMC3959570",
+   "http": 200,
+   "body_chars": 29224,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/24501391_PMC3959570.xml"
+  },
+  "25962108": {
+   "pmcid": "PMC4428685",
+   "http": 200,
+   "body_chars": 44910,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/25962108_PMC4428685.xml"
+  },
+  "27166379": {
+   "pmcid": "PMC5035524",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "28129117": {
+   "pmcid": "PMC5363306",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "28148846": {
+   "pmcid": "PMC6719790",
+   "http": 200,
+   "body_chars": 44483,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/28148846_PMC6719790.xml"
+  },
+  "29660022": {
+   "pmcid": "PMC6140787",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "30257000": {
+   "pmcid": "PMC6410949",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "31432139": {
+   "pmcid": "PMC6713431",
+   "http": 200,
+   "body_chars": 30958,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/31432139_PMC6713431.xml"
+  },
+  "31485480": {
+   "pmcid": "PMC6713854",
+   "http": 200,
+   "body_chars": 27509,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/31485480_PMC6713854.xml"
+  },
+  "32093290": {
+   "pmcid": "PMC7073086",
+   "http": 200,
+   "body_chars": 21219,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/32093290_PMC7073086.xml"
+  },
+  "32109370": {
+   "pmcid": "PMC7132621",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "32332014": {
+   "pmcid": "PMC7415674",
+   "http": 200,
+   "body_chars": 32271,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/32332014_PMC7415674.xml"
+  },
+  "33400737": {
+   "pmcid": "PMC7747859",
+   "http": 200,
+   "body_chars": 14353,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/33400737_PMC7747859.xml"
+  },
+  "33463272": {
+   "pmcid": "PMC8035708",
+   "http": 200,
+   "body_chars": 41499,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/33463272_PMC8035708.xml"
+  },
+  "34031054": {
+   "pmcid": "PMC9012394",
+   "http": 200,
+   "body_chars": 62803,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/34031054_PMC9012394.xml"
+  },
+  "35017150": {
+   "pmcid": "PMC8753448",
+   "http": 200,
+   "body_chars": 39993,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/35017150_PMC8753448.xml"
+  },
+  "36077380": {
+   "pmcid": "PMC9456411",
+   "http": 200,
+   "body_chars": 38074,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/36077380_PMC9456411.xml"
+  },
+  "37420122": {
+   "pmcid": "PMC12974676",
+   "http": 200,
+   "body_chars": 0,
+   "open_access": false,
+   "file": null
+  },
+  "38023712": {
+   "pmcid": "PMC10658508",
+   "http": 200,
+   "body_chars": 33273,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/38023712_PMC10658508.xml"
+  },
+  "39286083": {
+   "pmcid": "PMC11403485",
+   "http": 200,
+   "body_chars": 42143,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/39286083_PMC11403485.xml"
+  },
+  "41495049": {
+   "pmcid": "PMC12877024",
+   "http": 200,
+   "body_chars": 61634,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/41495049_PMC12877024.xml"
+  },
+  "42573529": {
+   "pmcid": "PMC13640953",
+   "http": 200,
+   "body_chars": 42214,
+   "open_access": true,
+   "file": "data/external/t4t5_emax_fulltext/42573529_PMC13640953.xml"
+  }
+ },
+ "note": "A PMCID means the article is indexed in PMC, not that its full text is open-access. `fetch` records which ones actually returned a body.",
+ "fetched_at_utc": "2026-11-28T04:37:40Z",
+ "n_open_access": 18,
+ "n_metadata_only": 11
+}
