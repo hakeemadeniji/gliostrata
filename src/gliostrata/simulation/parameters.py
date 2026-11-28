@@ -181,7 +181,15 @@ class ParameterSet:
 
     @property
     def modifier_names(self) -> tuple[str, ...]:
-        return tuple(self.doc["response"]["patient_modifier"])
+        """The actual modifiers, not every key under `patient_modifier`.
+
+        A modifier is a mapping carrying a `value`. Annotation keys sitting alongside them
+        (a note, a pointer to the reference they standardise against) are not modifiers, and
+        returning them would have made any note look like a term in the surface.
+        """
+        table = self.doc["response"]["patient_modifier"]
+        return tuple(name for name, entry in table.items()
+                     if isinstance(entry, dict) and "value" in entry)
 
     # -- toxicity -------------------------------------------------------------------------
 

@@ -375,3 +375,32 @@ def test_the_parameter_file_records_the_references_checksum(committed):
 def test_a_missing_reference_is_an_error_not_a_cohort_statistic(tmp_path):
     with pytest.raises(ParameterError, match="never be computed from the cohort"):
         delivery.load_tropism_reference(tmp_path / "absent.json")
+
+
+def test_the_reference_also_covers_the_patient_modifiers():
+    """Item 11: the modifier slopes are per SD, so u needs a FROZEN reference too.
+
+    Only the tropism half existed until 2026-11-28. Without this half, the SD would have
+    come from the cohort being scored, which is the leakage the reference exists to prevent.
+    """
+    doc = json.loads(
+        (ROOT / "configs" / "response_surface_v1_tropism_reference.json").read_text(
+            encoding="utf-8"))
+    modifiers = doc.get("modifier_reference") or {}
+    assert set(modifiers) == {"immune_tme_slope_per_sd", "mes_like_slope_per_sd"}
+    for slope, entry in modifiers.items():
+        assert entry["sd"] > 0, f"{slope} has a non-positive SD"
+        assert entry["n"] > 0
+    assert "tcga" in doc["modifier_source"].lower()
+    assert "cgga" not in doc["modifier_source"].lower()
+
+
+def test_every_modifier_the_surface_uses_has_a_frozen_reference(committed):
+    """A modifier with a slope but no reference would be silently standardised on the cohort."""
+    doc = json.loads(
+        (ROOT / "configs" / "response_surface_v1_tropism_reference.json").read_text(
+            encoding="utf-8"))
+    referenced = set(doc.get("modifier_reference") or {})
+    for name in committed.modifier_names:
+        assert name in referenced, (
+            f"{name} is used by the response surface but has no frozen reference")

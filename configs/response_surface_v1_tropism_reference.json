@@ -1,7 +1,7 @@
 {
- "what": "The frozen TCGA reference the T4/T5 tropism score is standardised against (pre-registration item 11(h)). Never rebuilt from a CGGA statistic.",
+ "what": "The frozen TCGA reference the T4/T5 tropism score AND patient modifiers are standardised against (pre-registration item 11(h)). Never rebuilt from a CGGA statistic.",
  "registered_under": "docs/preregistration.md section 2.2 item 11(h) and 11(n)",
- "built_at_utc": "2026-11-28T06:48:58Z",
+ "built_at_utc": "2026-11-28T20:42:56Z",
  "cohort": "TCGA-GBM",
  "n_samples": 284,
  "scale": "log2(FPKM + 1)",
@@ -61,6 +61,21 @@
    "max": 7.909057818531947
   }
  },
+ "modifier_reference": {
+  "immune_tme_slope_per_sd": {
+   "column": "tme_immune",
+   "mean": 0.33481756610035374,
+   "sd": 0.17613560062331157,
+   "n": 155
+  },
+  "mes_like_slope_per_sd": {
+   "column": "state_mes",
+   "mean": 0.26891974977230404,
+   "sd": 0.19567485225648487,
+   "n": 155
+  }
+ },
+ "modifier_source": "data/processed/tcga_gbm/feature_store.parquet",
  "scale_rationale": "FPKM, not CPM, because the cohort this reference standardises (CGGA) publishes RSEM FPKM. On these same 284 samples a CPM reference offsets the score by -1.36 SD for the NSC panel and -1.47 SD for TGFB1, cutting the engrafted-dose factor by about a third for every patient. Item 11(h) names no normalisation, so matching the scoring cohort is an implementation choice inside the registered design.",
  "caveat_remaining": "TCGA's FPKM here is GDC's STAR-derived fpkm_unstranded; CGGA's is RSEM FPKM. Both are length-normalised, so the first-order gene-length offset is removed, but a second-order pipeline difference remains and is reported, not corrected."
 }

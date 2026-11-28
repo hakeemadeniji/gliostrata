@@ -42,6 +42,13 @@ ANNOTATION = Path("data/raw/tcga_gbm/expression/gene_annotation.parquet")
 UNIVERSE = Path("configs/t2_comparator/gene_universe.txt")
 OUT = Path("configs/response_surface_v1_tropism_reference.json")
 PARAMS = Path("configs/response_surface_v1.yaml")
+FEATURE_STORE = Path("data/processed/tcga_gbm/feature_store.parquet")
+# The patient modifiers of item 11 enter as exp(w' u) with w "per SD", so u must be
+# standardised -- and against a frozen development reference, for the same reason the
+# tropism genes are: an SD taken from the cohort being scored would let that cohort into
+# its own transform. Only the tropism half of this reference existed until 2026-11-28.
+MODIFIER_COLUMNS = {"immune_tme_slope_per_sd": "tme_immune",
+                    "mes_like_slope_per_sd": "state_mes"}
 
 
 def _sha256(path: Path) -> str:
@@ -97,9 +104,27 @@ def build(force: bool = False) -> None:
         print(f"  {gene:<8} mean {rows[gene]['mean']:7.4f}  sd {sd:6.4f}  "
               f"range {rows[gene]['min']:.3f} to {rows[gene]['max']:.3f}")
 
+    modifiers = {}
+    if FEATURE_STORE.exists():
+        store = pd.read_parquet(FEATURE_STORE)
+        for slope, column in MODIFIER_COLUMNS.items():
+            if column not in store.columns:
+                raise SystemExit(f"{FEATURE_STORE} has no {column!r} for modifier {slope!r}")
+            values = store[column].astype(float).dropna()
+            sd = float(values.std(ddof=1))
+            if not sd > 0:
+                raise SystemExit(f"{column} has a non-positive standard deviation on TCGA")
+            modifiers[slope] = {"column": column, "mean": float(values.mean()), "sd": sd,
+                                "n": int(values.size)}
+            print(f"  {column:<14} mean {modifiers[slope]['mean']:7.4f}  sd {sd:6.4f}  "
+                  f"n {values.size}")
+    else:
+        raise SystemExit(f"{FEATURE_STORE} not found; the modifier reference cannot be built")
+
     document = {
-        "what": ("The frozen TCGA reference the T4/T5 tropism score is standardised against "
-                 "(pre-registration item 11(h)). Never rebuilt from a CGGA statistic."),
+        "what": ("The frozen TCGA reference the T4/T5 tropism score AND patient modifiers are "
+                 "standardised against (pre-registration item 11(h)). Never rebuilt from a "
+                 "CGGA statistic."),
         "registered_under": "docs/preregistration.md section 2.2 item 11(h) and 11(n)",
         "built_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "cohort": "TCGA-GBM",
@@ -114,6 +139,8 @@ def build(force: bool = False) -> None:
         "symbol_collapse": "counts of every Ensembl id sharing a GENCODE gene_name are summed",
         "genes_by_carrier": genes_by_carrier,
         "reference": rows,
+        "modifier_reference": modifiers,
+        "modifier_source": FEATURE_STORE.as_posix(),
         "scale_rationale": (
             "FPKM, not CPM, because the cohort this reference standardises (CGGA) publishes "
             "RSEM FPKM. On these same 284 samples a CPM reference offsets the score by -1.36 "

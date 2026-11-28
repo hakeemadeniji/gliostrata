@@ -1,0 +1,59 @@
+{
+ "what": "CGGA column names for the T4/T5 loader. Names, dtypes and counts only.",
+ "registered_under": "docs/preregistration.md 2.2 item 11",
+ "read_at_utc": "2026-11-28T20:40:32Z",
+ "ledger_seq": 23,
+ "access_kind": "schema (ungated; only `values` needs the OSF DOI)",
+ "clinical": {
+  "path": "data/raw/cgga/clinical_cohort.parquet",
+  "n_columns": 19,
+  "columns": {
+   "patient_id": "string",
+   "age": "float64",
+   "sex": "string",
+   "kps": "object",
+   "extent_of_resection": "object",
+   "mgmt_methylated": "Int64",
+   "idh_mutated": "Int64",
+   "subtype": "string",
+   "state_npc": "object",
+   "state_opc": "object",
+   "state_ac": "object",
+   "state_mes": "object",
+   "tme_immune": "object",
+   "tme_stromal": "object",
+   "tme_endothelial": "object",
+   "overall_survival_months": "float64",
+   "vital_status": "Int64",
+   "treatment_arm": "string",
+   "cgga_dataset": "string"
+  }
+ },
+ "expression": {
+  "mRNAseq_325": {
+   "member": "CGGA.mRNAseq_325.RSEM-genes.20200506.txt",
+   "first_column_name": "Gene_Name",
+   "n_columns": 326,
+   "n_sample_columns": 325,
+   "sample_id_examples": [
+    "CGGA_1001",
+    "CGGA_1006",
+    "CGGA_1007"
+   ],
+   "note": "header line only; no data row was read"
+  },
+  "mRNAseq_693": {
+   "member": "CGGA.mRNAseq_693.RSEM-genes.20200506.txt",
+   "first_column_name": "Gene_Name",
+   "n_columns": 694,
+   "n_sample_columns": 693,
+   "sample_id_examples": [
+    "CGGA_1002",
+    "CGGA_1003",
+    "CGGA_1010"
+   ],
+   "note": "header line only; no data row was read"
+  }
+ },
+ "not_read": "no expression value, no clinical field contents, no outcome, no patient identifier beyond the sample-id format shown"
+}

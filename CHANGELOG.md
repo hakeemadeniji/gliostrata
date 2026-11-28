@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — the patient modifiers had no frozen reference (2026-11-28)
+- A schema read of CGGA (ledger entry 23, names and dtypes only, no values) was taken to
+  write the T4/T5 loader against real column names rather than guesses. It showed the
+  clinical table already carries `tme_immune` and `state_mes`, and that raised the question
+  the tropism reference exists to answer: **against what are the modifiers standardised?**
+- Item 11 applies the modifier slopes "per SD", but **only the tropism half of the frozen
+  reference existed.** The modifier SD would have come from the cohort being scored — the
+  precise leakage the reference was built to prevent.
+- The reference now also carries TCGA mean and SD for `tme_immune` (0.3348 / 0.1761) and
+  `state_mes` (0.2689 / 0.1957) over 155 patients. New sha256 `b5839ad3…`, recorded in the
+  parameter file and asserted against the file by test.
+- Two tests added: every modifier the surface uses must have a frozen reference, and the
+  reference must name TCGA and not CGGA. The second test caught a **latent bug** —
+  `modifier_names` returned every key under `patient_modifier`, so any annotation placed
+  there would have been treated as a term in the surface. Now only entries carrying a value.
+
 ### Changed — timeline reformulated against measured velocity (2026-11-28)
 - `docs/project_record/07_timeline_2026_11_28.md`. The T4/T5 build schedule finished about
   three months early, so its dates are restated. No registered deadline changes.

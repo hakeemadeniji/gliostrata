@@ -73,10 +73,11 @@ delivery:
     # reference offsets every patient's score by -1.36 SD (NSC panel) and -1.47 SD (TGFB1),
     # which alone would cut the engrafted-dose factor by about a third. Item 11(h) names no
     # normalisation, so matching the scoring cohort stays inside the registered design.
-    source: "TCGA-GBM log2(FPKM + 1), 284 samples, GDC fpkm_unstranded, frozen"
+    source: "TCGA-GBM log2(FPKM + 1), 284 samples, GDC fpkm_unstranded, frozen; plus the
+      modifier mean and SD (tme_immune, state_mes) over 155 TCGA patients"
     file: "configs/response_surface_v1_tropism_reference.json"
     present: true
-    sha256: "c5288743a1a25d405c7165d8b7cda7bd16d7e97323de0bc08af8425407cf5df8"
+    sha256: "b5839ad3fe29df229bc905ad65d0b9061fbce1ed612a97729a68d10326b5380a"
     built_by: "scripts/t4t5_tropism_reference.py build"
     scale_caveat: >-
       TCGA's FPKM here is GDC's STAR-derived fpkm_unstranded; CGGA's is RSEM FPKM. Both are
@@ -213,6 +214,11 @@ response:
       source: "none; sign assumed"
       range: "0 to 0.3"
       applies_to: [CRAd, prodrug_enzyme, CAR]
+    # Standardisation: the slopes are per SD, so u is z-scored against the FROZEN TCGA
+    # reference above (modifier_reference block), never against the cohort being scored.
+    # Only the tropism half of that reference existed until 2026-11-28; a modifier SD taken
+    # from the scoring cohort would have been the leakage the reference exists to prevent.
+    standardised_against: "configs/response_surface_v1_tropism_reference.json"
     # No MGMT modifier: 5-FU and SN-38 act through antimetabolite and topoisomerase
     # mechanisms, not through MGMT (a mechanistic argument, not a measured effect).
     # No IDH modifier and no MGMT modifier anywhere: item 11(l).
