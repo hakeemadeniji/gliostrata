@@ -244,9 +244,11 @@ log-hazard offset, the L4 simulator is a deterministic closed-form delivery mode
 3. *Response.* Per payload p, the log-hazard reduction is
    E_i(c) = Emax_p * m_p(i) * sigma(s) * Cov(n) * N_eff^h / (N_eff^h + ED50_p^h),
    with a patient modifier m_p(i) = exp(w_p' u_i), u_i = (standardised immune-TME score,
-   MES-like fraction, subtype indicators). A "combo" is defined as CRAd plus prodrug_enzyme
-   with Bliss independence on the hazard scale: E_combo = E_CRAd + E_prodrug, times a
-   synergy factor (1.0 assumed).
+   MES-like fraction, subtype indicators). A "combo" combines by Bliss independence on the
+   hazard scale, E_combo = E_a + E_b, times a synergy factor (1.0 assumed). **Which two
+   payloads it combines was decided per carrier on 2026-11-27 (section 7, Q4), because a
+   single uniform pair would place an excluded payload on a carrier:** iPSC-NSC takes CRAd +
+   prodrug_enzyme, MSC takes prodrug_enzyme + CAR, HB1_F3_line takes CRAd + prodrug_enzyme.
 4. *Toxicity and delay (this is the only source of harm).* Excess log hazard
    T_i(c) = tau_p * (N / 5e7)^q * (1 + eta (n-1)) + delta_delay, with delta_delay the cost of
    delaying Stupp 10 to 14 days (PMID 34214495), all assumed.
@@ -285,8 +287,11 @@ range (section 5). "Fitted" means fitted on TCGA (development data), then frozen
 - *MGMT and IDH:* act on the **baseline** only (variant 3), and so on the *gain* only
   through the nonlinearity of RMST in the baseline (a fixed HR yields a larger gain when the
   baseline curve is higher; on the derived Weibull, HR 0.6 gives +3.26 months at scale 0.5
-  and +2.21 at scale 1.5 of the Stupp curve, so gain is not monotone in baseline). Under
-  variant 2 (no IDH, MGMT) the baseline varies only with age and sex.
+  and +2.21 at scale 1.5 of the Stupp curve, so gain is not monotone in baseline). **As
+  registered (variant 2; section 7, Q1 and Q6) neither acts anywhere in the frozen model:**
+  the baseline varies only with age and sex, and no IDH or MGMT modifier is added to the
+  configuration effect, because none is sourced. The sentence above describes what variant 3
+  would have done.
 - *Subtype and state fractions:* enter only through the tropism score and the modifier m_p.
   Their effect sizes are assumed; the stub's "affinity" table has no source and is dropped.
 
@@ -362,6 +367,10 @@ months. **Not freezable by 2027-06-30 and not recommended.**
 ## 4. Recommendation
 
 **Freeze Design A**, with the survival model and prior regime set as follows.
+
+> Design A was adopted on 2026-11-27. Item 1 below recommended variant 3; **the lead chose
+> variant 2**, for the reason given in section 7, Q1. Read section 7's table for what was
+> decided; this section is the proposal as written.
 
 1. **Survival model.** Variant 3 (age, sex, arm, IDH, MGMT), if the lead accepts it (decision
    Q1). Reasons: it is the transferable model that carries the two molecular determinants of
@@ -489,6 +498,22 @@ the same code runs on TCGA features and on synthetic files to tune nothing, only
 ---
 
 ## 7. Decision points for the lead
+
+**All nine were decided by the project lead on 2026-11-27 and registered the same day as
+pre-registration item 11 (g) to (o), with a dated section 8 entry.** The options below are
+left as written, so that what was chosen can be read against what was offered.
+
+| | Decided | Note |
+|---|---|---|
+| Q1 | **(b)** variant 2 (age, sex, arm) | Against this document's recommendation. Variant 3 needs an IDH and an MGMT call for every patient, which `cgga_external_v1`'s eligibility rule never required, so T5 would score fewer than the 218 its scoring set registers (the equivalent drop on CGGA as a whole is 283 to 241). The 0.05 C-index gain does not buy that, on a model that fails T2 either way. |
+| Q2 | **(a)** closed-form delivery model, uncalibrated | "L4-lite". Declared uncalibrated whatever T3 returns. |
+| Q3 | **(a)** pre-declared shrinkage rule | Emax_p = 0.5 x ln(ratio_p). Places T5 below its bar by construction, stated in advance. |
+| Q4 | **per carrier** (not (a), (b) or (c)) | None of the three options offered is consistent with item 4: (a) puts CRAd on MSC and (b) puts CAR on HB1_F3_line, both registered exclusions, while (c) makes two configurations with the same carrier, payload and site count different therapies, which item 4's distinctness rule and T4's distinct-config count depend on. combo is therefore the two payloads each carrier may carry: iPSC-NSC CRAd + prodrug, MSC prodrug + CAR, HB1_F3_line CRAd + prodrug. Bliss independence, synergy 1.0. |
+| Q5 | **(a)** toxicity term in the primary surface | It is the only source of harm; without it T5's harm row could not fail and a PASS there would be vacuous. |
+| Q6 | **(a)** IDH-mutant patients kept | But note the interaction with Q1: variant 2 has no IDH term, so "with IDH in the baseline" is not available. As registered, neither IDH nor MGMT appears anywhere in the frozen model — inventing a modifier slope for either would add an assumed parameter with no source. IDH-mutant baselines are therefore modelled as IDH-wild-type, which is disclosed, and section 3.6's IDH subgroup is where it is reported. |
+| Q7 | **(a)** 2027-02-28 | Four months of slack before the registered closing date, not to be spent on scope. |
+| Q8 | **wait, and loosen the subtype clause** | Both T3 rows decided 2027-01-08, independently; the four-subtype clause became three-of-four with a per-subtype floor of two. Registered 2026-11-27; see `docs/t3_data_search.md`. |
+| Q9 | **(a)** `configs/response_surface_v1.yaml` | Checksummed in section 8 at the freeze. |
 
 **Q1. Which survival model is frozen for T4 and T5?**
 - (a) Variant 3: age, sex, arm, IDH, MGMT (recommended; external C-index 0.5915, also fails T2).

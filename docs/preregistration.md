@@ -404,6 +404,100 @@ resolutions are pre-registered rather than chosen after the data is seen.
     (f) *Closing rule.* If they are not frozen by 2027-06-30, T4 and T5 are closed as NOT
     EVALUABLE, the reason is stated, and H1 and H2 are reported as untested.
 
+    *The model's design, decided 2026-11-27 (see section 8). Design A of
+    `docs/t4t5_model_design.md` is adopted; (g) to (o) fix what that document left to the
+    project lead. The numeric values themselves are frozen in the parameter file of (n),
+    before any T4 or T5 read, under (e).*
+
+    (g) *Survival model (L5).* `CoxPHModel` (Breslow) fitted on TCGA with covariates age,
+    sex and treatment arm — **variant 2**, the model that decided T2's rows (section 2.3) —
+    with its step baseline cumulative hazard H0(t) evaluated on [0, 24] months. Variant 3
+    (plus IDH and MGMT) is **not** used, although its external C-index is higher (0.5915
+    against 0.5385): it requires an IDH and an MGMT call for every patient, which the
+    partition's eligibility rule (item 7) never required, so T5 would run on fewer than the
+    218 patients its scoring set registers. On CGGA as a whole the equivalent complete-case
+    drop is 283 to 241. Every one of the 218 has age, sex and arm. Variant 2 failed external
+    validation (C-index 0.5385, 95% CI 0.4994 to 0.5807; Brier 0.2617); that failure is
+    stated wherever a T4 or T5 number is reported, together with the proportional-hazards
+    test of section 3.8.
+
+    (h) *Simulator (L4).* The deterministic closed-form delivery module of Design A item 2,
+    named **"L4-lite: closed-form delivery model, uncalibrated, literature-parameterised"**.
+    This is what satisfies (e)'s requirement for a frozen simulator. It is **declared
+    uncalibrated**, and that declaration stands whatever T3 returns: T3 data would calibrate
+    f_k, a_k, g_k and n0 if they arrive by item 8's decision date, but T4 and T5 do not
+    require them and are not deferred for them. No PDE or agent-based simulator is built
+    under this registration.
+
+    (i) *Efficacy prior.* Emax_p is fixed by a **rule declared before any read**, never by a
+    value chosen with a threshold in view: Emax_p = 0.5 x ln(ratio_p), where ratio_p is the
+    treated-to-control median-survival ratio of the nearest published preclinical study for
+    payload p, and 0.5 is a translation factor on the log scale. The factor is **assumed**,
+    and is declared as assumed in every table that reports a T4 or T5 number. The nearest
+    study per payload, and the single value the rule yields, are recorded with their PMIDs in
+    the parameter file of (n): CRAd from PMID 42179969 (ratios 1.33 to 1.48; the skeptical
+    end, 1.33, is used), prodrug_enzyme from PMID 23658244, and CAR at the pessimistic end of
+    its range because human CAR data in glioblastoma are uniformly poor (PMID 38216766, PMID
+    40451950). *Consequence, stated in advance:* this rule places T5 below its 3-month bar by
+    construction — the bar needs a hazard ratio near 0.59, and the rule yields about 0.82 to
+    0.87 — so T5's expected verdict is a FAIL that reflects the state of the evidence, not a
+    property of the framework. The break-even effect size is reported alongside it as an
+    exploratory analysis (section 3.6).
+
+    (j) *What "combo" combines.* The registered payload "combo" is defined **per carrier**,
+    as the two payloads that carrier is registered as able to carry (item 4 excludes
+    HB1_F3_line x CAR and MSC x CRAd): iPSC-NSC takes CRAd + prodrug_enzyme, MSC takes
+    prodrug_enzyme + CAR, HB1_F3_line takes CRAd + prodrug_enzyme. iPSC-NSC is compatible
+    with all three payloads, so its pairing is a declared choice. Payload effects combine by
+    **Bliss independence on the hazard scale** (E_combo = E_a + E_b) with a synergy factor of
+    1.0, assumed. A uniform definition was rejected because it would have placed an excluded
+    payload on a carrier that item 4 registers as unable to carry it; an optimiser-chosen
+    pair was rejected because two configurations sharing carrier, payload and site count
+    could then be different therapies, which item 4's distinctness rule — and so T4's
+    distinct-configuration count — depends on them not being. This changes no entry of item
+    4: the 10 carrier x payload pairs, the 240 discrete combinations and the exclusion list
+    all stand.
+
+    (k) *Toxicity and delay.* The excess-log-hazard term of Design A item 4 is **in the
+    primary surface**, not an exploratory variant: T_i(c) = tau_p (N / 5e7)^q (1 + eta (n-1))
+    + delta_delay, with the parameters of that document's table (all assumed, each with a
+    sensitivity range). It is the only source of harm in the model, so without it T5's harm
+    fraction would be 0 by construction and its harm row could not fail; a safety row that
+    cannot fail would be reported as vacuous rather than as met. A larger toxicity prior
+    drawn from the CAR neurotoxicity rate (56% grade 3, PMID 40451950) was rejected as not
+    transferable to carrier-cell delivery; it is a sensitivity range instead.
+
+    (l) *Population.* All 218 patients of `cgga_external_v1`, with **no exclusion by IDH
+    status**. Under WHO 2021 an IDH-mutant tumour is astrocytoma rather than glioblastoma,
+    which is an argument for excluding these patients; it is not acted on, because the
+    partition is sealed at 218 and changing who is in it after the seal is what sealing
+    exists to prevent. Under (g) neither IDH nor MGMT appears anywhere in the frozen model —
+    not in the baseline, and not as an effect modifier, because no sourced IDH or MGMT
+    modifier exists for the configuration effect and one will not be invented. *The cost is
+    disclosed:* IDH-mutant patients' Stupp baselines are therefore modelled as if they were
+    IDH-wild-type. Subgroup analysis by IDH status is already registered as exploratory in
+    section 3.6 and is where this is reported.
+
+    (m) *Freeze date.* The amendment of (e) is entered by **2027-02-28**, four months ahead
+    of (f)'s closing date. The slack is deliberate and is not to be spent on scope.
+
+    (n) *Where the parameters live.* Every numeric parameter of the response surface, the
+    delivery module and the toxicity term lives in a single versioned file,
+    **`configs/response_surface_v1.yaml`**, whose SHA-256 is entered in section 8 at the
+    freeze together with the survival model's. Each entry carries its value, its status
+    (fitted on TCGA, published with its PMID, or assumed) and its sensitivity range.
+    Constants are not kept in the module source, so that the registered checksum cannot be
+    broken by an edit that changes no parameter.
+
+    (o) *Controls, extending section 3.8.* Before the CGGA read, and reported with the
+    result: (i) a *no-modifier control* — every patient modifier set to zero, which must
+    yield a distinct-configuration count of 1, the optimiser's universal answer; (ii) a
+    *null-payload control* — Emax = 0 for every payload, which must yield a gain of exactly 0
+    for every patient and a harm equal to the toxicity term alone; (iii) the synthetic dry run
+    of section 3.8; (iv) a run of the whole T4 and T5 pipeline on the held-out TCGA split,
+    before any CGGA read, so that bugs are found without spending the registered read. A
+    control that does not give its stated answer stops the read.
+
 ### 2.3 Outcome of T2, recorded after the external read (2026-11-26)
 
 > This subsection is a post-registration record of a result.
@@ -1005,6 +1099,7 @@ threshold-table checksum plus the partition manifests are what make it a checkab
 | 2026-11-27 | 2.2 item 9 (scoring set frozen; input file named); 5 | **Made after the OSF submission of the registered commit `c7d7a95` (tag `prereg-deposit`), while approval was pending.** Froze T1's subtype scoring set by its registered rule. All 108 eligible CGGA mRNA_array_301 patients carry a reference label and have an expression column; they are sealed all-test as `data/partitions/cgga_t1_subtype_v1.json` (SHA-256 `7adfc09f068b793fa60fed0d191b34a39dc44c2f5b14cf4cc865d84c25d94049`), and `configs/scoring_rules.yaml` now names it. The classifier's input is CGGA's gene-level release (CGGA.mRNA_array_301_gene_level.20200506; SHA-256 in `data/provenance/cgga_microarray_sources.json`); the registered rule matches genes by symbol. No threshold, bound or rule changed. | Section 3.3 and item 9 require the scoring set to be frozen as a manifest before the read. | **No** T1 data read. The microarray file was fetched and hashed (ledger entries 19 to 21; the first attempt failed with HTTP 500). The freeze read only sample ids and whether a label is present, never a label or an expression value (entry 22). |
 | 2026-11-27 | 2.2 item 9(d) (input scale decided; two format contingencies) | **Made after the OSF submission of `c7d7a95`, before any microarray value was read.** Decided the input scale from documentation, as registered: log2(x + 1), because CGGA's sources say only that intensities were normalised with GeneSpring GX 11.0. Added two format contingencies so that the one read cannot fail on format: a negative value means the data are already log-scale and are used as distributed; a missing value drops that gene for that sample. No threshold, bound, scoring set or classifier changed. | Item 9(d) requires the scale to be decided from documentation before the read. A read that crashes on an unexpected format would waste the one registered read. | **No.** No T1 value was read: the matrix has been opened only for its header (sample ids). |
 | 2026-11-27 | 2.2 item 3(b), 3(e); 2.2 item 8 (decision date added) | **Made after the OSF submission of `c7d7a95`, before any T3 data was obtained or any T3 source was contacted.** Two changes to T3's data rule. (1) The qualifying rule required a source spanning all four Verhaak subtypes; it now requires at least three of the four, with at least two curves per represented subtype and the ten-curve minimum unchanged. Any absent subtype is named in this section when the data arrive, and the coverage limit is stated wherever T3's verdict is reported. (2) Both T3 rows are decided on 2027-01-08: by that date each row must have a qualifying source secured (a verified open release, or a custodian's written agreement), or that row is declared NOT EVALUABLE on that date. The rows are decided independently. Neither T3 threshold (RMSE <= 15%, migration r >= 0.65), nor the RMSE normalisation, nor the bootstrap unit, nor any decisive bound or decision rule changed. | The four-subtype requirement was written without a verified source in hand, and the registered search (`docs/t3_data_search.md`) found no public panel that pairs longitudinal control-arm volumes with subtype calls across all four. Both candidates classify three classes (classical, mesenchymal, proneural) under the Wang 2017 scheme, which has no Neural class at all, so the missing subtype is a property of how modern panels are labelled rather than of any one panel; Wang 2017 dropped it because its signal tracked normal-brain contamination. The ten-curve minimum is unaffected: the Mayo panel's published counts are 31, 21 and 16. A rule that no obtainable dataset can satisfy makes NOT EVALUABLE the only reachable verdict, which is not a finding about the model. The per-subtype floor of two is added at the same time so that the loosened rule cannot be met by a panel that is nominally three-subtype and effectively one. The decision date exists because item 11 freezes the T4 and T5 model before 2027-06-30, and that freeze must be made knowing whether the simulation layer is calibrated; an open-ended search would let T3's status be settled after its convenience was known. Chosen by the project lead. | **No** T3 data read, and none obtained: no PDX growth curve and no NSC-tracking series is on disk, no custodian has been contacted, and the loosened rule was fixed before any request was sent. CGGA had been read twice for T2 and for the availability and checksum accesses of ledger entries 11, 13, 16, 17 and 19 to 22 before this entry; none of them touches T3. |
+| 2026-11-27 | 2.2 item 11 (g) to (o) added | **Made after the OSF submission of `c7d7a95`, before any T4 or T5 computation and before any CGGA value was read for either.** Adopted Design A of `docs/t4t5_model_design.md` and fixed the nine choices that document left open, as decided by the project lead. (g) The frozen survival model is variant 2 (age, sex, arm), not variant 3: variant 3 needs an IDH and an MGMT call for every patient, which item 7's eligibility rule never required, so T5 would score fewer than the 218 its scoring set registers. (h) The simulator is a closed-form delivery module, declared uncalibrated whatever T3 returns. (i) The efficacy prior is a rule — Emax_p = 0.5 x ln(treated-to-control median-survival ratio of the nearest preclinical study) — which places T5 below its bar by construction, stated in advance. (j) "combo" is defined per carrier, as the two payloads that carrier may carry, with Bliss independence and synergy 1.0. (k) The toxicity and delay term is in the primary surface, because it is the only source of harm and T5's harm row could not otherwise fail. (l) All 218 patients, no exclusion by IDH status, and neither IDH nor MGMT anywhere in the frozen model; the resulting mis-modelling of IDH-mutant baselines is disclosed and reported in section 3.6. (m) The freeze amendment is entered by 2027-02-28. (n) Parameters live in `configs/response_surface_v1.yaml`, checksummed here at the freeze. (o) Four pre-read controls are added to section 3.8, any failure of which stops the read. No threshold, decisive bound, decision rule, partition or scoring set changed; item 4's configuration space, its two exclusions, its 10 pairs and its 240 combinations are untouched, as are (a) to (f) of item 11. | Item 11(e) requires the model to be frozen by amendment before any T4 or T5 read, and a model cannot be frozen while nine of its choices are open. Each choice is one that could otherwise be made after seeing the data. Three are recorded against the design document's own recommendation, with the reason given in the text: variant 2 over variant 3 (the 218-patient scoring set), the per-carrier "combo" over a uniform one (all three options in the document contradict item 4's exclusion list or its distinctness rule), and IDH and MGMT in no part of the model rather than as invented modifiers. This entry fixes the design; the numeric values and their checksum follow in the freeze amendment under (e) and (m). | **No.** No T4 or T5 computation has been run, and no CGGA value has been read for either: the response surface and the delivery module are stubs, and `configs/response_surface_v1.yaml` does not yet exist. CGGA had been read twice for T2 and for the availability and checksum accesses of ledger entries 11, 13, 16, 17 and 19 to 22 before this entry. The external C-index and Brier values quoted in (g) are T2's, already recorded in section 2.3. |
 
 ---
 

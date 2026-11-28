@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — T4/T5 model design registered (2026-11-27, after the OSF submission)
+- Pre-registration item 11 gains (g) to (o): the nine choices `docs/t4t5_model_design.md`
+  left to the project lead are decided and registered. Design A is adopted. Frozen survival
+  model: variant 2 (age, sex, arm), so that T5 scores all 218 patients. Simulator: a
+  closed-form delivery module, declared uncalibrated. Efficacy prior: the rule
+  Emax_p = 0.5 x ln(ratio_p), which places T5 below its bar by construction, stated in
+  advance. `combo` is defined per carrier. The toxicity and delay term is in the primary
+  surface. All 218 patients, with IDH and MGMT in no part of the model, and the cost
+  disclosed. Freeze by 2027-02-28. Parameters in `configs/response_surface_v1.yaml`. Four
+  pre-read controls added to section 3.8.
+- No threshold, decisive bound, decision rule, partition or scoring set changed; item 4's
+  configuration space, its two exclusions, its 10 pairs and its 240 combinations stand.
+- Three decisions went against the design document's recommendation, each with its reason in
+  the text: variant 2 over variant 3, a per-carrier `combo` (all three options offered
+  contradicted item 4), and IDH and MGMT in no part of the model rather than as invented
+  modifiers.
+
 ### Changed — T3 data rule (2026-11-27, after the OSF submission)
 - Pre-registration item 3(b): a qualifying PDX source must now span at least three of the
   four Verhaak subtypes, with at least two curves per represented subtype, instead of all
