@@ -67,6 +67,12 @@ control median survivals are extracted with the sentence they came from. A recor
 median survival cannot be found in what is accessible fails P3 and is excluded with that
 reason recorded — not silently dropped.
 
+Stage 2 also classifies each study's **control arm**, which item 11(i.7) requires: `untreated`,
+`vehicle`, `mock_or_reporter_vector`, `active_therapeutic`, or `uncertain`. The classification
+is structural — what the control arm received — and is made without reference to the ratio the
+study would contribute. Only `untreated`, `vehicle` and `mock_or_reporter_vector` enter the
+primary set; `active_therapeutic` and `uncertain` are reported in the exploratory set only.
+
 Disagreements between the two screens are adjudicated, and the adjudication is recorded with
 its reason. Counts at every stage are reported, so that the path from 108 records to the
 final ratio set is reconstructable.

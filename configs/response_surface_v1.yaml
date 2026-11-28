@@ -125,6 +125,14 @@ response:
   #   Emax_p = 0.5 * ln(ratio_p)
   #   ratio_p = the MEDIAN of the treated-to-control median-survival ratios across EVERY
   #             study qualifying under P1 to P5, not one study chosen by hand.
+  # Item 11(i.7), a DISCLOSED DEVIATION from (i.3): the primary qualifying set is narrowed to
+  # studies whose control arm receives no agent intended to have anti-tumour activity
+  # (untreated, saline, PBS, vehicle, mock-transduced, reporter-only or empty vector). An arm
+  # receiving an active therapeutic does not qualify; an uncertain one is excluded rather than
+  # argued about. The test is structural -- what the control arm received -- never its result.
+  # If a payload's narrowed set is empty it falls back to the literal (i.3) set, stated for
+  # that payload. The literal set is reported alongside as a section 3.6 exploratory analysis.
+  # Each entered value therefore carries control_arm_rule: narrowed | literal_fallback.
   # All three values are therefore pending the registered search of (i.4), which has not been
   # run. They are filled from docs/t4t5_emax_search/ and from nowhere else.
   emax:
@@ -260,13 +268,20 @@ controls:
 # ---------------------------------------------------------------------------------------
 open_questions:
   emax_values: >-
-    All three Emax values are pending the registered search of item 11 (i.4), which has not
-    been run. They are the only values in this file that are not settled; everything else is
-    final subject to the freeze. The three questions that were open when this file was first
-    drafted (prodrug reporting the wrong quantity, CAR's "pessimistic end" shortcut, CRAd's
-    ovarian anchor) are all resolved the same way: item 11(i) was rewritten on 2026-11-27,
-    before the search, so that ratio_p is the median across every qualifying glioma study
-    under P1 to P5 rather than one study chosen by hand. See pre-registration section 8.
+    All three Emax values are pending. The registered search of item 11(i.4) HAS been run
+    (2026-11-28T01:19:52Z; 108 records, 40 carried past dual screening, log in
+    docs/t4t5_emax_search/), but 37 of the 40 need full text before a ratio can be read, and
+    under item 11(i.7) each surviving study also needs its control arm classified. These are
+    the only values in this file that are not settled; everything else is final subject to the
+    freeze. The three questions open when this file was first drafted (prodrug reporting the
+    wrong quantity, CAR's "pessimistic end" shortcut, CRAd's ovarian anchor) were all resolved
+    by rewriting item 11(i) before the search, so that ratio_p is a median across qualifying
+    studies rather than one study chosen by hand. See pre-registration section 8.
+  abstract_level_ratios_are_not_ratio_p: >-
+    Eight ratios (1.21 to 2.75) are readable from abstracts alone. They are NOT ratio_p, which
+    item 11(i.2) defines as the median over EVERY qualifying study, and none of the eight has
+    a confirmed untreated control, so none is yet known to be in the item 11(i.7) primary set.
+    They are recorded in docs/t4t5_emax_search/screening/ and must not be entered here.
   tropism_reference: >-
     configs/response_surface_v1_tropism_reference.json does not exist yet. It holds the
     frozen TCGA mean and SD used to standardise the tropism score, and is written and

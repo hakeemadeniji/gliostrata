@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deviation — P3's control arm narrowed (2026-11-27, disclosed; after the OSF submission)
+- Pre-registration item 11(i.7) records a **disclosed deviation** from (i.3), not an amendment
+  to it: (i.6) closed (i.1) to (i.6) when the search ran, and they are unchanged.
+- P3 required median survival for "a control arm" without defining one. The qualifying studies
+  use untreated or vehicle controls, vectors without their activating prodrug, and parental
+  untransduced effector cells, which give systematically different ratios. The **primary**
+  qualifying set is now narrowed to studies whose control arm receives no agent intended to
+  have anti-tumour activity; the literal reading is reported beside it as a §3.6 exploratory
+  analysis, with the count dropped.
+- The test is structural — what the control arm received — and never its result, so no study's
+  inclusion can depend on the ratio it would contribute. If a payload's narrowed set is empty
+  it falls back to the literal (i.3) set, so the deviation can never be worse-evidenced than
+  the registration.
+- Declared **before** any full text was read: none of the eight abstract-level ratios has a
+  confirmed untreated control, so which studies survive the narrowing was unknown as it was
+  declared. Its direction is known and runs against the project's own hypothesis — an active
+  comparator gives a smaller ratio, so Emax falls and T5 fails by a wider margin.
+- Reason it is labelled a deviation rather than a correction: the reading was chosen after the
+  literal reading's ratios were visible. The reasoning is in
+  `docs/t4t5_emax_search/screening/p3_interpretation.md`, whose superseded first decision is
+  kept unedited as the record of what was decided first.
+
 ### Changed — the T4/T5 efficacy prior is now mechanical (2026-11-27, after the OSF submission)
 - Pre-registration item 11(i) is rewritten as (i.1) to (i.6), **before the search it governs
   was run**. None of the three studies the design document named satisfied "the nearest

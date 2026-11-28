@@ -1,5 +1,26 @@
 # P3's "control arm": an ambiguity found after the search was run
 
+> ## SUPERSEDED AS PRIMARY, the same day (2026-11-27)
+>
+> This file first recorded the **literal** reading of P3 as primary, with the restricted
+> reading as an exploratory check. Later the same day the project lead reversed the two: the
+> **restricted** reading is now primary, registered as pre-registration item 11(i.7) and
+> logged in section 8 as a **disclosed deviation** from (i.3) — not an amendment to it, since
+> (i.6) closed (i.1) to (i.6) when the search ran.
+>
+> | | Primary | Exploratory |
+> |---|---|---|
+> | First decided | literal P3 (any designated control) | restricted (untreated only) |
+> | **Now** | **restricted: control arm receives no agent intended to have anti-tumour activity** | literal P3, with the count dropped |
+>
+> If a payload's restricted set is empty, it falls back to the literal set for that payload,
+> so the deviation can never be worse-evidenced than the registration itself.
+>
+> The reasoning below is kept **unedited**, because it is the record of what was decided
+> first and why. Where it says the literal reading is primary, read item 11(i.7) instead.
+> The reversal was taken openly, with its effect on the verdict unknown but its direction
+> known and against the project's own hypothesis. See section 8.
+
 **Status: an interpretation of a closed criterion, not a revision of it.** Pre-registration
 item 11(i.6) says that nothing in (i.1) to (i.5) may be revised once the search has been run.
 The search ran on 2026-11-28T01:19:52Z. P3 therefore stands exactly as written, and what
