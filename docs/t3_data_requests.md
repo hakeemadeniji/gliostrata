@@ -8,9 +8,18 @@ nothing at all.
 Replace `[YOUR NAME]` and `[YOUR AFFILIATION]`. Your email address is in the From field, so
 none of these drafts contains it.
 
-**Before sending email A**, check whether Table S3B of Vaubel et al. is already downloadable
-from the journal's supplement — if the per-line growth data is public, the ask becomes much
-smaller and the email should say so.
+**Checked 2026-11-28, and the answer changes email A.** Table S3B is *not* the data this
+needs. The paper's own text cites it for "the median time to exceed 2 cm3 ranging from 20 to
+189 days" — **one summary value per line**, where the registered criterion needs volumes at
+three or more time points per line. Whether the supplement files are downloadable could not
+be confirmed either: PMC lists eight files for this manuscript but serves none of them to an
+automated request, and the journal's own page returns 403. They are very likely downloadable
+in a browser, and worth opening — but on the published text, what is in them is a
+time-to-endpoint summary, not serial measurements.
+
+So email A asks for the **underlying serial measurements**, which are probably unpublished,
+and says plainly why the published summary will not do. That is a larger ask than pointing at
+a table, and it is the honest one.
 
 ## What makes a source usable, so you can answer a follow-up question
 
@@ -42,17 +51,21 @@ Orthotopic implantation is **not** required for this row, so subcutaneous panels
 > best-matched resource I have found.
 >
 > Vaubel et al. (*Clin Cancer Res* 2020) states that models and genomic data are openly
-> available, and Table S3B appears to hold per-line growth data. What I need is narrower than
-> the full resource:
+> available. I have read the paper and its supplementary tables, and I think what I need is
+> not among them: Table S3B reports the median time to exceed 2 cm3 per line, whereas the
+> analysis needs the serial measurements underlying those curves. Specifically:
 >
-> - untreated or vehicle control tumour volumes at each measurement time, per animal or as a
->   mean per time point, for at least three time points per line;
-> - the per-line subtype call (Table S6A) or the matching RNA-seq identifier
->   (PRJNA548556).
+> - untreated or vehicle control tumour volumes **at each measurement time**, per animal or as
+>   a mean per time point, with at least three time points per line — the raw caliper or
+>   imaging series rather than a derived time-to-endpoint;
+> - the per-line subtype call, or the matching RNA-seq identifier (PRJNA548556) so I can
+>   derive it myself.
 >
 > Ten lines would be sufficient, provided they cover at least three subtypes with two or more
 > lines each. A three-class panel under the Wang 2017 scheme is fine — I am not expecting a
-> Neural group.
+> Neural group. If the serial volumes exist only in a lab notebook or an internal database
+> rather than in an analysis-ready file, that is still worth knowing: I would rather adapt to
+> the format you have than ask you to build one.
 >
 > The data would be used only to compute a normalised error of a growth model against your
 > curves. It would not be redistributed, and the resource would be cited. The analysis plan,
