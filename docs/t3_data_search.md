@@ -97,6 +97,14 @@ If the Mayo resource supplies per-animal volumes, 10 or more curves is likely re
 
 ## 5. Email drafts
 
+> **Superseded 2026-11-28 by `docs/t3_data_requests.md`**, which is the version to send.
+> The drafts below quote a deadline of 2027-01-15, which is the data deadline rather than
+> the decision date; item 8 now decides both rows on **2027-01-08**. They also predate the
+> amendment that accepts three-subtype panels, so they do not tell a custodian the one thing
+> most likely to make them think they cannot help. Kept here as the record of what was first
+> drafted.
+
+
 Email A, Mayo Clinic Brain Tumor PDX National Resource
 
 > Subject: Request for control-arm growth data, glioblastoma PDX panel
