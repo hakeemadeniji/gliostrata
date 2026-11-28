@@ -1,0 +1,11 @@
+{
+ "checked_at_utc": "2026-11-28T05:57:06Z",
+ "csv": "docs/t4t5_emax_search/manual_extraction/manual_extraction.csv",
+ "n_rows": 20,
+ "n_filled": 0,
+ "n_blank": 20,
+ "n_problems": 0,
+ "problems": [],
+ "ok": true,
+ "control_arm_kinds": {}
+}
