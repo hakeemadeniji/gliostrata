@@ -35,8 +35,13 @@ SURVIVAL = re.compile(r"median\s+(?:overall\s+)?survival|survival\s+(?:time|was|
 CONTROL = re.compile(r"\b(?:control|vehicle|saline|PBS|mock|untreated|naive|parental|"
                      r"empty\s+vector|GFP|sham|no\s+treatment|phosphate[- ]buffered)\b", re.I)
 NUMBER = re.compile(r"\d")
-MAX_PARAGRAPHS = 40
-MAX_CHARS = 1200
+MAX_PARAGRAPHS = 80
+# 1200 was too tight: the first pass cut median-survival figures off the end of long results
+# paragraphs in at least three articles, which the extraction then recorded as absent. A
+# paragraph that loses its numbers to truncation is worse than one left out, because it looks
+# like evidence of absence. 8000 leaves normal journal paragraphs intact, and any paragraph
+# still cut is counted in `n_paragraphs_truncated` rather than passing silently.
+MAX_CHARS = 8000
 
 
 def _flatten(node) -> str:

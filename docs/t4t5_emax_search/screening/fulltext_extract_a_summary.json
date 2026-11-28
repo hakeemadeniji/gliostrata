@@ -1,0 +1,51 @@
+{
+ "extractor": "A",
+ "n_rows": 18,
+ "n_with_both_medians": 6,
+ "n_resolved": 5,
+ "control_arm_kinds": {
+  "untreated": 3,
+  "vehicle": 5,
+  "mock_or_reporter_vector": 6,
+  "active_therapeutic": 0,
+  "uncertain": 4
+ },
+ "by_payload": {
+  "CRAd": {
+   "n_rows": 4,
+   "n_with_both_medians": 2,
+   "n_resolved": 1,
+   "control_arm_kinds": {
+    "untreated": 0,
+    "vehicle": 3,
+    "mock_or_reporter_vector": 0,
+    "active_therapeutic": 0,
+    "uncertain": 1
+   }
+  },
+  "prodrug_enzyme": {
+   "n_rows": 8,
+   "n_with_both_medians": 4,
+   "n_resolved": 4,
+   "control_arm_kinds": {
+    "untreated": 1,
+    "vehicle": 2,
+    "mock_or_reporter_vector": 4,
+    "active_therapeutic": 0,
+    "uncertain": 1
+   }
+  },
+  "CAR": {
+   "n_rows": 6,
+   "n_with_both_medians": 0,
+   "n_resolved": 0,
+   "control_arm_kinds": {
+    "untreated": 2,
+    "vehicle": 0,
+    "mock_or_reporter_vector": 2,
+    "active_therapeutic": 0,
+    "uncertain": 2
+   }
+  }
+ }
+}
