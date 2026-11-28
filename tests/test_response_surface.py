@@ -315,3 +315,36 @@ def test_gain_is_positive_when_the_benefit_outweighs_the_toxicity(resolved):
         "CRAd", "iPSC-NSC", 1e6, 1, 1e9, {}, 1.15, 0.95, resolved)
     assert strong.benefit > strong.toxicity
     assert rs.gain_months(baseline, strong, resolved) > 0
+
+
+# --- the frozen tropism reference (item 11(h)) -------------------------------------------
+
+def test_the_committed_tropism_reference_loads_and_is_tcga():
+    reference = delivery.load_tropism_reference(
+        ROOT / "configs" / "response_surface_v1_tropism_reference.json")
+    assert "TCGA" in reference.source
+    assert "cgga" not in reference.source.lower()
+    assert set(reference.mean) == {"CCL2", "CXCL12", "PLAU", "TGFB1", "VEGFA"}
+    assert all(sd > 0 for sd in reference.sd.values())
+
+
+def test_the_reference_covers_every_carriers_genes(committed):
+    reference = delivery.load_tropism_reference(
+        ROOT / "configs" / "response_surface_v1_tropism_reference.json")
+    for carrier in ("iPSC-NSC", "MSC", "HB1_F3_line"):
+        for gene in committed.tropism_genes(carrier):
+            assert gene in reference.mean, f"{carrier}'s gene {gene} has no reference"
+
+
+def test_the_parameter_file_records_the_references_checksum(committed):
+    import hashlib
+    entry = committed.doc["delivery"]["tropism_reference"]
+    path = ROOT / entry["file"]
+    assert entry["present"] is True
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == entry["sha256"], (
+        "the tropism reference has changed since its checksum was recorded")
+
+
+def test_a_missing_reference_is_an_error_not_a_cohort_statistic(tmp_path):
+    with pytest.raises(ParameterError, match="never be computed from the cohort"):
+        delivery.load_tropism_reference(tmp_path / "absent.json")

@@ -24,12 +24,16 @@ refuses to compute one from the data it is given.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from gliostrata.simulation.parameters import ParameterError, ParameterSet
+
+DEFAULT_REFERENCE = Path("configs/response_surface_v1_tropism_reference.json")
 
 
 @dataclass(frozen=True)
@@ -52,6 +56,31 @@ class TropismReference:
                 "the tropism reference names CGGA as its source. Section 3.1 and item 11 "
                 "require a frozen TCGA reference: a cohort statistic taken from the sealed "
                 "external cohort would leak it into the transform.")
+
+
+def load_tropism_reference(path: str | Path = DEFAULT_REFERENCE) -> TropismReference:
+    """Read the frozen TCGA reference written by `scripts/t4t5_tropism_reference.py`.
+
+    The file records the cohort it was built from. A reference naming CGGA is refused by
+    `TropismReference`, so the leakage rule of item 11(h) is enforced on load and not only
+    at build time.
+    """
+    path = Path(path)
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ParameterError(
+            f"{path} not found. The tropism score has no reference to standardise against, "
+            "and one must never be computed from the cohort being scored (item 11(h)).") from exc
+    rows = doc.get("reference") or {}
+    if not rows:
+        raise ParameterError(f"{path} carries no reference statistics")
+    return TropismReference(
+        mean={gene: float(row["mean"]) for gene, row in rows.items()},
+        sd={gene: float(row["sd"]) for gene, row in rows.items()},
+        source=f"{doc.get('cohort', 'unknown')} {doc.get('scale', '')}, "
+               f"n={doc.get('n_samples', '?')}, built {doc.get('built_at_utc', '?')}",
+    )
 
 
 def tropism_score(

@@ -69,9 +69,17 @@ delivery:
   tropism_reference:
     # The standardisation of the tropism score uses a frozen TCGA mean and SD, never a
     # CGGA cohort statistic, so that the sealed cohort cannot leak into the transform.
-    source: "TCGA log2 CPM, frozen; written at the freeze"
+    source: "TCGA-GBM log2(CPM + 1), 284 samples, frozen"
     file: "configs/response_surface_v1_tropism_reference.json"
-    present: false
+    present: true
+    sha256: "6ea8bbbf285137eba21aa77deb65792de0a780dd8963892d975caad08c958ee5"
+    built_by: "scripts/t4t5_tropism_reference.py build"
+    library_size_universe: "configs/t2_comparator/gene_universe.txt (33,212 symbols)"
+    scale_caveat: >-
+      The reference is log2(CPM + 1) from TCGA counts. CGGA's RNA-seq release is RSEM FPKM, a
+      different normalisation, so a standardised score computed on it carries a systematic
+      offset. The offset is common to every patient and does not reorder them, but it moves
+      the absolute level of the engrafted dose. See open_questions.tropism_scale.
 
   # f_k: fraction of injected cells surviving to act.
   cell_fraction_acting:
@@ -282,7 +290,12 @@ open_questions:
     item 11(i.2) defines as the median over EVERY qualifying study, and none of the eight has
     a confirmed untreated control, so none is yet known to be in the item 11(i.7) primary set.
     They are recorded in docs/t4t5_emax_search/screening/ and must not be entered here.
-  tropism_reference: >-
-    configs/response_surface_v1_tropism_reference.json does not exist yet. It holds the
-    frozen TCGA mean and SD used to standardise the tropism score, and is written and
-    checksummed at the freeze. It must never be computed from a CGGA statistic.
+  tropism_scale: >-
+    The tropism reference is built and checksummed (TCGA-GBM, 284 samples, log2(CPM + 1)).
+    What is NOT settled is the scale mismatch it creates: CGGA's RNA-seq release is RSEM FPKM,
+    so standardising CGGA values against TCGA CPM statistics leaves a systematic offset in the
+    tropism score. It is common to all patients and does not reorder them, but it shifts the
+    absolute engrafted dose and so the position on the dose-response curve. Registered item
+    11(h) specifies a per-gene frozen TCGA mean and SD, so the fix is not free: a scale-free
+    alternative (z-scoring each sample across its own genes, as T1's classifier does) would be
+    a design change and must be decided before the freeze, not after seeing a T4 or T5 number.

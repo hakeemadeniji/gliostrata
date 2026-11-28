@@ -1,0 +1,74 @@
+{
+ "what": "The frozen TCGA reference the T4/T5 tropism score is standardised against (pre-registration item 11(h)). Never rebuilt from a CGGA statistic.",
+ "registered_under": "docs/preregistration.md section 2.2 item 11(h) and 11(n)",
+ "built_at_utc": "2026-11-28T06:42:30Z",
+ "cohort": "TCGA-GBM",
+ "n_samples": 284,
+ "scale": "log2(CPM + 1)",
+ "library_size_universe": {
+  "file": "configs/t2_comparator/gene_universe.txt",
+  "n_symbols": 33212,
+  "sha256": "92ec3389d8048da964f9a8bc2080ebf4eb9004180de56191c87cecf123ca7c20"
+ },
+ "sources": {
+  "counts": {
+   "file": "data/raw/tcga_gbm/expression/counts.parquet",
+   "sha256": "bc78e730b43d9a187d86dca2d604dec37af7736d0afcb98394b41d4ba1826d48"
+  },
+  "annotation": {
+   "file": "data/raw/tcga_gbm/expression/gene_annotation.parquet",
+   "sha256": "408434126c8e57807d79b0f44ab7b13ccde25699155d8fd0236f9adadba34960"
+  }
+ },
+ "symbol_collapse": "counts of every Ensembl id sharing a GENCODE gene_name are summed",
+ "genes_by_carrier": {
+  "iPSC-NSC": [
+   "CXCL12",
+   "VEGFA",
+   "PLAU",
+   "CCL2"
+  ],
+  "HB1_F3_line": [
+   "CXCL12",
+   "VEGFA",
+   "PLAU",
+   "CCL2"
+  ],
+  "MSC": [
+   "TGFB1"
+  ]
+ },
+ "reference": {
+  "CCL2": {
+   "mean": 5.33813875639468,
+   "sd": 1.6883082896610555,
+   "min": 0.5574900423794378,
+   "max": 9.484921353677368
+  },
+  "CXCL12": {
+   "mean": 4.042499361577359,
+   "sd": 1.3295095177989138,
+   "min": 0.680430878244318,
+   "max": 8.204964133626481
+  },
+  "PLAU": {
+   "mean": 4.887029624203283,
+   "sd": 1.313949739799698,
+   "min": 1.4429160619637311,
+   "max": 8.504792863224322
+  },
+  "TGFB1": {
+   "mean": 5.635002770109732,
+   "sd": 1.0899742451285679,
+   "min": 2.3993860512283507,
+   "max": 8.461264686758836
+  },
+  "VEGFA": {
+   "mean": 8.32221456356216,
+   "sd": 1.637422672567246,
+   "min": 3.78241378789697,
+   "max": 11.69730938495321
+  }
+ },
+ "caveat_scale": "These are log2(CPM + 1) statistics from TCGA counts. A later cohort scored on a different normalisation (CGGA's release is RSEM FPKM) is not on the same scale, so the standardised score carries a systematic offset. The offset is common to every patient and so does not reorder them, but it does move the absolute level of the engrafted dose. Stated here so that it is reported rather than discovered."
+}
