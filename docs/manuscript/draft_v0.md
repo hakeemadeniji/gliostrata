@@ -1,6 +1,9 @@
 # GlioStrata manuscript: working draft v0
 
 Status: working draft, not for circulation. Two sections that can be written now.
+**Part 3 is in `part3_t4t5_methods.md`** (added 2026-11-28): the methods for the T4/T5
+configuration model, its registered efficacy-prior search, and what the model can and cannot
+support. Section 2.4's row for T4 and T5 below is superseded by it.
 Every number is traced to a repository file in the list at the end (section 3). Places
 that need the lead's decision are marked [LEAD: ...].
 
