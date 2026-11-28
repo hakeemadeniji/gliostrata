@@ -1,0 +1,27 @@
+months,series,survival
+0.0,Stupp baseline,1.0
+2.0,Stupp baseline,0.89583
+4.0,Stupp baseline,0.80252
+6.0,Stupp baseline,0.71892
+8.0,Stupp baseline,0.64404
+10.0,Stupp baseline,0.57695
+12.0,Stupp baseline,0.51685
+14.0,Stupp baseline,0.46301
+16.0,Stupp baseline,0.41478
+18.0,Stupp baseline,0.37158
+20.0,Stupp baseline,0.33287
+22.0,Stupp baseline,0.2982
+24.0,Stupp baseline,0.26714
+0.0,configuration,1.0
+2.0,configuration,0.91517
+4.0,configuration,0.83754
+6.0,configuration,0.7665
+8.0,configuration,0.70148
+10.0,configuration,0.64198
+12.0,configuration,0.58752
+14.0,configuration,0.53768
+16.0,configuration,0.49207
+18.0,configuration,0.45033
+20.0,configuration,0.41213
+22.0,configuration,0.37718
+24.0,configuration,0.34518

@@ -1,0 +1,13 @@
+payload,engrafted_cells,log_hazard_reduction
+CRAd,1e+06,0.00227
+CRAd,1e+07,0.01683
+CRAd,2.5e+07,0.02945
+CRAd,5e+07,0.03926
+prodrug_enzyme,1e+06,0.0083
+prodrug_enzyme,1e+07,0.06168
+prodrug_enzyme,2.5e+07,0.10795
+prodrug_enzyme,5e+07,0.14393
+CAR,1e+06,0.01904
+CAR,1e+07,0.14143
+CAR,2.5e+07,0.2475
+CAR,5e+07,0.33001

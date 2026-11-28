@@ -226,6 +226,9 @@ def control_synthetic(params: ParameterSet, n_patients: int = 10, budget: int = 
             "t5_success_fraction": float(np.mean([g >= 3.0 for g in gains])),
             "t5_harm_fraction": float(np.mean([g < 0.0 for g in gains])),
             "mean_gain_months": float(np.mean(gains)),
+            # The per-patient values, so a reader and a figure can see the distribution
+            # rather than a mean standing in for it.
+            "gains_months": [float(g) for g in gains],
             "passed": bool(np.isfinite(mean_gp) and np.isfinite(reduction)),
             "note": "synthetic patients; these numbers are not results"}
 
@@ -314,6 +317,7 @@ def control_tcga(params: ParameterSet, budget: int = 60, max_patients: int = 50)
             "t5_success_fraction": float(np.mean([g >= 3.0 for g in gains])),
             "t5_harm_fraction": float(np.mean([g < 0.0 for g in gains])),
             "mean_gain_months": float(np.mean(gains)),
+            "gains_months": [float(g) for g in gains],
             "passed": bool(np.isfinite(reduction)),
             "note": ("a rehearsal on development data with simulated tropism inputs. NOT a "
                      "result, never reported as one, and no CGGA path was opened.")}
