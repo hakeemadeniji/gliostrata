@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — the four item 11(o) controls, all passing (2026-11-28)
+- `scripts/t4t5_controls.py` runs all four pre-read controls and exits non-zero on any
+  failure. The survival model is T2's validated `VARIANT_2` fit, not a new one.
+- **no-modifier**: 1 distinct configuration across 20 patients, as required.
+- **null-payload**: benefit exactly 0.0 across 120 configurations x 20 patients, gain equal to
+  the toxicity term's alone to 1e-12 in all 2,400 pairs, every gain negative (-0.111 to
+  -0.723 months). This could not have passed under 11(o)(ii) as first written.
+- **synthetic** and **TCGA rehearsal** both complete. Rehearsal: mean baseline RMST 13.79
+  months on 50 held-out TCGA patients, mean gain 0.586 months, T5 success fraction 0.0 and
+  harm fraction 0.0 — the harm row passing non-vacuously, since the null-payload control
+  shows harm can occur.
+- **Two defects found in the control harness, not the model:**
+  - It counted distinct configurations from each patient's single best config. T4's
+    registered metric is distinct configs in the **top 5**. Corrected: the rehearsal gives
+    **6** on the registered metric against **2** on the wrong one, so the wrong metric sat
+    below T4's threshold of 3 and the right one above it.
+  - A `nohup … &` inside an already-backgrounded call made a run that never executed report
+    success. Caught by the stale timestamp in the output.
+- **T4's regret metric saturates.** GP-EI beat random search on every patient (mean advantage
+  0.208–0.244 months), so its regret is identically zero, the reduction is exactly 100%, and
+  the ≥25% threshold cannot fail. The bootstrap CI would be degenerate too. This is a
+  property of the registered definition, so it is disclosed and given a non-saturating
+  descriptive companion rather than rewritten with its behaviour already visible.
+
 ### Changed — the tropism reference is on FPKM, not CPM (2026-11-27)
 - `scripts/t4t5_tropism_reference.py` now builds the frozen TCGA reference on
   **log2(FPKM + 1)** from GDC's `fpkm_unstranded`, matching CGGA's RSEM FPKM release.

@@ -1,10 +1,24 @@
 {
  "registered_under": "docs/preregistration.md section 2.2 item 11(o)",
- "run_at_utc": "2026-11-28T07:44:35Z",
+ "run_at_utc": "2026-11-28T09:00:50Z",
  "parameter_file": "configs/response_surface_v1.yaml",
  "parameter_sha256": "bd18201156bf5dec8b01bda89a74776cae260eade9c997798da402b3d3786469",
  "frozen": false,
  "controls": [
+  {
+   "control": "no_modifier",
+   "must_yield": "distinct-configuration count of 1",
+   "n_patients": 20,
+   "n_distinct": 1,
+   "distinct": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "passed": true
+  },
   {
    "control": "null_payload",
    "must_yield": "benefit exactly 0; gain equal to the toxicity term's alone, negative wherever that term is positive",
@@ -15,6 +29,50 @@
    "max_gain": -0.11110911244965394,
    "min_gain": -0.7230232836846184,
    "passed": true
+  },
+  {
+   "control": "synthetic_dry_run",
+   "must_yield": "completes and writes a verdict of the registered shape",
+   "n_patients": 10,
+   "budget": 60,
+   "t4_distinct_configs_top5": 5,
+   "t4_distinct_configs_best_only": 2,
+   "t4_regret_reduction_pct": 100.0,
+   "t4_regret_saturated": true,
+   "t4_mean_advantage_months": 0.24426360010316586,
+   "t4_gp_won_every_patient": true,
+   "t5_success_fraction": 0.0,
+   "t5_harm_fraction": 0.0,
+   "mean_gain_months": 0.7178627041028125,
+   "passed": true,
+   "note": "synthetic patients; these numbers are not results"
+  },
+  {
+   "control": "tcga_rehearsal",
+   "must_yield": "completes without error; numbers are not results",
+   "reference_scale": "TCGA-GBM log2(FPKM + 1), n=284, built 2026-11-28T06:48:58Z",
+   "survival_model": {
+    "features": [
+     "age",
+     "sex",
+     "treatment_arm"
+    ],
+    "n_fit": 570,
+    "internal_cindex": 0.6520385967289122
+   },
+   "n_patients": 50,
+   "mean_baseline_rmst_months": 13.794531973045602,
+   "t4_distinct_configs_top5": 6,
+   "t4_distinct_configs_best_only": 2,
+   "t4_regret_reduction_pct": 100.0,
+   "t4_regret_saturated": true,
+   "t4_mean_advantage_months": 0.20764767585186136,
+   "t4_gp_won_every_patient": true,
+   "t5_success_fraction": 0.0,
+   "t5_harm_fraction": 0.0,
+   "mean_gain_months": 0.5855327279304328,
+   "passed": true,
+   "note": "a rehearsal on development data with simulated tropism inputs. NOT a result, never reported as one, and no CGGA path was opened."
   }
  ],
  "all_passed": true

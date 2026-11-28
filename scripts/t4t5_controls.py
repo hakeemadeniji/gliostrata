@@ -108,8 +108,21 @@ class PatientScorer:
 
 
 def _distinctness(config: Configuration) -> tuple[str, str, int]:
-    """Item 11(f) of item 4: carrier, payload and NUMBER of sites; dose and schedule ignored."""
+    """Item 4's registered rule: carrier, payload and NUMBER of sites; dose and schedule
+    ignored. Two configurations are the same if and only if these three agree."""
     return (config.cell_type, config.payload, config.n_injection_sites)
+
+
+def _top_k_keys(result, k: int = 5) -> set[tuple[str, str, int]]:
+    """The distinctness keys of a patient's top k configurations.
+
+    T4's registered metric counts distinct configurations **in the top 5** across the
+    patients, not the single best per patient (item 2's threshold table, with item 4's
+    equivalence rule). Counting only the best would be a different, stricter quantity, so a
+    rehearsal that did that would not be rehearsing T4.
+    """
+    order = np.argsort(np.asarray(result.values, dtype=float))[::-1][:k]
+    return {_distinctness(result.configs[int(i)]) for i in order}
 
 
 def _synthetic_scorer(params: ParameterSet, rng: np.random.Generator,
@@ -193,6 +206,8 @@ def control_synthetic(params: ParameterSet, n_patients: int = 10, budget: int = 
         gain = scorer.gain(gp.best_config)
         rows.append({"patient": index, "best_rmst": gp.best_value, "gain_months": gain,
                      "config": gp.best_config.to_dict(),
+                     "top5_keys": sorted(_top_k_keys(gp)),
+                     "advantage_months": gp.best_value - rand.best_value,
                      "distinct_key": list(_distinctness(gp.best_config))})
     mean_gp, mean_rs = float(np.mean(regret_gp)), float(np.mean(regret_rs))
     reduction = 100.0 * (1.0 - mean_gp / mean_rs) if mean_rs > 0 else float("nan")
@@ -200,8 +215,14 @@ def control_synthetic(params: ParameterSet, n_patients: int = 10, budget: int = 
     return {"control": "synthetic_dry_run",
             "must_yield": "completes and writes a verdict of the registered shape",
             "n_patients": n_patients, "budget": budget,
-            "t4_distinct_configs": len({tuple(r["distinct_key"]) for r in rows}),
+            "t4_distinct_configs_top5": len(
+                {k for r in rows for k in map(tuple, r["top5_keys"])}),
+            "t4_distinct_configs_best_only": len({tuple(r["distinct_key"]) for r in rows}),
             "t4_regret_reduction_pct": reduction,
+            "t4_regret_saturated": bool(mean_gp == 0.0),
+            "t4_mean_advantage_months": float(np.mean([r["advantage_months"] for r in rows])),
+            "t4_gp_won_every_patient": bool(all(
+                r["advantage_months"] >= 0 for r in rows)),
             "t5_success_fraction": float(np.mean([g >= 3.0 for g in gains])),
             "t5_harm_fraction": float(np.mean([g < 0.0 for g in gains])),
             "mean_gain_months": float(np.mean(gains)),
@@ -268,6 +289,8 @@ def control_tcga(params: ParameterSet, budget: int = 60, max_patients: int = 50)
         regret_rs.append(best - rand.best_value)
         rows.append({"gain_months": scorer.gain(gp.best_config),
                      "baseline_rmst": scorer.baseline_rmst,
+                     "top5_keys": sorted(_top_k_keys(gp)),
+                     "advantage_months": gp.best_value - rand.best_value,
                      "distinct_key": list(_distinctness(gp.best_config))})
     mean_gp, mean_rs = float(np.mean(regret_gp)), float(np.mean(regret_rs))
     reduction = 100.0 * (1.0 - mean_gp / mean_rs) if mean_rs > 0 else float("nan")
@@ -280,8 +303,14 @@ def control_tcga(params: ParameterSet, budget: int = 60, max_patients: int = 50)
                                "internal_cindex": fitted.internal_cindex},
             "n_patients": int(len(rows)),
             "mean_baseline_rmst_months": float(np.mean([r["baseline_rmst"] for r in rows])),
-            "t4_distinct_configs": len({tuple(r["distinct_key"]) for r in rows}),
+            "t4_distinct_configs_top5": len(
+                {k for r in rows for k in map(tuple, r["top5_keys"])}),
+            "t4_distinct_configs_best_only": len({tuple(r["distinct_key"]) for r in rows}),
             "t4_regret_reduction_pct": reduction,
+            "t4_regret_saturated": bool(mean_gp == 0.0),
+            "t4_mean_advantage_months": float(np.mean([r["advantage_months"] for r in rows])),
+            "t4_gp_won_every_patient": bool(all(
+                r["advantage_months"] >= 0 for r in rows)),
             "t5_success_fraction": float(np.mean([g >= 3.0 for g in gains])),
             "t5_harm_fraction": float(np.mean([g < 0.0 for g in gains])),
             "mean_gain_months": float(np.mean(gains)),
