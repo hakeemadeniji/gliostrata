@@ -302,6 +302,9 @@ the module is "uncalibrated" (item 8) and the Emax values stay assumed regardles
 **Feasibility and time.** Pure NumPy, about 3 to 5 weeks of work for one analyst (module,
 tests, TCGA-only dry run, checksums, amendment text). Each evaluation is microseconds, so
 T4 (6000 evaluations) and T5 are trivial. Can be frozen in January 2027.
+**[Measured 2026-11-28: wrong. The objective is microseconds; the GP surrogate refit around it
+is not. One patient at budget 60, both methods, takes 33.3 s. See section 7.3 of
+`docs/project_record/07_timeline_2026_11_28.md` for what this does to the sensitivity plan.]**
 
 ### Design B: reduced-order mechanistic simulator (coupled PDE, deterministic)
 
@@ -407,6 +410,15 @@ months. **Not freezable by 2027-06-30 and not recommended.**
    gain = 0 for every patient and harm = the toxicity term only; (iii) the synthetic dry run
    of section 3.8; (iv) the TCGA-only run of the whole T4/T5 pipeline on the held-out TCGA
    split before the CGGA read, to catch bugs without touching sealed data.
+
+> **Superseded 2026-11-28.** Every item in this timeline was finished on 2026-11-28, about
+> three months early, so its dates no longer mean anything; see
+> `docs/project_record/07_timeline_2026_11_28.md`. Two of this section's estimates were wrong
+> in opposite directions: the build estimate was about 10x too long, and the claim above that
+> "each evaluation is microseconds, so T4 and T5 are trivial" costed the objective instead of
+> the GP surrogate around it. Measured, one patient at the registered budget of 60 takes
+> **33.3 s**, so a T4 plus T5 run is about two hours, and section 5's 1000-draw Latin
+> hypercube would be **103 days** if each draw re-ran the optimiser rather than re-scoring.
 
 **Timeline (proposed).** Decision on this document by 2026-12-15. Module, tests and TCGA
 dry run by 2027-01-31. Draft amendment text, checksums and the proposed sensitivity ranges

@@ -331,6 +331,13 @@ Found in stage 3b (2026-11-27), not fixed:
 
 ## 5.6 Milestones and publication plan, as stated in the protocol
 
+> **Dates superseded 2026-11-28** by `07_timeline_2026_11_28.md`. The schedule below was
+> written when the T4/T5 build was the critical path; that build finished about three months
+> early, and the critical path is now the OSF DOI and then the manuscript. The registered
+> dates (2027-01-08, 2027-02-28, 2027-06-30) are unchanged.
+
+
+
 The protocol's eight-month map, unchanged since it was written:
 
 | Month | Milestone | Tests |

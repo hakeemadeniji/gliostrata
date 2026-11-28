@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — timeline reformulated against measured velocity (2026-11-28)
+- `docs/project_record/07_timeline_2026_11_28.md`. The T4/T5 build schedule finished about
+  three months early, so its dates are restated. No registered deadline changes.
+- **The design document's compute claim was wrong by five orders of magnitude** where it
+  mattered: "each evaluation is microseconds, so T4 and T5 are trivial" costed the objective,
+  not the GP surrogate around it. Measured: **33.3 s** per patient at the registered budget of
+  60, so a T4+T5 run is ~2 h — fine — but §5's 1000-draw Latin hypercube would be **103 days**
+  if each draw re-optimises rather than re-scores (a 225,000× difference).
+- The sensitivity plan therefore needs splitting into a re-scoring tier (1000 draws, ~1 min)
+  and a re-optimising tier (~10 settings, ~1 h) before it is run. That is a working plan, not
+  registered text, so no amendment is needed — but it must be written down before the
+  analyses run rather than retrofitted around a slow script.
+- Both superseded claims are annotated at their source in `docs/t4t5_model_design.md` rather
+  than only corrected elsewhere.
+
 ### Added — publication figures on one validated visual system (2026-11-28)
 - `src/gliostrata/reporting/figures.py` holds the style; `scripts/t4t5_figures.py` draws
   four figures from committed result files, never from numbers typed into the script.
