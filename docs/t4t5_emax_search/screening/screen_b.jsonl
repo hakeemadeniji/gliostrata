@@ -1,0 +1,108 @@
+{"pmid": "37061388", "payload": "CRAd", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "we conducted a first-in-human phase 1 clinical trial", "note": "Review; human trial summary."}
+{"pmid": "36077380", "payload": "CRAd", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Oncolytic XVir-N-31 in humanized mouse GBM model with contralateral-hemisphere tumours."}
+{"pmid": "35767439", "payload": "CRAd", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "patients with newly diagnosed DIPG", "note": "Human phase I trial only."}
+{"pmid": "31432139", "payload": "CRAd", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "mice exhibited a prolonged mean and median survival following single tumor irradiation", "note": "XVir-N-31 mouse glioma model; intracranial vs other site not stated."}
+{"pmid": "29179527", "payload": "CRAd", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review discusses the strengths and weaknesses", "note": "Review."}
+{"pmid": "23926209", "payload": "CRAd", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "median survival of mice bearing patient-derived GBM43 glioma xenografts", "note": "CRAd-S-pk7 NSC study; implantation site not stated in abstract."}
+{"pmid": "23821758", "payload": "CRAd", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "CRAd-S-pk7 in NSC carrier; mice with human GBM, migration to contralateral hemisphere."}
+{"pmid": "21718006", "payload": "CRAd", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Oncolytic adenovirus in NSC/MSC carriers, orthotopic glioma model."}
+{"pmid": "21629227", "payload": "CRAd", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "CRAd-S-pk7 NSC carriers, orthotopic mouse GBM."}
+{"pmid": "19920199", "payload": "CRAd", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Delta24-RGD in hMSC, orthotopic U87MG/U251 xenografts."}
+{"pmid": "43067423", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "Pt(IV) prodrug", "note": "Chemical Pt prodrug, no delivered enzyme."}
+{"pmid": "40119786", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "PEG-ss-Dox and apatinib", "note": "Nanoparticle prodrug, no activating enzyme."}
+{"pmid": "39341660", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This chapter describes the latest developments", "note": "Review chapter."}
+{"pmid": "39286083", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "CD/5-FC lentiviral gene therapy, rats with intracranial C6 glioma."}
+{"pmid": "37494541", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "LP-184 is an acylfulvene-derived prodrug activated by the oxidoreductase PTGR1", "note": "Endogenous enzyme activation, no delivered enzyme."}
+{"pmid": "37420122", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "xenograft tumor mice", "note": "iNSC-TK/GCV; tumour site not stated in abstract."}
+{"pmid": "37064879", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "peptide prodrug with a Cat-B-responsive linker", "note": "Endogenous cathepsin B activation; no delivered enzyme."}
+{"pmid": "36349615", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "Pt(IV) cisplatin prodrug", "note": "Chemical prodrug, no delivered enzyme."}
+{"pmid": "36226069", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2", "P4"], "quote": "phase 2, dual center", "note": "Human clinical trial of hypoxia-activated prodrug."}
+{"pmid": "35017150", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "using a syngeneic murine GBM model", "note": "CAN-2409 (replication-deficient Ad-HSV-tk) with GCV/valacyclovir; model site not stated."}
+{"pmid": "34012924", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "Metformin (MET) as add-on therapy to Temozolomide", "note": "No enzyme-prodrug pair."}
+{"pmid": "33546301", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2", "P4"], "quote": "Polymer Pro-Drug Nanoparticles", "note": "In vitro chemical prodrug."}
+{"pmid": "33463272", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "HSV-tk/GCV nanoparticle gene therapy, orthotopic human GBM xenograft."}
+{"pmid": "33400737", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P1", "P4"], "quote": "We also discuss immunotherapeutic interventions currently being implemented", "note": "TK/Flt3L brainstem glioma; perspective-like text, ganciclovir not stated."}
+{"pmid": "33215345", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "systematic review and evidence-based guidelines", "note": "Systematic review/guideline."}
+{"pmid": "32439343", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "CD/5-FC with rHSV-1 in orthotopic glioma xenografts."}
+{"pmid": "32332014", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P4"], "quote": "adenoviruses expressing thymidine kinase (TK)", "note": "Ad-TK/Flt3L in intracranial brainstem glioma; ganciclovir not named in abstract."}
+{"pmid": "32109370", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "tNSC-TK plus GCV, resected orthotopic GBM xenografts."}
+{"pmid": "32093290", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "GALV-RRV CD/NTR prodrug activator, intracerebral RG-2 rat glioma."}
+{"pmid": "31909530", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "Female Wistar rats were inoculated with 106 C6 glioma cells", "note": "Lentiviral HSV-TK/GCV in C6 rats; intracranial site not stated explicitly."}
+{"pmid": "30257000", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "OEC-delivered CD::UPRT plus 5-FC, mouse glioma delivered via nasal route to brain tumour."}
+{"pmid": "29660022", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P4"], "quote": "Tie2-TK-IRES-GFP mice", "note": "HSV-TK expressed in host endothelium of transgenic mice with GCV; not delivered to tumour as therapy; intracranial glioma."}
+{"pmid": "28860082", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2", "P4"], "quote": "U87MG glioblastoma cell line", "note": "In vitro memantine derivatives."}
+{"pmid": "28720549", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "The long and winding road from the laboratory to the clinical trial follows below.", "note": "Review."}
+{"pmid": "28148846", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "h-iNSC-TK/GCV in patient-derived GBM xenografts incl. resection-cavity model."}
+{"pmid": "28129117", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P2", "P4"], "quote": "herpes simplex type-I thymidine kinase (TK) plus Fms-like tyrosine kinase ligand (Flt3L)", "note": "TK/Flt3L gene therapy; tumour site and ganciclovir not stated in abstract."}
+{"pmid": "27976583", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "PTX prodrug (PTX-SS-C18) conjugate", "note": "Chemical prodrug, no delivered enzyme."}
+{"pmid": "27288077", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "A Phase I, first in person trial, to test whether reengineering the brain immune system is potentially therapeutic is ongoing", "note": "Review."}
+{"pmid": "27287110", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "prodrug (Lf-HA-DOX)", "note": "Chemical prodrug, no delivered enzyme."}
+{"pmid": "27166379", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Toca 511 (CD RRV) plus 5-FC in orthotopic rat/mouse glioma."}
+{"pmid": "25677185", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4", "P1"], "quote": "MAO-B-selectively activated prodrug", "note": "Endogenous MAO-B activation; in vitro only."}
+{"pmid": "25379024", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "serum albumin-binding doxorubicin (Doxo), aldoxorubicin", "note": "Chemical prodrug, no delivered enzyme."}
+{"pmid": "24756350", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "systematic review and meta analysis", "note": "Meta-analysis of human trials."}
+{"pmid": "24501391", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Ad-TK/Ad-Flt3L plus GCV and TMZ, intracranial mouse GBM."}
+{"pmid": "26056588", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "In this review, we will discuss", "note": "Review."}
+{"pmid": "23969884", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Toca 511 CD plus 5-FC with TMZ, orthotopic mouse glioma."}
+{"pmid": "23557138", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "nanometer-sized prodrug (nanoprodrug) of camptothecin", "note": "Chemical prodrug, no delivered enzyme."}
+{"pmid": "22996231", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Ad-Flt3L/Ad-TK plus GCV in orthotopic RG2 rat glioma."}
+{"pmid": "22149031", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "Evaluation of: Chiocca EA", "note": "Comment on human trial."}
+{"pmid": "21844505", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "Thirteen patients were enrolled", "note": "Human phase IB trial."}
+{"pmid": "21505426", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P2", "P4"], "quote": "In a model of GBM recurrence, we demonstrate", "note": "Flt3L/TK adenoviral therapy; host species/site and ganciclovir not stated in abstract."}
+{"pmid": "17522334", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "bifunctional prodrug", "note": "Chemical prodrug, no delivered enzyme."}
+{"pmid": "17409449", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Replication-competent Ad expressing CD::UPRT plus 5-FC, intracranial glioma xenografts."}
+{"pmid": "16954557", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P2", "P4"], "quote": "nude mice bearing subcutaneous U87 xenografts", "note": "Subcutaneous only; replication-deficient vector imaging study."}
+{"pmid": "16095972", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "current clinical status", "note": "Review."}
+{"pmid": "15072465", "payload": "prodrug_enzyme", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "Ad-HSV-TK plus GCV and radiation, intracerebral U87 xenografts in nude mice."}
+{"pmid": "14682377", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "phase I/II multi-institutional trial", "note": "Human trial."}
+{"pmid": "12788659", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "we treated 14 patients", "note": "Human phase I trial."}
+{"pmid": "12481438", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P4"], "quote": "Capecitabine (a novel, fluoropyrimidine prodrug)", "note": "Endogenous enzyme only, no delivered enzyme; expression study."}
+{"pmid": "12125988", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2", "P4"], "quote": "32 patients with high-grade gliomas", "note": "Retrospective human temozolomide study."}
+{"pmid": "11096443", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "phase III, multicenter, randomized, open-label", "note": "Human trial."}
+{"pmid": "21390812", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P1"], "quote": "HSV-1 Vectors for Gene Therapy of Experimental CNS Tumors", "note": "Overview-type chapter text, no experiment described; may contain methods."}
+{"pmid": "10515452", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "In 48 patients", "note": "Human trial."}
+{"pmid": "9853526", "payload": "prodrug_enzyme", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "Twelve patients with recurrent glioblastoma were treated", "note": "Human trial."}
+{"pmid": "9195489", "payload": "prodrug_enzyme", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "rats with 9L-tk tumors", "note": "HSV-tk plus acyclovir in rat 9L glioma; tumour site not stated."}
+{"pmid": "42990810", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "Twenty-six patients were enrolled", "note": "Human trial."}
+{"pmid": "42940191", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review looks at", "note": "Review."}
+{"pmid": "42657603", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Then we reviewed 5 convergent engineering strategies", "note": "Review."}
+{"pmid": "42573529", "payload": "CAR", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "B7-H3 CAR-T, orthotopic DHG xenograft models with survival extension."}
+{"pmid": "42568366", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "narrative review", "note": "Review."}
+{"pmid": "42503899", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "phase 1 study of repeated intracerebroventricular", "note": "Human trial."}
+{"pmid": "42396877", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "In this review, we summarize", "note": "Review."}
+{"pmid": "42377714", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Overcoming resistance in glioblastoma immunotherapy: lessons from the past", "note": "Review."}
+{"pmid": "42296961", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "A recent phase 1 trial of intracerebroventricular", "note": "Human trial correlative study."}
+{"pmid": "42295570", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "A systematic review was conducted", "note": "Systematic review."}
+{"pmid": "41961113", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Targeting the COX-2/PGE2 axis to enhance NK and T cell immunotherapy in brain tumors", "note": "Review."}
+{"pmid": "41613141", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "B cell immunity and therapeutic opportunities in brain metastases", "note": "Review on brain metastases."}
+{"pmid": "41495049", "payload": "CAR", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "preclinical characterization and phase I trial", "note": "Human trial plus preclinical characterisation; animal glioma model not stated."}
+{"pmid": "41381983", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "We review evidence for alkylators", "note": "Review."}
+{"pmid": "41373591", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review aims to offer an exhaustive overview", "note": "Review."}
+{"pmid": "41372729", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Emerging therapies for glioblastoma", "note": "Review."}
+{"pmid": "41362037", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Current Status and Future Perspectives of Clinical Trials", "note": "Review."}
+{"pmid": "41176315", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review synthesizes recent clinical and mechanistic data", "note": "Review."}
+{"pmid": "41123743", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review provides a comprehensive overview", "note": "Review."}
+{"pmid": "41071178", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "In this comprehensive review", "note": "Review of chlorotoxin."}
+{"pmid": "40223940", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review explores the key challenges", "note": "Review."}
+{"pmid": "40214448", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "The goal of this review", "note": "Review."}
+{"pmid": "39985914", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Unlocking the code: The role of molecular and genetic profiling", "note": "Review."}
+{"pmid": "39775044", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "phase 1 clinical trial of repetitive intracerebroventricular", "note": "Human trial."}
+{"pmid": "39095594", "payload": "CAR", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "cell-line-derived xenograft (CDX) models of recurrent GBM", "note": "ROBO1 CAR T; intracranial implantation not explicit in abstract."}
+{"pmid": "38928445", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "This review seeks to provide readers", "note": "Review."}
+{"pmid": "38626338", "payload": "CAR", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "We used a mouse model of GBM", "note": "CAR-T plus PLX liposome; site of GBM model not stated."}
+{"pmid": "38023712", "payload": "CAR", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "iNSC cytokine delivery plus CAR-T, orthotopic GBM xenografts, median survival reported."}
+{"pmid": "37661178", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "the review explores", "note": "Review."}
+{"pmid": "37637064", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "patient-derived DIPG cell lines", "note": "In vitro proteomic target discovery."}
+{"pmid": "37420122", "payload": "CAR", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "xenograft tumor mice", "note": "iNSC-TK plus GD2 CAR-NK; tumour site not stated in abstract."}
+{"pmid": "37124134", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "In this review, we provide an overview", "note": "Review."}
+{"pmid": "35118842", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Current Immunotherapeutic Approaches for Malignant Gliomas", "note": "Review."}
+{"pmid": "34825292", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "In the current review, we present", "note": "Review."}
+{"pmid": "34054867", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Herein, we review the primary ongoing immunotherapy", "note": "Review."}
+{"pmid": "34031054", "payload": "CAR", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "EGFRvIII CAR T with LIPU BBB opening in intracranial glioma models with survival data."}
+{"pmid": "31896081", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "Progress in diffuse intrinsic pontine glioma: advocating for stereotactic biopsy", "note": "Perspective/review, no CAR experiment."}
+{"pmid": "31798595", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1"], "quote": "CAR-Engineered NK Cells for the Treatment of Glioblastoma: Turning Innate Effectors", "note": "Review."}
+{"pmid": "31485480", "payload": "CAR", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "B7-H3 CAR-T, orthotopic GBM models with median survival."}
+{"pmid": "29950117", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2", "P4"], "quote": "Emerging patents in the therapeutic areas of glioma", "note": "Patent review."}
+{"pmid": "26640245", "payload": "CAR", "decision": "INCLUDE", "failed_criteria": [], "quote": "", "note": "ErbB2 CAR NK-92, orthotopic human and murine GBM xenografts."}
+{"pmid": "25962108", "payload": "CAR", "decision": "UNCLEAR", "failed_criteria": ["P2"], "quote": "established subcutaneous U87-MG tumor xenografts", "note": "EGFRvIII CAR-NK; xenografts appear subcutaneous but CXCR4 part site unstated."}
+{"pmid": "22780919", "payload": "CAR", "decision": "EXCLUDE", "failed_criteria": ["P1", "P2"], "quote": "T cells from glioblastoma patients could be genetically engineered", "note": "In vitro CAR characterisation, no animal experiment in abstract."}

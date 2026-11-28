@@ -1,0 +1,22 @@
+{
+ "registered_under": "docs/preregistration.md section 2.2 item 11 (i.3) and (i.4)",
+ "adjudicated_by": "the session lead (Claude), after two independent screens",
+ "n_records": 108,
+ "n_agreed": 103,
+ "agreement_rate": 0.9537,
+ "n_disagreements": 5,
+ "include_vs_exclude_conflicts": 0,
+ "adjudication_rule": "A disagreement resolves to whichever decision carries the record forward to stage 2. Between INCLUDE and UNCLEAR it resolves to UNCLEAR: both are carried forward, but UNCLEAR keeps the unresolved criterion visible rather than hiding it. EXCLUDE survives only where both screens agree. The rule is mechanical, so no record's fate turns on the adjudicator's view of the paper.",
+ "resolved": {
+  "EXCLUDE": 68,
+  "INCLUDE": 23,
+  "UNCLEAR": 17
+ },
+ "n_carried_to_stage_2": 40,
+ "carried_by_payload": {
+  "CRAd": 7,
+  "prodrug_enzyme": 23,
+  "CAR": 10
+ },
+ "stage_2_note": "Stage 2 verifies P2, P3 and P4 from full text for EVERY carried record, not only the UNCLEAR ones. Both screens flagged agreed-INCLUDE abstracts where the intracranial site was implied rather than stated; full-text verification settles those too."
+}

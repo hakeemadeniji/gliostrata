@@ -1,0 +1,25 @@
+{
+ "screener": "A",
+ "n_records": 108,
+ "n_include": 27,
+ "n_exclude": 69,
+ "n_unclear": 12,
+ "by_payload": {
+  "CRAd": {
+   "n_include": 7,
+   "n_exclude": 3,
+   "n_unclear": 0
+  },
+  "prodrug_enzyme": {
+   "n_include": 14,
+   "n_exclude": 32,
+   "n_unclear": 9
+  },
+  "CAR": {
+   "n_include": 6,
+   "n_exclude": 34,
+   "n_unclear": 3
+  }
+ },
+ "criteria_version": "pre-registration 2.2 item 11 (i.3)"
+}
