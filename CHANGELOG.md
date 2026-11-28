@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Registered — the Emax evidence base is closed (2026-11-27, item 11(i.8))
+- The project lead retrieved the paywalled articles manually (19 PDF files). PMID 23969884
+  and PMID 21390812 could not be obtained; they fail P3 for inaccessibility and are reported.
+- Item 11(i.8) closes the evidence base **before any of the 19 files was opened**: no article is
+  added afterwards, whatever the result. Closing now rather than later was chosen because
+  retrieval was exhausted.
+- The PDFs live in `data/external/t4t5_emax_fulltext_manual/` (git-ignored). They had been
+  placed in the repository root, where the next `git add -A` would have published 185 MB of
+  copyrighted files to the public repository; moved before any commit.
+
 ### Added — the Emax evidence base, computed but PROVISIONAL (2026-11-27)
 - Full-text stage complete for the 18 open-access articles. Dual independent extraction with
   **zero** disagreements on any median across all 18 rows, and one control-arm-kind

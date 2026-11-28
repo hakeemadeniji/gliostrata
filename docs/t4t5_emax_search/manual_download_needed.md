@@ -57,3 +57,18 @@ What is needed from each: the **treated and control median survival** (P3) and *
 ## If a paper cannot be obtained
 
 It fails P3 and is excluded, with that reason recorded — not silently dropped. Item 11(i.2) takes the median over the studies that *do* qualify, so an unobtainable paper narrows the evidence base rather than biasing it in a known direction. The count excluded for inaccessibility is reported with the result.
+
+## Outcome (2026-11-27)
+
+The project lead retrieved the paywalled articles manually and supplied **19 PDF files**.
+Two could not be obtained:
+
+| PMID | Payload | Why it matters |
+|---|---|---|
+| 23969884 | prodrug_enzyme | Toca 511 + 5-FC (*Cancer Gene Ther* 2013). Passed stage 1; a genuine loss. |
+| 21390812 | prodrug_enzyme | A 2000 methods chapter. Both screeners flagged it as likely to fail P1, so its absence probably changes nothing. |
+
+The evidence base was then **closed** by pre-registration item 11(i.8), before any of the 19
+files was opened. No article is added after that point, whatever the result. The files are
+kept in `data/external/t4t5_emax_fulltext_manual/`, which git ignores: they are copyrighted
+and the repository is public. Only the extraction from them is committed.
