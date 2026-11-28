@@ -1,16 +1,16 @@
 {
- "checked_at_utc": "2026-11-28T06:19:10Z",
+ "checked_at_utc": "2026-11-28T06:24:50Z",
  "csv": "docs/t4t5_emax_search/manual_extraction/manual_extraction.csv",
  "n_rows": 20,
- "n_filled": 17,
- "n_blank": 3,
+ "n_filled": 20,
+ "n_blank": 0,
  "n_problems": 0,
  "problems": [],
  "ok": true,
  "control_arm_kinds": {
-  "vehicle": 9,
+  "vehicle": 10,
   "active_therapeutic": 2,
-  "uncertain": 4,
+  "uncertain": 6,
   "untreated": 2
  }
 }

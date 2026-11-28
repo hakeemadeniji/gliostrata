@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Closed — the Emax evidence base is complete (2026-11-27)
+- The last two articles were retrieved against their corrected identifiers and extracted. All
+  three batch-3 rows agreed between both readers. 38 of 40 rows extracted; the remaining 2 are
+  the articles item 11(i.8) records as unobtainable, which fail P3 and are reported as such.
+- **Final values:** CRAd ratio 1.1250, Emax 0.0589, HR **0.9428** (n=3); prodrug_enzyme ratio
+  1.5400, Emax 0.2159, HR **0.8058** (n=10); CAR ratio 2.6913, Emax 0.4950, HR **0.6096**
+  (n=1). Item 11(i.6)'s advance expectation holds for every payload.
+- `emax_result.md` now distinguishes a closed evidence base from an outstanding one, so the
+  two registered-unobtainable rows no longer make the result read as provisional for ever.
+- Known weakness, reported rather than patched: **CAR rests on a single study.** 3 of its 4
+  eligible studies have `uncertain` controls (irrelevant-specificity CAR products and
+  undescribed comparators). The registered rule sets no minimum n, and adding one now — with
+  CAR's n and its being the largest Emax both visible — is precisely the change the
+  registration exists to prevent.
+
 ### Added — 17 retrieved papers extracted; the picture changes (2026-11-27)
 - `pdftotext` converted all 17 retrieved PDFs, so the extraction ran here after all. Four
   readers, two independent per article, over two batches split by payload. **2 disagreements in

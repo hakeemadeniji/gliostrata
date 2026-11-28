@@ -42,6 +42,10 @@ OUT_MD = SEARCH_DIR / "emax_result.md"
 PARAMS = Path("configs/response_surface_v1.yaml")
 PAYLOADS = ("CRAd", "prodrug_enzyme", "CAR")
 PRIMARY_CONTROL_KINDS = frozenset({"untreated", "vehicle", "mock_or_reporter_vector"})
+# The two articles item 11(i.8) records as unobtainable. They fail P3 and are counted and
+# reported, but they are *closed*, not outstanding: they must not make the result provisional,
+# or it would stay provisional for ever.
+UNOBTAINABLE = frozenset({"23969884", "21390812"})
 # The 3-month gain bar of item 11(c) corresponds to roughly this hazard ratio on the derived
 # Stupp curve (docs/t4t5_model_design.md section 2.1). Reported for context only: it is not
 # a threshold and nothing here is compared against it to decide anything.
@@ -114,6 +118,11 @@ def compute() -> dict:
         "translation_factor_status": "assumed, declared as assumed wherever reported",
         "n_rows": len(rows),
         "n_abstract_only": sum(1 for r in rows if r.get("source") == "abstract_only"),
+        "n_awaiting_full_text": sum(
+            1 for r in rows if r.get("source") == "abstract_only"
+            and r["pmid"] not in UNOBTAINABLE),
+        "n_unobtainable_rows": sum(
+            1 for r in rows if r["pmid"] in UNOBTAINABLE),
         "payloads": {},
         "t5_break_even_hazard_ratio_for_context": T5_BREAK_EVEN_HR,
     }
@@ -169,12 +178,25 @@ def _fmt(value: float | None, places: int = 4) -> str:
 
 
 def _markdown(result: dict) -> str:
-    blocked = result.get("n_abstract_only", 0)
+    blocked = result.get("n_awaiting_full_text", 0)
     lines = [
         "# Emax, computed under item 11(i)", "",
         f"Computed {result['computed_at_utc']} from "
         "`docs/t4t5_emax_search/screening/extraction_final.jsonl`.", "",
     ]
+    if not blocked:
+        lines += [
+            "> ## The evidence base is CLOSED",
+            ">",
+            f"> Every obtainable article has been extracted. "
+            f"{result.get('n_unobtainable_rows', 0)} row(s) are the articles item 11(i.8) "
+            "records as unobtainable; they fail P3, and are counted and reported here rather "
+            "than quietly dropped.",
+            ">",
+            "> These are therefore the values for the freeze amendment of item 11(e) and (m). "
+            "Entering them in `configs/response_surface_v1.yaml` remains a deliberate step, "
+            "not a side effect of this computation.", "",
+        ]
     if blocked:
         lines += [
             "> ## PROVISIONAL — not the registered value",
