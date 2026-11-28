@@ -69,17 +69,19 @@ delivery:
   tropism_reference:
     # The standardisation of the tropism score uses a frozen TCGA mean and SD, never a
     # CGGA cohort statistic, so that the sealed cohort cannot leak into the transform.
-    source: "TCGA-GBM log2(CPM + 1), 284 samples, frozen"
+    # Scale is log2(FPKM + 1), matching CGGA's RSEM FPKM release rather than CPM. A CPM
+    # reference offsets every patient's score by -1.36 SD (NSC panel) and -1.47 SD (TGFB1),
+    # which alone would cut the engrafted-dose factor by about a third. Item 11(h) names no
+    # normalisation, so matching the scoring cohort stays inside the registered design.
+    source: "TCGA-GBM log2(FPKM + 1), 284 samples, GDC fpkm_unstranded, frozen"
     file: "configs/response_surface_v1_tropism_reference.json"
     present: true
-    sha256: "6ea8bbbf285137eba21aa77deb65792de0a780dd8963892d975caad08c958ee5"
+    sha256: "c5288743a1a25d405c7165d8b7cda7bd16d7e97323de0bc08af8425407cf5df8"
     built_by: "scripts/t4t5_tropism_reference.py build"
-    library_size_universe: "configs/t2_comparator/gene_universe.txt (33,212 symbols)"
     scale_caveat: >-
-      The reference is log2(CPM + 1) from TCGA counts. CGGA's RNA-seq release is RSEM FPKM, a
-      different normalisation, so a standardised score computed on it carries a systematic
-      offset. The offset is common to every patient and does not reorder them, but it moves
-      the absolute level of the engrafted dose. See open_questions.tropism_scale.
+      TCGA's FPKM here is GDC's STAR-derived fpkm_unstranded; CGGA's is RSEM FPKM. Both are
+      length-normalised, so the first-order gene-length offset is gone, but a second-order
+      pipeline difference remains. It is reported, not corrected.
 
   # f_k: fraction of injected cells surviving to act.
   cell_fraction_acting:
@@ -291,11 +293,11 @@ open_questions:
     a confirmed untreated control, so none is yet known to be in the item 11(i.7) primary set.
     They are recorded in docs/t4t5_emax_search/screening/ and must not be entered here.
   tropism_scale: >-
-    The tropism reference is built and checksummed (TCGA-GBM, 284 samples, log2(CPM + 1)).
-    What is NOT settled is the scale mismatch it creates: CGGA's RNA-seq release is RSEM FPKM,
-    so standardising CGGA values against TCGA CPM statistics leaves a systematic offset in the
-    tropism score. It is common to all patients and does not reorder them, but it shifts the
-    absolute engrafted dose and so the position on the dose-response curve. Registered item
-    11(h) specifies a per-gene frozen TCGA mean and SD, so the fix is not free: a scale-free
-    alternative (z-scoring each sample across its own genes, as T1's classifier does) would be
-    a design change and must be decided before the freeze, not after seeing a T4 or T5 number.
+    RESOLVED 2026-11-27, before any T4 or T5 number existed. The reference was first built on
+    TCGA log2(CPM + 1), which left a measured offset of -1.36 SD for the NSC panel and -1.47 SD
+    for TGFB1 against CGGA's RSEM FPKM release -- about a third of the engrafted-dose factor,
+    for every patient. Rebuilt on TCGA log2(FPKM + 1) from GDC's fpkm_unstranded column, so the
+    reference and the scoring cohort share a normalisation. Item 11(h) requires a frozen TCGA
+    mean and SD and names no normalisation, so this is an implementation choice inside the
+    registered design, not an amendment to it. The remaining second-order difference between
+    GDC's STAR-derived FPKM and CGGA's RSEM FPKM is disclosed, not corrected.

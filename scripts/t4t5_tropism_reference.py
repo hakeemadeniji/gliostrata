@@ -10,11 +10,16 @@ This builds that reference from TCGA counts and writes
 `configs/response_surface_v1_tropism_reference.json`, to be checksummed in section 8 at the
 freeze alongside the parameter file.
 
-Scale and universe are the project's existing ones, not new choices: symbols are collapsed by
-`collapse_to_symbols` and values are `log2(CPM + 1)` from `log2_cpm`, with the library size
-summed over the same 33,212-symbol universe the T2 comparator used
-(`configs/t2_comparator/gene_universe.txt`). Reusing them means a value here means the same
-thing as a value anywhere else in the project.
+Scale: **log2(FPKM + 1)**, taken from the `fpkm_unstranded` column of the cached GDC files,
+with the counts of every Ensembl id sharing a GENCODE `gene_name` summed as elsewhere in the
+project. FPKM rather than CPM because the cohort this reference will be used to standardise
+(CGGA) publishes RSEM FPKM, and a reference on a different normalisation leaves a systematic
+offset in the score: measured on these same 284 samples it is -1.36 SD for the NSC
+chemoattractant panel and -1.47 SD for TGFB1, which alone would cut the engrafted-dose factor
+by about a third for every patient. Item 11(h) requires a frozen TCGA mean and SD and names no
+normalisation, so matching the scoring cohort is an implementation choice inside the registered
+design. What remains, and is disclosed rather than fixed, is the second-order difference
+between GDC's STAR-derived FPKM and CGGA's RSEM FPKM.
 
 **Only TCGA is read.** No CGGA path is opened, so no read-guard access is recorded. The script
 refuses to overwrite an existing reference, because a frozen reference is frozen.
@@ -28,10 +33,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
-from gliostrata.prediction.geneset_comparator import collapse_to_symbols, log2_cpm
-
+CACHE = Path("data/raw/tcga_gbm/expression/_cache")
 COUNTS = Path("data/raw/tcga_gbm/expression/counts.parquet")
 ANNOTATION = Path("data/raw/tcga_gbm/expression/gene_annotation.parquet")
 UNIVERSE = Path("configs/t2_comparator/gene_universe.txt")
@@ -48,10 +53,10 @@ def build(force: bool = False) -> None:
         raise SystemExit(
             f"{OUT} exists and a frozen reference is never overwritten. Pass --force only to "
             "rebuild one that has not yet been checksummed in section 8.")
-    for path in (COUNTS, ANNOTATION, UNIVERSE, PARAMS):
+    for path in (CACHE, UNIVERSE, PARAMS):
         if not path.exists():
             raise SystemExit(f"{path} not found")
-    if "cgga" in str(COUNTS).lower():
+    if "cgga" in str(CACHE).lower():
         raise SystemExit("the reference must be built from TCGA, never from CGGA")
 
     import yaml
@@ -60,19 +65,26 @@ def build(force: bool = False) -> None:
     wanted = sorted({g for genes in genes_by_carrier.values() for g in genes})
     print(f"tropism genes, from the parameter file: {wanted}")
 
-    counts = pd.read_parquet(COUNTS)
-    annotation = pd.read_parquet(ANNOTATION)
-    universe = [line.strip() for line in UNIVERSE.read_text(encoding="utf-8").splitlines()
-                if line.strip()]
-    print(f"TCGA counts: {counts.shape[0]:,} ids x {counts.shape[1]} samples")
+    files = sorted(CACHE.glob("*.tsv"))
+    if not files:
+        raise SystemExit(f"no cached GDC files under {CACHE}")
+    print(f"reading fpkm_unstranded from {len(files)} cached GDC files")
 
-    by_symbol = collapse_to_symbols(counts, annotation)
-    missing = [g for g in wanted if g not in by_symbol.index]
+    columns: list[pd.Series] = []
+    for path in files:
+        frame = pd.read_csv(path, sep="\t", comment="#",
+                            usecols=["gene_name", "fpkm_unstranded"])
+        frame = frame.dropna(subset=["fpkm_unstranded"])
+        # Sum the ids sharing a GENCODE gene_name, as collapse_to_symbols does for counts.
+        columns.append(frame.groupby("gene_name")["fpkm_unstranded"].sum().rename(path.stem))
+    fpkm = pd.concat(columns, axis=1)
+    missing = [g for g in wanted if g not in fpkm.index]
     if missing:
         raise SystemExit(f"tropism genes absent from TCGA after symbol collapse: {missing}")
-    expression = log2_cpm(by_symbol, universe)
-    print(f"log2(CPM + 1) over the {len(universe):,}-symbol universe: "
-          f"{expression.shape[0]:,} genes x {expression.shape[1]} samples")
+    if fpkm.loc[wanted].isna().to_numpy().any():
+        raise SystemExit("a tropism gene is missing from at least one sample")
+    expression = np.log2(fpkm + 1.0)
+    print(f"log2(FPKM + 1): {expression.shape[0]:,} symbols x {expression.shape[1]} samples")
 
     rows = {}
     for gene in wanted:
@@ -92,24 +104,28 @@ def build(force: bool = False) -> None:
         "built_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "cohort": "TCGA-GBM",
         "n_samples": int(expression.shape[1]),
-        "scale": "log2(CPM + 1)",
-        "library_size_universe": {
-            "file": UNIVERSE.as_posix(), "n_symbols": len(universe),
-            "sha256": _sha256(UNIVERSE),
-        },
+        "scale": "log2(FPKM + 1)",
+        "fpkm_column": "fpkm_unstranded (GDC STAR-derived)",
         "sources": {
-            "counts": {"file": COUNTS.as_posix(), "sha256": _sha256(COUNTS)},
-            "annotation": {"file": ANNOTATION.as_posix(), "sha256": _sha256(ANNOTATION)},
+            "cache_dir": CACHE.as_posix(), "n_files": len(files),
+            "file_manifest_sha256": _sha256(
+                Path("data/raw/tcga_gbm/expression/file_manifest.parquet")),
         },
         "symbol_collapse": "counts of every Ensembl id sharing a GENCODE gene_name are summed",
         "genes_by_carrier": genes_by_carrier,
         "reference": rows,
-        "caveat_scale": (
-            "These are log2(CPM + 1) statistics from TCGA counts. A later cohort scored on a "
-            "different normalisation (CGGA's release is RSEM FPKM) is not on the same scale, "
-            "so the standardised score carries a systematic offset. The offset is common to "
-            "every patient and so does not reorder them, but it does move the absolute level "
-            "of the engrafted dose. Stated here so that it is reported rather than discovered."
+        "scale_rationale": (
+            "FPKM, not CPM, because the cohort this reference standardises (CGGA) publishes "
+            "RSEM FPKM. On these same 284 samples a CPM reference offsets the score by -1.36 "
+            "SD for the NSC panel and -1.47 SD for TGFB1, cutting the engrafted-dose factor "
+            "by about a third for every patient. Item 11(h) names no normalisation, so "
+            "matching the scoring cohort is an implementation choice inside the registered "
+            "design."
+        ),
+        "caveat_remaining": (
+            "TCGA's FPKM here is GDC's STAR-derived fpkm_unstranded; CGGA's is RSEM FPKM. "
+            "Both are length-normalised, so the first-order gene-length offset is removed, "
+            "but a second-order pipeline difference remains and is reported, not corrected."
         ),
     }
     OUT.write_text(json.dumps(document, indent=1) + "\n", encoding="utf-8", newline="\n")

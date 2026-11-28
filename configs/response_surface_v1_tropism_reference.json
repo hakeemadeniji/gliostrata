@@ -1,24 +1,15 @@
 {
  "what": "The frozen TCGA reference the T4/T5 tropism score is standardised against (pre-registration item 11(h)). Never rebuilt from a CGGA statistic.",
  "registered_under": "docs/preregistration.md section 2.2 item 11(h) and 11(n)",
- "built_at_utc": "2026-11-28T06:42:30Z",
+ "built_at_utc": "2026-11-28T06:48:58Z",
  "cohort": "TCGA-GBM",
  "n_samples": 284,
- "scale": "log2(CPM + 1)",
- "library_size_universe": {
-  "file": "configs/t2_comparator/gene_universe.txt",
-  "n_symbols": 33212,
-  "sha256": "92ec3389d8048da964f9a8bc2080ebf4eb9004180de56191c87cecf123ca7c20"
- },
+ "scale": "log2(FPKM + 1)",
+ "fpkm_column": "fpkm_unstranded (GDC STAR-derived)",
  "sources": {
-  "counts": {
-   "file": "data/raw/tcga_gbm/expression/counts.parquet",
-   "sha256": "bc78e730b43d9a187d86dca2d604dec37af7736d0afcb98394b41d4ba1826d48"
-  },
-  "annotation": {
-   "file": "data/raw/tcga_gbm/expression/gene_annotation.parquet",
-   "sha256": "408434126c8e57807d79b0f44ab7b13ccde25699155d8fd0236f9adadba34960"
-  }
+  "cache_dir": "data/raw/tcga_gbm/expression/_cache",
+  "n_files": 284,
+  "file_manifest_sha256": "ce160dd1d59d13299ce8da7d5dba8268e33cbc24c800fd9ac7bd0ac80b435cf1"
  },
  "symbol_collapse": "counts of every Ensembl id sharing a GENCODE gene_name are summed",
  "genes_by_carrier": {
@@ -40,35 +31,36 @@
  },
  "reference": {
   "CCL2": {
-   "mean": 5.33813875639468,
-   "sd": 1.6883082896610555,
-   "min": 0.5574900423794378,
-   "max": 9.484921353677368
+   "mean": 4.4392949654201335,
+   "sd": 1.6168259227295243,
+   "min": 0.3115031154682697,
+   "max": 8.588668168811868
   },
   "CXCL12": {
-   "mean": 4.042499361577359,
-   "sd": 1.3295095177989138,
-   "min": 0.680430878244318,
-   "max": 8.204964133626481
+   "mean": 1.946570961459398,
+   "sd": 0.9895574181906864,
+   "min": 0.15458320905306852,
+   "max": 5.605740253756813
   },
   "PLAU": {
-   "mean": 4.887029624203283,
-   "sd": 1.313949739799698,
-   "min": 1.4429160619637311,
-   "max": 8.504792863224322
+   "mean": 3.482770968144945,
+   "sd": 1.2115903670051513,
+   "min": 0.6565421333499936,
+   "max": 7.00345607095681
   },
   "TGFB1": {
-   "mean": 5.635002770109732,
-   "sd": 1.0899742451285679,
-   "min": 2.3993860512283507,
-   "max": 8.461264686758836
+   "mean": 4.034348659953797,
+   "sd": 0.9834848405352942,
+   "min": 1.198745581844824,
+   "max": 6.728929987796398
   },
   "VEGFA": {
-   "mean": 8.32221456356216,
-   "sd": 1.637422672567246,
-   "min": 3.78241378789697,
-   "max": 11.69730938495321
+   "mean": 4.604772250645609,
+   "sd": 1.5192307363669895,
+   "min": 1.042013896022044,
+   "max": 7.909057818531947
   }
  },
- "caveat_scale": "These are log2(CPM + 1) statistics from TCGA counts. A later cohort scored on a different normalisation (CGGA's release is RSEM FPKM) is not on the same scale, so the standardised score carries a systematic offset. The offset is common to every patient and so does not reorder them, but it does move the absolute level of the engrafted dose. Stated here so that it is reported rather than discovered."
+ "scale_rationale": "FPKM, not CPM, because the cohort this reference standardises (CGGA) publishes RSEM FPKM. On these same 284 samples a CPM reference offsets the score by -1.36 SD for the NSC panel and -1.47 SD for TGFB1, cutting the engrafted-dose factor by about a third for every patient. Item 11(h) names no normalisation, so matching the scoring cohort is an implementation choice inside the registered design.",
+ "caveat_remaining": "TCGA's FPKM here is GDC's STAR-derived fpkm_unstranded; CGGA's is RSEM FPKM. Both are length-normalised, so the first-order gene-length offset is removed, but a second-order pipeline difference remains and is reported, not corrected."
 }

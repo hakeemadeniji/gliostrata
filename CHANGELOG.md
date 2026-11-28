@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — the tropism reference is on FPKM, not CPM (2026-11-27)
+- `scripts/t4t5_tropism_reference.py` now builds the frozen TCGA reference on
+  **log2(FPKM + 1)** from GDC's `fpkm_unstranded`, matching CGGA's RSEM FPKM release.
+- A CPM reference left a measured offset of **-1.36 SD** (NSC chemoattractant panel) and
+  **-1.47 SD** (TGFB1), which alone cuts the engrafted-dose factor by **32.8%** for every
+  patient. Measured on the same 284 samples, not estimated.
+- Not an amendment: item 11(h) requires a frozen TCGA mean and SD and names no normalisation,
+  so matching the scoring cohort is an implementation choice inside the registered design.
+- Disclosed and not corrected: TCGA's FPKM is GDC STAR-derived, CGGA's is RSEM. Both are
+  length-normalised, so the first-order offset is gone and a second-order pipeline difference
+  remains.
+- sha256 `c5288743...`, recorded in the parameter file and asserted against the file on disk
+  by a test — which is what caught the stale checksum when the first edit missed its anchor.
+
 ### Closed — the Emax evidence base is complete (2026-11-27)
 - The last two articles were retrieved against their corrected identifiers and extracted. All
   three batch-3 rows agreed between both readers. 38 of 40 rows extracted; the remaining 2 are
