@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — 17 retrieved papers extracted; the picture changes (2026-11-27)
+- `pdftotext` converted all 17 retrieved PDFs, so the extraction ran here after all. Four
+  readers, two independent per article, over two batches split by payload. **2 disagreements in
+  17 rows**, both resolved to null by the standing rule and both on studies excluded anyway.
+- Still PROVISIONAL: 5 of 40 rows lack full text (2 unobtainable, 3 awaiting retrieval).
+- **CRAd collapses**: HR 0.777 (n=1) to **0.9428** (n=3). Its two newly extracted
+  vehicle-controlled studies give ratios of 1.125 and 1.102 — almost no effect. CRAd
+  previously rested on one study with a ratio of 1.655.
+- **prodrug_enzyme holds**: HR 0.840 to **0.8165**, on 9 primary studies rather than 4.
+- **CAR gains a primary set** (n=1) and leaves the literal fallback: HR 0.5619 to **0.6096**.
+- **Item 11(i.6)'s advance expectation now holds for every payload.** The apparent
+  contradiction for CAR in the previous computation was an artefact of a 2-study fallback set.
+- The withdrawn direction claim is now demonstrably right to have been withdrawn: the
+  narrowing **lowers** Emax for CRAd (HR 0.8483 to 0.9428) and **raises** it slightly for
+  prodrug_enzyme (HR 0.8187 to 0.8165). Payload-dependent, as (i.7) now says.
+
 ### Fixed — DOIs were read from reference lists (2026-11-27)
 - `scripts/t4t5_emax_search.py` took each record's DOI from the last `<ArticleId IdType="doi">`
   in its PubmedArticle element. For any article with a reference list that is a *cited* paper's

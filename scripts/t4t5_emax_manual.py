@@ -37,6 +37,7 @@ SEARCH = Path("docs/t4t5_emax_search")
 CSV_PATH = SEARCH / "manual_extraction" / "manual_extraction.csv"
 FINAL = SEARCH / "screening" / "extraction_final.jsonl"
 REPORT = SEARCH / "manual_extraction" / "validation_report.json"
+SCRATCH_BATCHES = ("batch1", "batch2")
 CONTROL_KINDS = ("untreated", "vehicle", "mock_or_reporter_vector",
                  "active_therapeutic", "uncertain")
 TERNARY = ("yes", "no", "uncertain")
@@ -68,6 +69,10 @@ def _flag(value: str | None) -> bool:
     return (value or "").strip().upper() in {"TRUE", "T", "YES", "Y", "1"}
 
 
+def entry_ratio(row: dict) -> str | None:
+    return row.get("ratio_reported_directly")
+
+
 def validate(verbose: bool = True) -> dict:
     rows = _rows()
     known = {(r["pmid"], r["payload"]) for r in
@@ -90,7 +95,8 @@ def validate(verbose: bool = True) -> dict:
         unit = (row.get("unit") or "").strip().lower()
         kind = (row.get("control_arm_kind") or "").strip()
 
-        if treated is None and control is None and not kind:
+        direct = _num(entry_ratio(row))
+        if treated is None and control is None and direct is None and not kind:
             blank += 1
             continue
         filled += 1
@@ -104,9 +110,9 @@ def validate(verbose: bool = True) -> dict:
 
         if (treated is not None or control is not None) and unit not in UNITS:
             bad(row, f"unit must be one of {UNITS}, got {unit!r}")
-        if (treated is not None or control is not None) \
+        if (treated is not None or control is not None or direct is not None) \
                 and not (row.get("survival_quote") or "").strip():
-            bad(row, "a median was recorded with no survival_quote")
+            bad(row, "a median or ratio was recorded with no survival_quote")
         if treated is not None and control:
             ratio = treated / control
             if not RATIO_SANE[0] <= ratio <= RATIO_SANE[1]:
@@ -164,14 +170,15 @@ def merge() -> None:
             continue
         treated, control = _num(entry.get("treated_median")), _num(entry.get("control_median"))
         kind = (entry.get("control_arm_kind") or "").strip()
-        if treated is None and control is None and not kind:
+        direct = _num(entry_ratio(entry))  # the SHEET's ratio, not the existing row's
+        if treated is None and control is None and direct is None and not kind:
             out.append(row)  # left blank: stays abstract_only with an uncertain control
             continue
         row.update({
             "source": "fulltext_manual",
             "treated_median": treated, "control_median": control,
             "unit": (entry.get("unit") or "").strip().lower() or None,
-            "ratio": None,
+            "ratio": _num(entry.get("ratio_reported_directly")),
             "arm_is_combination": _flag(entry.get("arm_is_combination")),
             "control_arm_kind": kind or "uncertain",
             "p2_intracranial": (entry.get("p2_intracranial") or "uncertain").strip().lower(),
