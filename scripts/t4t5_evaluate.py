@@ -138,9 +138,11 @@ def _top_k_keys(result, k: int = TOP_K) -> set[tuple[str, str, int]]:
 
 # --- the four metrics -------------------------------------------------------------------------
 
-def run_t4(scorers: dict, patient_ids: list[str]) -> dict:
+def run_t4(scorers: dict, patient_ids: list[str], *, progress: bool = True) -> dict:
     rows, regret_gp, regret_rs = [], [], []
     for index, pid in enumerate(patient_ids):
+        if progress and index % 10 == 0:
+            print(f"  T4 {index}/{len(patient_ids)}", flush=True)
         scorer = scorers[pid]
         gp = gp_ei_optimize(scorer.rmst, budget=BUDGET, seed=SEED + index)
         rand = random_search_optimize(scorer.rmst, budget=BUDGET, seed=SEED + index)
@@ -194,9 +196,11 @@ def run_t4(scorers: dict, patient_ids: list[str]) -> dict:
     }
 
 
-def run_t5(scorers: dict, patient_ids: list[str]) -> dict:
+def run_t5(scorers: dict, patient_ids: list[str], *, progress: bool = True) -> dict:
     gains = []
     for index, pid in enumerate(patient_ids):
+        if progress and index % 10 == 0:
+            print(f"  T5 {index}/{len(patient_ids)}", flush=True)
         scorer = scorers[pid]
         gp = gp_ei_optimize(scorer.rmst, budget=BUDGET, seed=SEED + index)
         gains.append({"patient_id": pid, "gain_months": scorer.gain(gp.best_config),
@@ -307,6 +311,8 @@ def dry_run(args) -> None:
         scorers[pid] = scorer
         del index
 
+    print(f"synthetic dry run: {len(ids)} patients, budget {BUDGET} per method",
+          flush=True)
     t4_ids = sorted(ids)[:min(N_T4, len(ids))]
     t4 = run_t4(scorers, t4_ids)
     t5 = run_t5(scorers, sorted(ids))

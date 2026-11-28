@@ -1,0 +1,1596 @@
+{
+ "what": "T4 and T5 end-to-end evaluation",
+ "registered_under": "docs/preregistration.md 2.2 items 4, 5, 7 and 11",
+ "run_at_utc": "2026-11-28T20:34:13Z",
+ "synthetic": true,
+ "parameter_file": "configs/response_surface_v1.yaml",
+ "parameter_sha256": "bd18201156bf5dec8b01bda89a74776cae260eade9c997798da402b3d3786469",
+ "parameters_frozen": false,
+ "budget_per_patient_per_method": 60,
+ "sources": {
+  "note": "synthetic patients; no cohort was read"
+ },
+ "t4": {
+  "n_patients": 50,
+  "distinct_configs_top5": 10,
+  "distinct_ci": [
+   5,
+   10
+  ],
+  "mean_regret_gp": 0.0,
+  "mean_regret_random": 0.2494879426912787,
+  "regret_reduction_pct": 100.0,
+  "regret_reduction_ci": [
+   100.0,
+   100.0
+  ],
+  "regret_saturated": true,
+  "gp_won_every_patient": true,
+  "mean_advantage_months": 0.2494879426912787,
+  "wilcoxon_p": 1.7763568394002505e-15,
+  "n_tied_both_zero": 0,
+  "tie_rule_breached": false
+ },
+ "t5": {
+  "n_patients": 60,
+  "success_fraction": 0.0,
+  "success_ci": [
+   0.0,
+   0.0
+  ],
+  "harm_fraction": 0.0,
+  "harm_ci": [
+   0.0,
+   0.0
+  ],
+  "mean_gain_months": 0.6131737505348875
+ },
+ "t4_per_patient": [
+  {
+   "patient_id": "SYN-000",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.24576144575108572
+  },
+  {
+   "patient_id": "SYN-001",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.2567561524472062
+  },
+  {
+   "patient_id": "SYN-002",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.014822020964093241
+  },
+  {
+   "patient_id": "SYN-003",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.07490726576639872
+  },
+  {
+   "patient_id": "SYN-004",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.3569631058406113
+  },
+  {
+   "patient_id": "SYN-005",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     6
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.31326785072704766
+  },
+  {
+   "patient_id": "SYN-006",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.3395501099410403
+  },
+  {
+   "patient_id": "SYN-007",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.06889944582757579
+  },
+  {
+   "patient_id": "SYN-008",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.2621044490977873
+  },
+  {
+   "patient_id": "SYN-009",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.22318861746001062
+  },
+  {
+   "patient_id": "SYN-010",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.2994647418848544
+  },
+  {
+   "patient_id": "SYN-011",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.47228970491462263
+  },
+  {
+   "patient_id": "SYN-012",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     6
+    ],
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.34848011454296035
+  },
+  {
+   "patient_id": "SYN-013",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.18694607464946955
+  },
+  {
+   "patient_id": "SYN-014",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.4236482610156518
+  },
+  {
+   "patient_id": "SYN-015",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.29391479441131096
+  },
+  {
+   "patient_id": "SYN-016",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.28487095041696797
+  },
+  {
+   "patient_id": "SYN-017",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.11308938284782499
+  },
+  {
+   "patient_id": "SYN-018",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     6
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.07804766448461642
+  },
+  {
+   "patient_id": "SYN-019",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.11936747280740967
+  },
+  {
+   "patient_id": "SYN-020",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.0667048115978961
+  },
+  {
+   "patient_id": "SYN-021",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.4508703246930583
+  },
+  {
+   "patient_id": "SYN-022",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.2030737332942003
+  },
+  {
+   "patient_id": "SYN-023",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.38681637134711977
+  },
+  {
+   "patient_id": "SYN-024",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.13778133767829104
+  },
+  {
+   "patient_id": "SYN-025",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     6
+    ],
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.4999678647673029
+  },
+  {
+   "patient_id": "SYN-026",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.5056320441250026
+  },
+  {
+   "patient_id": "SYN-027",
+   "top5": [
+    [
+     "HB1_F3_line",
+     "combo",
+     7
+    ],
+    [
+     "HB1_F3_line",
+     "combo",
+     8
+    ],
+    [
+     "HB1_F3_line",
+     "prodrug_enzyme",
+     7
+    ],
+    [
+     "HB1_F3_line",
+     "prodrug_enzyme",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.2982152519508183
+  },
+  {
+   "patient_id": "SYN-028",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.32384580507348915
+  },
+  {
+   "patient_id": "SYN-029",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.10794403005361453
+  },
+  {
+   "patient_id": "SYN-030",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.1516335044134962
+  },
+  {
+   "patient_id": "SYN-031",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.18870584772685461
+  },
+  {
+   "patient_id": "SYN-032",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.09501137507061053
+  },
+  {
+   "patient_id": "SYN-033",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.15871071307971008
+  },
+  {
+   "patient_id": "SYN-034",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.39120123992285727
+  },
+  {
+   "patient_id": "SYN-035",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.15328836563519666
+  },
+  {
+   "patient_id": "SYN-036",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.0389929148353545
+  },
+  {
+   "patient_id": "SYN-037",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     6
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.3922985885275079
+  },
+  {
+   "patient_id": "SYN-038",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.17481604713307064
+  },
+  {
+   "patient_id": "SYN-039",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.3916121300446971
+  },
+  {
+   "patient_id": "SYN-040",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.08032825961162438
+  },
+  {
+   "patient_id": "SYN-041",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.1312705652498618
+  },
+  {
+   "patient_id": "SYN-042",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.1816374015092137
+  },
+  {
+   "patient_id": "SYN-043",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.28877153703152025
+  },
+  {
+   "patient_id": "SYN-044",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.3546004312736297
+  },
+  {
+   "patient_id": "SYN-045",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.1742563737073688
+  },
+  {
+   "patient_id": "SYN-046",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.42062285849565484
+  },
+  {
+   "patient_id": "SYN-047",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.1720693404962219
+  },
+  {
+   "patient_id": "SYN-048",
+   "top5": [
+    [
+     "MSC",
+     "combo",
+     7
+    ],
+    [
+     "MSC",
+     "combo",
+     8
+    ]
+   ],
+   "advantage_months": 0.6147006741152712
+  },
+  {
+   "patient_id": "SYN-049",
+   "top5": [
+    [
+     "iPSC-NSC",
+     "CAR",
+     7
+    ],
+    [
+     "iPSC-NSC",
+     "CAR",
+     8
+    ]
+   ],
+   "advantage_months": 0.16267776630487418
+  }
+ ],
+ "t5_per_patient": [
+  {
+   "patient_id": "SYN-000",
+   "gain_months": 0.40011933947919687,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 42271938,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-001",
+   "gain_months": 0.5558503072426006,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 47297024,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-002",
+   "gain_months": 0.3707816217928297,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 38924845,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-003",
+   "gain_months": 0.3403538705089275,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 37689581,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-004",
+   "gain_months": 0.40615552727933135,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 41311796,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-005",
+   "gain_months": 0.7072221429273782,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 49162935,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-006",
+   "gain_months": 0.9419883536901708,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-007",
+   "gain_months": 0.8392850832425083,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 48907920,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-008",
+   "gain_months": 0.6104168347424128,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 47187570,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-009",
+   "gain_months": 0.4895027228428557,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 47941112,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-010",
+   "gain_months": 0.6177943392194862,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 47523435,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-011",
+   "gain_months": 0.8790199767639315,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 49326883,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-012",
+   "gain_months": 0.7300091875022598,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 49677164,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-013",
+   "gain_months": 0.4939389107407095,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 43912500,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-014",
+   "gain_months": 0.7033637883413419,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-015",
+   "gain_months": 0.6183833347965528,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 49726921,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-016",
+   "gain_months": 0.55701462445837,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 43370966,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-017",
+   "gain_months": 0.30462356836060955,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 37445222,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-018",
+   "gain_months": 0.6989695646831535,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-019",
+   "gain_months": 0.8004084511022338,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 47265319,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-020",
+   "gain_months": 0.34459029784665063,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 39601392,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-021",
+   "gain_months": 0.6861103067368557,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 49243893,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-022",
+   "gain_months": 0.6606770641404065,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-023",
+   "gain_months": 0.7244900480146654,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 47629036,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-024",
+   "gain_months": 0.6215146158503746,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 48251743,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-025",
+   "gain_months": 0.8131807369064283,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-026",
+   "gain_months": 0.7901773271817447,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-027",
+   "gain_months": 0.5516549647191109,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-028",
+   "gain_months": 0.8102354068354263,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-029",
+   "gain_months": 0.5230246309125093,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 40773167,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-030",
+   "gain_months": 0.475559672533052,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 43276751,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-031",
+   "gain_months": 0.4211613932764564,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 43193996,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-032",
+   "gain_months": 0.4704837127122783,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 40887598,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-033",
+   "gain_months": 0.6319583064713239,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 45248877,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-034",
+   "gain_months": 0.5917067972002243,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 47401177,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-035",
+   "gain_months": 0.46788101354755973,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 40745836,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-036",
+   "gain_months": 0.4669785768600647,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 41653378,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-037",
+   "gain_months": 0.733114371838095,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-038",
+   "gain_months": 0.530928128909995,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 43181972,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-039",
+   "gain_months": 1.0280064330113703,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-040",
+   "gain_months": 0.5743267968320218,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 45107590,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-041",
+   "gain_months": 0.578869962714176,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 42106074,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-042",
+   "gain_months": 0.8021285770162709,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 49844035,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-043",
+   "gain_months": 0.7386671204760695,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 46226544,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-044",
+   "gain_months": 0.7589487723638992,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 49891571,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-045",
+   "gain_months": 0.48030992592690147,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 41025096,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-046",
+   "gain_months": 0.816238069123628,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 48305197,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-047",
+   "gain_months": 0.5742330756379275,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 44512007,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-048",
+   "gain_months": 1.2038924293675368,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-049",
+   "gain_months": 0.6334853972466092,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 45217354,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-050",
+   "gain_months": 0.43355690448458795,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 42696303,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-051",
+   "gain_months": 0.6249870122882246,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 49479820,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-052",
+   "gain_months": 0.33019016123842526,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 39789973,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-053",
+   "gain_months": 0.5912230034986035,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 44807692,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-054",
+   "gain_months": 0.35561902534969825,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 38007350,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-055",
+   "gain_months": 0.8451084195164498,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-056",
+   "gain_months": 0.6144779862054719,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 45711407,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-057",
+   "gain_months": 0.35636786471464355,
+   "config": {
+    "cell_type": "MSC",
+    "payload": "combo",
+    "dose_cells": 39624338,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-058",
+   "gain_months": 0.25025417321425714,
+   "config": {
+    "cell_type": "HB1_F3_line",
+    "payload": "prodrug_enzyme",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  },
+  {
+   "patient_id": "SYN-059",
+   "gain_months": 0.8189049996564002,
+   "config": {
+    "cell_type": "iPSC-NSC",
+    "payload": "CAR",
+    "dose_cells": 50000000,
+    "n_injection_sites": 8,
+    "schedule": "fractionated_x3"
+   }
+  }
+ ],
+ "verdicts": {
+  "T4_personalization_distinct_configs": {
+   "metric_key": "T4_personalization_distinct_configs",
+   "test_id": "T4",
+   "metric": "Personalization variance (distinct configs in top-5 across 50 patients)",
+   "status": "PASS",
+   "point_estimate": 10.0,
+   "ci_lower": 5.0,
+   "ci_upper": 10.0,
+   "threshold": 3.0,
+   "direction": "gte",
+   "ci_bound": "lower",
+   "decisive_value": 5.0,
+   "reason": "PASS: 95% CI lower bound 5 >= 3.",
+   "justification": "Proves the optimizer has not converged to a universal recommendation.",
+   "auxiliary_requirement": null,
+   "auxiliary_satisfied": null
+  },
+  "T4_optimizer_regret_reduction_pct": {
+   "metric_key": "T4_optimizer_regret_reduction_pct",
+   "test_id": "T4",
+   "metric": "Optimizer beats random search (regret reduction)",
+   "status": "PASS",
+   "point_estimate": 100.0,
+   "ci_lower": 100.0,
+   "ci_upper": 100.0,
+   "threshold": 25.0,
+   "direction": "gte",
+   "ci_bound": "lower",
+   "decisive_value": 100.0,
+   "reason": "PASS: 95% CI lower bound 100 >= 25; auxiliary requirement 'Wilcoxon signed-rank p < 0.01' holds.",
+   "justification": "A statistical test, not a point estimate, must carry the claim.",
+   "auxiliary_requirement": "Wilcoxon signed-rank p < 0.01",
+   "auxiliary_satisfied": true,
+   "auxiliary": {
+    "requirement": "Wilcoxon signed-rank p < 0.01",
+    "p_value": 1.7763568394002505e-15,
+    "satisfied": true,
+    "n_tied_both_zero": 0,
+    "tie_rule_breached": false
+   }
+  },
+  "T5_endtoend_rmst_success_fraction": {
+   "metric_key": "T5_endtoend_rmst_success_fraction",
+   "test_id": "T5",
+   "metric": "End-to-end success (fraction of held-out patients with >= 3-month RMST gain)",
+   "status": "FAIL",
+   "point_estimate": 0.0,
+   "ci_lower": 0.0,
+   "ci_upper": 0.0,
+   "threshold": 0.5,
+   "direction": "gte",
+   "ci_bound": "lower",
+   "decisive_value": 0.0,
+   "reason": "FAIL: point estimate 0 does not clear >= 0.5; 95% CI lower bound 0 does not clear >= 0.5.",
+   "justification": "Pre-registered primary success criterion from the working hypothesis.",
+   "auxiliary_requirement": null,
+   "auxiliary_satisfied": null
+  },
+  "T5_safety_predicted_harm_fraction": {
+   "metric_key": "T5_safety_predicted_harm_fraction",
+   "test_id": "T5",
+   "metric": "Safety floor (predicted harm rate)",
+   "status": "PASS",
+   "point_estimate": 0.0,
+   "ci_lower": 0.0,
+   "ci_upper": 0.0,
+   "threshold": 0.15,
+   "direction": "lte",
+   "ci_bound": "upper",
+   "decisive_value": 0.0,
+   "reason": "PASS: 95% CI upper bound 0 <= 0.15; point estimate 0 satisfies the pre-registered limit <= 0.1.",
+   "justification": "Hard safety stop: harm rate <= 10% with 95% CI upper bound <= 15%.",
+   "auxiliary_requirement": null,
+   "auxiliary_satisfied": null
+  }
+ },
+ "reported_with_the_verdicts": {
+  "t4_regret_saturates": "Item 5, recorded 2026-11-28: regret is measured against the best value found by either method, so if GP-EI attains it for every patient its regret is identically zero, the metric is exactly 100% whatever the margin, its CI is degenerate, and the threshold cannot fail. The mean advantage in months is reported beside it as the magnitude the metric cannot show.",
+  "thin_emax_payloads": [
+   "CAR"
+  ],
+  "thin_emax_note": "Item 11(i.7): these payloads' Emax rests on fewer than three studies. The registered reading is the most favourable available for each."
+ }
+}
