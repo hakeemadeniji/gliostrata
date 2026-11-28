@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Disclosed — T4's regret threshold cannot fail (2026-11-28, nothing changed)
+- Item 5 gains a dated note, and §8 a row, recording that T4's regret metric **saturates**:
+  regret is measured against the best value found by either method, so a method attaining
+  that best for every patient has regret identically zero, the metric reads exactly 100%
+  whatever its margin, the bootstrap CI is degenerate, and the ≥25% threshold cannot fail.
+- Observed in the registered rehearsal: GP-EI attained the per-patient best for all 50
+  held-out TCGA patients; the advantage the metric conceals was 0.21 months of RMST.
+- The existing tie rule does not catch this — it is written for patients whose regret is zero
+  under *both* methods, and random search's regret was positive for every patient.
+- **The metric, threshold, bootstrap and Wilcoxon test are unchanged.** The threshold is now
+  reported together with whether the regret saturated, whether GP-EI won on every patient,
+  and the mean advantage in months as a non-saturating §3.6 companion. A reader can then see
+  that a PASS may mean only "GP-EI was never worse".
+- Recorded before any CGGA read rather than in the paper's limitations, so the date shows it
+  was known in advance and not offered afterwards as an excuse.
+
 ### Added — the four item 11(o) controls, all passing (2026-11-28)
 - `scripts/t4t5_controls.py` runs all four pre-read controls and exits non-zero on any
   failure. The survival model is T2's validated `VARIANT_2` fit, not a new one.
